@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 2. Debug và lỗi thường gặp - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 2</span>
+        <span class="pill pill-green">Debug + Tra cứu lỗi</span>
+      </div>
+      <div>
+        <a href="01_setup_format_cautruc.html" class="copy-btn" style="text-decoration:none;">&larr; Phần 1. Setup</a>
+        <a href="03_dart_co_ban.html" class="copy-btn" style="text-decoration:none; margin-left: 8px;">Phần 3. Dart cơ bản &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 2. Debug và lỗi thường gặp</h2>
+        <p>Cách đọc thông báo lỗi, các công cụ debug trong Android Studio, và bảng tra cứu lỗi chia làm 2 nhóm: <strong>lỗi code</strong> và <strong>lỗi nền tảng</strong>. Cách chạy app, Run/Debug, Hot Reload/Hot Restart xem ở <a href="../index.html" style="color:var(--accent-blue);">Phần 1, mục 6</a>.</p>
+      </div>
+
+      <!-- ===================== 1. PHÂN LOẠI LỖI ===================== -->
+      <h3>1. Phân loại lỗi và cách đọc thông báo lỗi</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Lỗi code</strong> là lỗi do <span class="hl">code Dart / Flutter bạn viết</span>: sai cú pháp, sai kiểu dữ liệu, dùng biến null, đặt Widget sai chỗ. Sửa bằng cách sửa code trong <code>lib/</code>.</p>
+        <p><strong>Lỗi nền tảng</strong> là lỗi do <span class="hl">môi trường và công cụ</span>: cài SDK, PATH, Android Studio, emulator, tải thư viện, Gradle, build native. Code có thể đúng hoàn toàn nhưng app vẫn không chạy được. Sửa bằng cách cài đặt, cấu hình, chạy lệnh.</p>
+      </div>
+
+      <h4>Lỗi code chia làm 3 loại theo thời điểm xuất hiện</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Loại</th><th>Xuất hiện khi nào</th><th>Nhận biết</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Lỗi biên dịch</strong> (compile error)</td>
+              <td>Ngay khi đang gõ code, trước khi chạy.</td>
+              <td><span class="hl-red">Gạch đỏ</span> dưới code, app <span class="hl-red">không chạy được</span>. Danh sách đầy đủ ở cửa sổ <strong>Dart Analysis</strong>.</td>
+            </tr>
+            <tr>
+              <td><strong>Lỗi khi chạy</strong> (runtime error / exception)</td>
+              <td>App đã chạy, lỗi xảy ra khi tới đoạn code có vấn đề.</td>
+              <td>Ở chế độ debug: <span class="hl-red">màn hình đỏ chữ vàng</span> trên app, thông báo lỗi in ra cửa sổ <strong>Run</strong> / <strong>Debug</strong>.</td>
+            </tr>
+            <tr>
+              <td><strong>Lỗi giao diện</strong> (layout error)</td>
+              <td>Khi Flutter vẽ màn hình. Là một dạng lỗi khi chạy.</td>
+              <td><span class="hl">Vạch sọc vàng đen</span>, màn hình trắng hoặc đỏ, cửa sổ Run in khung <code>EXCEPTION CAUGHT BY RENDERING LIBRARY</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">Gạch vàng và gạch xám không phải lỗi</div>
+        <p>Gạch <span class="hl">vàng</span> là cảnh báo (warning), gạch <strong>xám</strong> là gợi ý (hint, ví dụ biến không dùng tới). App vẫn chạy bình thường, nên sửa để code sạch.</p>
+      </div>
+
+      <h4>Cách đọc thông báo lỗi khi chạy</h4>
+      <p>Thông báo lỗi trong cửa sổ Run thường gồm 2 phần: <strong>tên lỗi + mô tả</strong> ở trên, và <strong>stack trace</strong> ở dưới.</p>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Stack trace</strong> là <span class="hl">danh sách các hàm đang được gọi lồng nhau</span> tại thời điểm xảy ra lỗi, dòng trên cùng là nơi lỗi xảy ra. Mỗi dòng có tên file, số dòng và số cột.</p>
+      </div>
+      <div class="code-wrapper">
+        <div class="code-header"><span>Ví dụ thông báo lỗi trong cửa sổ Run</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>======== Exception caught by widgets library ========
+The following _TypeError was thrown building NoteListScreen:
+Null check operator used on a null value          <span class="c"># Tên lỗi: đọc dòng này trước</span>
+
+#0      _NoteListScreenState.build (package:ten_project/ui/note_list_screen.dart:25:30)   <span class="c"># Code của bạn: file, dòng 25, cột 30</span>
+#1      StatefulElement.build (package:flutter/src/widgets/framework.dart:5729:27)       <span class="c"># Code của Flutter: bỏ qua</span>
+...</code></pre>
+      </div>
+      <ol>
+        <li>Đọc <span class="hl">dòng tên lỗi</span> để biết lỗi gì, tra ở bảng mục 5.</li>
+        <li>Tìm dòng đầu tiên trong stack trace có <span class="hl"><code>package:ten_project/</code></span> (tên project của bạn). Đó là chỗ trong code của bạn gây lỗi.</li>
+        <li>Bấm vào đường dẫn màu xanh trong cửa sổ Run để Android Studio nhảy thẳng tới dòng đó.</li>
+        <li>Các dòng <code>package:flutter/...</code> là code bên trong Flutter, thường không cần đọc.</li>
+      </ol>
+
+      <!-- ===================== 2. BREAKPOINT ===================== -->
+      <h3>2. Debug bằng Breakpoint</h3>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Breakpoint</strong> là <span class="hl">điểm dừng</span> đặt tại một dòng code. Khi chạy ở chế độ Debug, app sẽ tạm dừng ngay trước khi thực thi dòng đó, cho phép xem giá trị các biến tại thời điểm đó.</p>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Đặt breakpoint</strong>
+          <p>Bấm vào lề trái cạnh số dòng, xuất hiện chấm đỏ. Hoặc đặt con trỏ ở dòng đó nhấn <span class="kbd">Ctrl</span> + <span class="kbd">F8</span> (Mac: <span class="kbd">Cmd</span> + <span class="kbd">F8</span>). Bấm lại để bỏ.</p>
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Chạy Debug</strong>
+          <p>Bấm nút Debug (<span class="kbd">Shift</span> + <span class="kbd">F9</span>, Mac: <span class="kbd">Ctrl</span> + <span class="kbd">D</span>). <span class="hl-red">Bấm Run thì breakpoint không có tác dụng.</span> Thao tác trên app để code chạy tới dòng có breakpoint. Dòng đó được tô xanh, cửa sổ <strong>Debug</strong> mở ra ở dưới.</p>
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Xem biến và đi từng bước</strong>
+          <p>Tab <strong>Variables</strong> hiển thị giá trị các biến hiện tại. Dùng các nút sau để điều khiển:</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Nút</th><th>Tác dụng</th><th>Win/Linux</th><th>Mac</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Step Over</strong></td><td>Chạy dòng hiện tại, sang dòng kế tiếp. Không đi vào bên trong hàm được gọi.</td><td><span class="kbd">F8</span></td><td><span class="kbd">F8</span></td></tr>
+                <tr><td><strong>Step Into</strong></td><td>Đi vào bên trong hàm được gọi ở dòng hiện tại.</td><td><span class="kbd">F7</span></td><td><span class="kbd">F7</span></td></tr>
+                <tr><td><strong>Step Out</strong></td><td>Chạy hết hàm hiện tại, quay về chỗ gọi nó.</td><td><span class="kbd">Shift</span> + <span class="kbd">F8</span></td><td><span class="kbd">Shift</span> + <span class="kbd">F8</span></td></tr>
+                <tr><td><strong>Resume</strong></td><td>Chạy tiếp cho tới breakpoint kế tiếp.</td><td><span class="kbd">F9</span></td><td><span class="kbd">Cmd</span> + <span class="kbd">Option</span> + <span class="kbd">R</span></td></tr>
+                <tr><td><strong>Evaluate Expression</strong></td><td>Gõ một biểu thức bất kỳ để tính giá trị ngay lúc đang dừng, ví dụ <code>list.length</code>.</td><td><span class="kbd">Alt</span> + <span class="kbd">F8</span></td><td><span class="kbd">Option</span> + <span class="kbd">F8</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 3. LOG ===================== -->
+      <h3>3. Debug bằng in log</h3>
+      <p>Cách nhanh để kiểm tra code có chạy tới đâu và biến có giá trị gì. Kết quả hiện ở cửa sổ <strong>Run</strong> (hoặc <strong>Debug</strong>) phía dưới Android Studio.</p>
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="k">import</span> <span class="s">'package:flutter/foundation.dart'</span>;
+
+<span class="k">void</span> loadData() {
+  <span class="k">final</span> list = [<span class="s">'a'</span>, <span class="s">'b'</span>];
+
+  print(<span class="s">'So phan tu: ${list.length}'</span>);      <span class="c">// In ra console. Lint sẽ cảnh báo avoid_print</span>
+  debugPrint(<span class="s">'Danh sach: $list'</span>);         <span class="c">// Nên dùng: không bị cắt chữ khi log quá dài</span>
+}</code></pre>
+      </div>
+      <div class="callout">
+        <div class="callout-title">Vì sao <code>print</code> bị gạch dưới màu vàng</div>
+        <p>Bộ lint <code>flutter_lints</code> có luật <code>avoid_print</code>, nhắc rằng <code>print</code> không nên để lại trong app thật. Đây là <span class="hl">cảnh báo</span>, không phải lỗi, app vẫn chạy. Dùng <code>debugPrint</code> để hết cảnh báo.</p>
+      </div>
+
+      <!-- ===================== 4. INSPECTOR ===================== -->
+      <h3>4. Flutter Inspector</h3>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Flutter Inspector</strong> là công cụ <span class="hl">xem cây Widget</span> của màn hình đang chạy. Bấm vào một Widget trên cây sẽ thấy kích thước, padding, thuộc tính của nó. Rất hữu ích khi giao diện bị lệch, tràn mà không biết do Widget nào.</p>
+      </div>
+      <ol>
+        <li>Chạy app (Run hoặc Debug).</li>
+        <li>Mở cửa sổ <strong>Flutter Inspector</strong> ở cạnh phải Android Studio (hoặc <code>View &rarr; Tool Windows &rarr; Flutter Inspector</code>).</li>
+        <li>Bật <strong>Select Widget Mode</strong>, bấm vào phần tử trên app, Inspector sẽ chọn Widget tương ứng trên cây và nhảy tới dòng code tạo ra nó.</li>
+      </ol>
+
+      <!-- ===================== 5. LỖI CODE ===================== -->
+      <h3>5. Lỗi code</h3>
+
+      <h4>5.1. Lỗi biên dịch (gạch đỏ, app không chạy)</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thông báo</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Undefined class 'X'</code> / <code>Undefined name 'x'</code></td>
+              <td>Chưa import file chứa class đó, hoặc gõ sai tên.</td>
+              <td>Đặt con trỏ vào tên đó nhấn <span class="kbd">Alt</span> + <span class="kbd">Enter</span> (Mac: <span class="kbd">Option</span> + <span class="kbd">Enter</span>) &rarr; Import library.</td>
+            </tr>
+            <tr>
+              <td><code>Target of URI doesn't exist: '...'</code></td>
+              <td>Đường dẫn trong câu <code>import</code> sai, hoặc thư viện ngoài chưa được tải.</td>
+              <td>Kiểm tra lại tên file, thư mục. Nếu là <code>package:</code> của thư viện ngoài: xem lỗi cùng tên ở mục 6.3.</td>
+            </tr>
+            <tr>
+              <td><code>The method 'x' isn't defined for the type 'Y'</code></td>
+              <td>Gọi hàm không có trong class đó, sai tên hàm, hoặc biến có kiểu khác bạn nghĩ.</td>
+              <td>Kiểm tra tên hàm, <span class="kbd">Ctrl</span> + Click vào class để xem class có những hàm nào.</td>
+            </tr>
+            <tr>
+              <td><code>A value of type 'String?' can't be assigned to a variable of type 'String'</code></td>
+              <td>Gán giá trị có thể null (<code>String?</code>) cho biến không được null (<code>String</code>).</td>
+              <td>Đặt giá trị mặc định: <code>name ?? ''</code>, hoặc kiểm tra <code>if (name != null)</code> trước khi gán.</td>
+            </tr>
+            <tr>
+              <td><code>Non-nullable instance field 'x' must be initialized</code></td>
+              <td>Thuộc tính của class không được null nhưng chưa được gán giá trị.</td>
+              <td>Gán trong constructor (<code>required this.x</code>), đặt giá trị mặc định, hoặc khai báo <code>String? x</code>.</td>
+            </tr>
+            <tr>
+              <td><code>The named parameter 'x' is required, but there's no corresponding argument</code></td>
+              <td>Gọi constructor / hàm mà thiếu tham số bắt buộc <code>required</code>.</td>
+              <td>Truyền thêm tham số đó, ví dụ <code>Note(title: 'abc')</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Invalid constant value</code></td>
+              <td>Dùng <code>const</code> cho Widget mà bên trong có giá trị thay đổi được (biến, controller).</td>
+              <td>Xoá chữ <code>const</code> ở Widget đó.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>5.2. Lỗi khi chạy (màn hình đỏ, exception)</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thông báo</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Null check operator used on a null value</code></td>
+              <td>Dùng dấu <code>!</code> (khẳng định không null) trên biến đang là null.</td>
+              <td>Kiểm tra null trước (<code>if (x != null)</code>), hoặc dùng giá trị mặc định <code>x ?? ...</code> thay cho <code>x!</code>.</td>
+            </tr>
+            <tr>
+              <td><code>LateInitializationError: Field 'x' has not been initialized</code></td>
+              <td>Biến khai báo <code>late</code> nhưng được đọc trước khi gán giá trị.</td>
+              <td>Gán giá trị trong <code>initState()</code> hoặc trước khi dùng. Nếu không chắc có giá trị: đổi thành biến nullable <code>Type? x</code>.</td>
+            </tr>
+            <tr>
+              <td><code>RangeError (index): Invalid value: Not in inclusive range 0..N</code></td>
+              <td>Truy cập phần tử ngoài danh sách, ví dụ <code>list[3]</code> khi list chỉ có 3 phần tử (chỉ số 0 đến 2).</td>
+              <td>Kiểm tra <code>index &lt; list.length</code>. Trong <code>ListView.builder</code> phải truyền đúng <code>itemCount: list.length</code>.</td>
+            </tr>
+            <tr>
+              <td><code>type 'Null' is not a subtype of type 'String'</code></td>
+              <td>Đọc JSON mà key không tồn tại hoặc sai tên, trả về null nhưng gán vào kiểu không null.</td>
+              <td>Kiểm tra tên key đúng với dữ liệu thật, hoặc đặt mặc định: <code>json['name'] ?? ''</code>.</td>
+            </tr>
+            <tr>
+              <td><code>type 'int' is not a subtype of type 'String'</code> (hoặc các cặp kiểu khác)</td>
+              <td>Dữ liệu thật có kiểu khác với kiểu khai báo trong class.</td>
+              <td>Sửa kiểu trong class cho đúng, hoặc chuyển đổi: <code>json['id'].toString()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>FormatException: Invalid radix-10 number</code></td>
+              <td><code>int.parse()</code> / <code>double.parse()</code> nhận chuỗi không phải số (chuỗi rỗng, có chữ).</td>
+              <td>Dùng <code>int.tryParse(text)</code>, trả về null nếu không đổi được, rồi kiểm tra null.</td>
+            </tr>
+            <tr>
+              <td><code>setState() called after dispose()</code></td>
+              <td>Gọi <code>setState</code> sau khi màn hình đã đóng, thường xảy ra sau một lệnh <code>await</code> (gọi API, đọc DB).</td>
+              <td>Thêm <code>if (!mounted) return;</code> ngay sau <code>await</code>, trước <code>setState</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>5.3. Lỗi giao diện (layout)</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thông báo / Hiện tượng</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Vạch sọc vàng đen, <code>A RenderFlex overflowed by XX pixels on the bottom/right</code></td>
+              <td>Nội dung trong <code>Column</code> / <code>Row</code> dài hơn chỗ trống (hay gặp khi bàn phím ảo bật lên).</td>
+              <td>Bọc <code>Column</code> bằng <code>SingleChildScrollView</code>, hoặc bọc phần tử con bằng <code>Expanded</code> / <code>Flexible</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Vertical viewport was given unbounded height</code></td>
+              <td>Đặt <code>ListView</code> / <code>GridView</code> trực tiếp trong <code>Column</code>, không giới hạn chiều cao.</td>
+              <td>Đặt con trỏ vào <code>ListView</code> &rarr; <span class="kbd">Alt</span> + <span class="kbd">Enter</span> &rarr; <strong>Wrap with Expanded</strong>.</td>
+            </tr>
+            <tr>
+              <td><code>An InputDecorator, which is typically created by a TextField, cannot have an unbounded width</code></td>
+              <td>Đặt <code>TextField</code> trực tiếp trong <code>Row</code>, <code>TextField</code> không biết rộng bao nhiêu.</td>
+              <td>Bọc <code>TextField</code> bằng <code>Expanded</code>, hoặc <code>SizedBox(width: ...)</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Incorrect use of ParentDataWidget</code></td>
+              <td>Dùng <code>Expanded</code> / <code>Flexible</code> không nằm trực tiếp trong <code>Row</code> / <code>Column</code>, hoặc <code>Positioned</code> không nằm trực tiếp trong <code>Stack</code>.</td>
+              <td>Chuyển Widget đó ra làm con trực tiếp của <code>Row</code> / <code>Column</code> / <code>Stack</code>.</td>
+            </tr>
+            <tr>
+              <td><code>No Material widget found</code></td>
+              <td>Dùng <code>TextField</code>, <code>ListTile</code>... mà bên ngoài không có <code>Scaffold</code> hoặc <code>Material</code>.</td>
+              <td>Bọc màn hình bằng <code>Scaffold</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 6. LỖI NỀN TẢNG ===================== -->
+      <h3>6. Lỗi nền tảng</h3>
+
+      <h4>6.1. Cài đặt SDK và Android Studio</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thông báo / Hiện tượng</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>flutter: command not found</code> (Linux, macOS) hoặc <code>'flutter' is not recognized as an internal or external command</code> (Windows)</td>
+              <td>Chưa thêm <code>flutter/bin</code> vào PATH, thêm sai đường dẫn, hoặc chưa mở lại Terminal sau khi thêm.</td>
+              <td>Làm lại phần PATH ở <a href="../index.html" style="color:var(--accent-blue);">Phần 1, mục 1</a> theo đúng hệ điều hành, kiểm tra đường dẫn có thư mục <code>bin</code>, rồi mở Terminal mới.</td>
+            </tr>
+            <tr>
+              <td><code>Dart SDK is not configured</code> hoặc không có nút New Flutter Project</td>
+              <td>Chưa cài plugin Flutter hoặc chưa khai báo Flutter SDK path.</td>
+              <td>Làm lại bước 2 và 3 ở <a href="../index.html" style="color:var(--accent-blue);">Phần 1, mục 1</a>.</td>
+            </tr>
+            <tr>
+              <td><code>cmdline-tools component is missing</code> khi chạy <code>flutter doctor</code></td>
+              <td>Android SDK thiếu bộ công cụ dòng lệnh.</td>
+              <td>Android Studio: <code>Settings &rarr; Languages &amp; Frameworks &rarr; Android SDK</code> &rarr; tab <code>SDK Tools</code> &rarr; tick <strong>Android SDK Command-line Tools</strong> &rarr; Apply. Sau đó chạy <code>flutter doctor --android-licenses</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Android licenses not accepted</code> khi chạy <code>flutter doctor</code></td>
+              <td>Chưa đồng ý điều khoản Android SDK.</td>
+              <td>Chạy <code>flutter doctor --android-licenses</code>, gõ <code>y</code> cho tất cả.</td>
+            </tr>
+            <tr>
+              <td><code>Waiting for another flutter command to release the startup lock</code></td>
+              <td>Một lệnh flutter khác đang chạy (thường do Android Studio đang pub get).</td>
+              <td>Đợi lệnh kia xong. Nếu treo lâu: tắt Android Studio và các tiến trình <code>dart</code>, chạy lại.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>6.2. Thiết bị và chạy app</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thông báo / Hiện tượng</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Device Selector hiện <code>&lt;no devices&gt;</code></td>
+              <td>Chưa mở emulator, chưa cắm máy thật hoặc chưa bật USB debugging.</td>
+              <td>Mở emulator trong <code>Device Manager</code>, hoặc chạy <code>flutter devices</code> để kiểm tra.</td>
+            </tr>
+            <tr>
+              <td>Sửa code rồi Hot Reload nhưng app không thay đổi</td>
+              <td>Sửa ở chỗ Hot Reload không chạy lại: <code>main()</code>, <code>initState()</code>, giá trị khởi tạo.</td>
+              <td>Dùng Hot Restart. Xem bảng ở <a href="../index.html" style="color:var(--accent-blue);">Phần 1, mục 6</a>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>6.3. Thư viện và build</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thông báo / Hiện tượng</th><th>Nguyên nhân</th><th>Cách sửa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lỗi khi Pub get: <code>Error on line X, column Y</code> trong <code>pubspec.yaml</code></td>
+              <td>Sai thụt lề YAML, dùng Tab, hoặc thiếu dấu <code>:</code>.</td>
+              <td>Xem đúng dòng báo lỗi, thụt lề bằng dấu cách, mỗi cấp 2 dấu cách.</td>
+            </tr>
+            <tr>
+              <td><code>Target of URI doesn't exist: 'package:ten_thu_vien/...'</code></td>
+              <td>Đã khai báo thư viện trong <code>pubspec.yaml</code> nhưng chưa tải về, hoặc chưa khai báo.</td>
+              <td>Kiểm tra thư viện có trong <code>dependencies</code>, rồi chạy <code>flutter pub get</code>.</td>
+            </tr>
+            <tr>
+              <td><code>MissingPluginException</code> sau khi thêm thư viện</td>
+              <td>Thư viện có code native nhưng app chưa được build lại.</td>
+              <td>Stop app rồi Run lại (Hot Restart không đủ).</td>
+            </tr>
+            <tr>
+              <td>Build Android lần đầu rất lâu hoặc lỗi Gradle lạ</td>
+              <td>Gradle đang tải công cụ lần đầu, hoặc cache build bị hỏng.</td>
+              <td>Lần đầu cần mạng và chờ. Nếu lỗi: chạy bộ lệnh làm sạch bên dưới.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>bash - Bộ lệnh làm sạch khi gặp lỗi build khó hiểu</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c"># Xoá thư mục build/ và .dart_tool/</span>
+flutter clean
+
+<span class="c"># Tải lại thư viện</span>
+flutter pub get
+
+<span class="c"># Chạy lại</span>
+flutter run</code></pre>
+      </div>
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

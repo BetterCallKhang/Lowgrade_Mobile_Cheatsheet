@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 1. Setup dự án, Format code, Cấu trúc code - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 1</span>
+        <span class="pill pill-green">Android Studio + Terminal</span>
+      </div>
+      <div>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none;">&larr; Trang chủ</a>
+        <a href="02_debug_loi.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Phần 2. Debug &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 1. Setup dự án, Format code, Cấu trúc code</h2>
+        <p>Cài môi trường, tạo project Flutter, hiểu từng thư mục trong project, chạy app, format code cho gọn. Mỗi thao tác đều có 2 cách: giao diện Android Studio và dòng lệnh (Terminal). Debug và tra cứu lỗi xem ở <a href="02_debug_loi.html" style="color:var(--accent-blue);">Phần 2</a>.</p>
+        <p>Phím tắt ghi theo dạng <span class="kbd">Windows/Linux</span> trước, <span class="kbd">Mac</span> ghi kèm phía sau.</p>
+      </div>
+
+      <!-- ===================== 1. MÔI TRƯỜNG ===================== -->
+      <h3>1. Chuẩn bị môi trường</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Dart</strong> là <span class="hl">ngôn ngữ lập trình</span> (giống Java, C#). <strong>Flutter</strong> là <span class="hl">framework</span> viết bằng Dart, cung cấp sẵn các Widget để dựng giao diện và build ra app Android, iOS, Web, Desktop từ cùng một code.</p>
+        <p><strong>Flutter SDK</strong> là bộ công cụ tải về máy, bên trong đã có sẵn Dart SDK. Cài Flutter SDK là có luôn lệnh <code>flutter</code> và <code>dart</code>.</p>
+        <p><strong>Android Studio</strong> là <span class="hl">IDE</span> (phần mềm viết code). Nó cung cấp Android SDK (để build app Android) và Emulator (máy ảo Android). Muốn viết Flutter trong Android Studio phải cài thêm <strong>plugin Flutter</strong>.</p>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Cài Flutter SDK và Android Studio (theo hệ điều hành)</strong>
+          <p>Việc cần làm giống nhau trên mọi hệ điều hành: <span class="hl">tải Flutter SDK, giải nén, thêm thư mục <code>flutter/bin</code> vào PATH, cài Android Studio</span>. Chỉ khác cách thao tác. Trang tải chính thức: <code>docs.flutter.dev/install</code> và <code>developer.android.com/studio</code>.</p>
+          <div class="def">
+            <span class="def-term">Khái niệm</span>
+            <p><strong>PATH</strong> là <span class="hl">biến môi trường chứa danh sách thư mục</span> mà Terminal sẽ tìm khi bạn gõ một lệnh. Thêm <code>flutter/bin</code> vào PATH thì gõ <code>flutter</code> ở thư mục nào cũng chạy được. Nếu không thêm, Terminal báo <code>flutter: command not found</code> (Windows: <code>'flutter' is not recognized...</code>).</p>
+          </div>
+          <div class="callout danger">
+            <div class="callout-title">Quy tắc chung cho thư mục chứa Flutter SDK</div>
+            <p>Đường dẫn <span class="hl-red">không có dấu cách, không có tiếng Việt</span>, và không đặt trong thư mục cần quyền admin (Windows: không đặt trong <code>C:\Program Files</code>).</p>
+          </div>
+        </div>
+      </div>
+
+      <h4>Windows</h4>
+      <div class="card">
+        <ol>
+          <li><strong>Cài Git for Windows</strong> (Flutter dùng Git bên trong). Tải ở <code>git-scm.com</code>, cài mặc định.</li>
+          <li><strong>Tải Flutter SDK:</strong> file <code>flutter_windows_x.y.z-stable.zip</code> ở trang tải chính thức.</li>
+          <li><strong>Giải nén</strong> vào <code>C:\src\</code>, được thư mục <code>C:\src\flutter</code> (bên trong có thư mục <code>bin</code>).</li>
+          <li><strong>Thêm vào PATH:</strong>
+            <ul>
+              <li>Bấm Start, gõ <code>env</code> &rarr; chọn <strong>Edit environment variables for your account</strong>.</li>
+              <li>Ở khung <strong>User variables</strong>, chọn dòng <code>Path</code> &rarr; <strong>Edit</strong> &rarr; <strong>New</strong> &rarr; nhập <code>C:\src\flutter\bin</code> &rarr; OK &rarr; OK.</li>
+              <li><span class="hl">Tắt hết cửa sổ Terminal / PowerShell đang mở và mở lại</span> thì PATH mới có hiệu lực.</li>
+            </ul>
+          </li>
+          <li><strong>Cài Android Studio:</strong> tải file <code>.exe</code>, chạy và bấm Next theo mặc định. Lần đầu mở, <strong>Setup Wizard</strong> sẽ tự tải Android SDK và Emulator, chọn <code>Standard</code>.</li>
+        </ol>
+        <div class="code-wrapper">
+          <div class="code-header"><span>PowerShell - Kiểm tra</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="c"># Xem Flutter đã nhận chưa</span>
+flutter --version
+
+<span class="c"># Xem lệnh flutter đang trỏ tới đâu</span>
+where.exe flutter</code></pre>
+        </div>
+      </div>
+
+      <h4>Linux</h4>
+      <div class="card">
+        <ol>
+          <li><strong>Cài các gói cần thiết</strong> (ví dụ Ubuntu / Debian, các distro khác dùng trình quản lý gói tương ứng):
+            <div class="code-wrapper">
+              <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code>sudo apt-get update
+sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa</code></pre>
+            </div>
+          </li>
+          <li><strong>Tải và giải nén Flutter SDK.</strong> Chọn một trong hai cách:
+            <div class="code-wrapper">
+              <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="c"># Tạo thư mục chứa SDK</span>
+mkdir -p ~/develop
+
+<span class="c"># Cách A: tải file flutter_linux_x.y.z-stable.tar.xz từ trang chính thức về ~/Downloads rồi giải nén</span>
+tar -xf ~/Downloads/flutter_linux_*-stable.tar.xz -C ~/develop/
+
+<span class="c"># Cách B: lấy trực tiếp bằng git (nhánh stable)</span>
+git clone https://github.com/flutter/flutter.git -b stable ~/develop/flutter</code></pre>
+            </div>
+            <p>Kết quả: thư mục <code>~/develop/flutter</code> (bên trong có <code>bin</code>).</p>
+          </li>
+          <li><strong>Thêm vào PATH.</strong> Kiểm tra shell đang dùng bằng <code>echo $SHELL</code>:
+            <div class="code-wrapper">
+              <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="c"># Nếu dùng bash (kết quả /bin/bash)</span>
+echo 'export PATH="$HOME/develop/flutter/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+<span class="c"># Nếu dùng zsh (kết quả /bin/zsh hoặc /usr/bin/zsh)</span>
+echo 'export PATH="$HOME/develop/flutter/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc</code></pre>
+            </div>
+            <p><code>~/.bashrc</code>, <code>~/.zshrc</code> là <span class="hl">file cấu hình chạy mỗi khi mở Terminal</span>. Dòng <code>export PATH=...</code> ghi vào đó để lần nào mở Terminal cũng có PATH. Lệnh <code>source</code> nạp lại ngay mà không cần mở Terminal mới.</p>
+          </li>
+          <li><strong>Cài Android Studio:</strong> tải file <code>.tar.gz</code>, giải nén rồi chạy file <code>bin/studio.sh</code>. Lần đầu mở, <strong>Setup Wizard</strong> tự tải Android SDK, chọn <code>Standard</code>. Ubuntu có thể cài nhanh bằng <code>sudo snap install android-studio --classic</code>.</li>
+          <li><strong>Tạo lối tắt trên menu ứng dụng:</strong> trong Android Studio chọn <code>Tools &rarr; Create Desktop Entry</code> (nếu có).</li>
+        </ol>
+        <div class="code-wrapper">
+          <div class="code-header"><span>bash - Kiểm tra</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>flutter --version
+
+<span class="c"># Xem lệnh flutter đang trỏ tới đâu</span>
+which flutter</code></pre>
+        </div>
+      </div>
+
+      <h4>macOS</h4>
+      <div class="card">
+        <ol>
+          <li><strong>Cài Xcode Command Line Tools</strong> (có sẵn Git và các công cụ build):
+            <div class="code-wrapper">
+              <div class="code-header"><span>zsh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code>xcode-select --install</code></pre>
+            </div>
+          </li>
+          <li><strong>Xem máy dùng chip gì:</strong> menu Apple &rarr; <strong>About This Mac</strong>. Chip <code>Apple M1/M2/M3...</code> là <span class="hl">Apple Silicon</span>, chip <code>Intel</code> là Intel. Tải đúng bản Flutter SDK cho chip đó. Máy Apple Silicon nên cài thêm Rosetta:
+            <div class="code-wrapper">
+              <div class="code-header"><span>zsh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code>sudo softwareupdate --install-rosetta --agree-to-license</code></pre>
+            </div>
+          </li>
+          <li><strong>Tải và giải nén Flutter SDK:</strong>
+            <div class="code-wrapper">
+              <div class="code-header"><span>zsh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="c"># Tạo thư mục chứa SDK</span>
+mkdir -p ~/develop
+
+<span class="c"># Giải nén file .zip đã tải về (tên file tuỳ phiên bản và chip)</span>
+unzip ~/Downloads/flutter_macos_*-stable.zip -d ~/develop/</code></pre>
+            </div>
+            <p>Kết quả: thư mục <code>~/develop/flutter</code>. Có thể dùng Homebrew thay cho 2 bước tải và giải nén: <code>brew install --cask flutter</code>.</p>
+          </li>
+          <li><strong>Thêm vào PATH.</strong> macOS dùng <code>zsh</code> làm shell mặc định:
+            <div class="code-wrapper">
+              <div class="code-header"><span>zsh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre><code>echo 'export PATH="$HOME/develop/flutter/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc</code></pre>
+            </div>
+          </li>
+          <li><strong>Cài Android Studio:</strong> tải file <code>.dmg</code> đúng chip, mở ra và <span class="hl">kéo biểu tượng Android Studio vào thư mục Applications</span>. Lần đầu mở, <strong>Setup Wizard</strong> tự tải Android SDK, chọn <code>Standard</code>.</li>
+        </ol>
+        <div class="code-wrapper">
+          <div class="code-header"><span>zsh - Kiểm tra</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>flutter --version
+
+<span class="c"># Xem lệnh flutter đang trỏ tới đâu</span>
+which flutter</code></pre>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Cài plugin Flutter trong Android Studio</strong>
+          <p><code>File &rarr; Settings</code> (Mac: <code>Android Studio &rarr; Settings</code>) &rarr; <code>Plugins</code> &rarr; tab <code>Marketplace</code> &rarr; tìm <strong>Flutter</strong> &rarr; Install. Plugin Dart sẽ được cài kèm. Khởi động lại Android Studio.</p>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Khai báo đường dẫn Flutter SDK cho Android Studio</strong>
+          <p><code>Settings &rarr; Languages &amp; Frameworks &rarr; Flutter</code> &rarr; mục <strong>Flutter SDK path</strong> trỏ tới thư mục <code>flutter</code> đã giải nén ở bước 1:</p>
+          <ul>
+            <li>Windows: <code>C:\src\flutter</code></li>
+            <li>Linux: <code>/home/ten_user/develop/flutter</code></li>
+            <li>macOS: <code>/Users/ten_user/develop/flutter</code></li>
+          </ul>
+          <p>Không nhớ đã cài ở đâu (ví dụ cài bằng Homebrew hoặc snap): chạy <code>flutter doctor -v</code>, dòng đầu tiên có dạng <code>Flutter version ... at /duong/dan/flutter</code>, đó là đường dẫn cần điền.</p>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Kiểm tra môi trường bằng <code>flutter doctor</code></strong>
+          <p><code>flutter doctor</code> là lệnh <span class="hl">kiểm tra máy đã đủ công cụ chưa</span>. Mỗi dòng có dấu <code>[√]</code> là đạt, <code>[!]</code> là thiếu một phần, <code>[X]</code> là chưa có. Chỉ cần đạt các dòng Flutter, Android toolchain, Android Studio là làm app Android được.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c"># Kiểm tra môi trường</span>
+flutter doctor
+
+<span class="c"># Xem chi tiết từng mục (khi có dòng [!] hoặc [X])</span>
+flutter doctor -v
+
+<span class="c"># Chấp nhận license Android SDK (khi doctor báo "Android licenses not accepted")</span>
+flutter doctor --android-licenses</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 2. TẠO DỰ ÁN ===================== -->
+      <h3>2. Tạo dự án mới</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Cách 1: Giao diện Android Studio</div>
+          <ol>
+            <li>Màn hình Welcome chọn <strong>New Flutter Project</strong> (hoặc <code>File &rarr; New &rarr; New Flutter Project...</code>).</li>
+            <li>Cột trái chọn <strong>Flutter</strong>, kiểm tra <strong>Flutter SDK path</strong> &rarr; <strong>Next</strong>.</li>
+            <li>Điền thông tin:
+              <ul>
+                <li><strong>Project name:</strong> tên project, quy tắc ở bảng bên dưới.</li>
+                <li><strong>Project location:</strong> thư mục lưu project.</li>
+                <li><strong>Project type:</strong> chọn <code>Application</code> (app chạy được).</li>
+                <li><strong>Organization:</strong> tiền tố định danh app, ví dụ <code>com.example</code>. Kết hợp với tên project thành <span class="hl">package name</span> <code>com.example.ten_project</code> dùng để phân biệt app trên điện thoại.</li>
+                <li><strong>Platforms:</strong> tick các nền tảng muốn build, tối thiểu <code>Android</code>. Tick thêm <code>Web</code> nếu muốn chạy thử trên Chrome.</li>
+              </ul>
+            </li>
+            <li>Bấm <strong>Create</strong>, đợi thanh tiến trình dưới cùng (indexing) chạy xong.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Cách 2: Terminal</div>
+          <p>Mở Terminal tại thư mục muốn chứa project (trong Android Studio: <span class="kbd">Alt</span> + <span class="kbd">F12</span>, Mac: <span class="kbd">Option</span> + <span class="kbd">F12</span>).</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c"># Tạo project với tên mặc định org là com.example</span>
+flutter create ten_project
+
+<span class="c"># Tạo project, chỉ định org và chỉ tạo nền tảng android + web</span>
+flutter create --org com.mycompany --platforms android,web ten_project
+
+<span class="c"># Vào thư mục project</span>
+cd ten_project</code></pre>
+          </div>
+          <p>Sau đó trong Android Studio chọn <code>File &rarr; Open</code> và mở thư mục <code>ten_project</code>.</p>
+        </div>
+      </div>
+
+      <h4>Quy tắc đặt tên project</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Quy tắc</th><th>Đúng</th><th>Sai</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chỉ chữ thường, số, dấu gạch dưới <code>_</code></td><td><code>note_app</code></td><td><code>NoteApp</code>, <code>note-app</code></td></tr>
+            <tr><td>Không bắt đầu bằng số</td><td><code>app2</code></td><td><code>2app</code></td></tr>
+            <tr><td>Không trùng từ khoá Dart hoặc tên package có sẵn</td><td><code>my_flutter_app</code></td><td><code>class</code>, <code>flutter</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 3. CẤU TRÚC PROJECT ===================== -->
+      <h3>3. Cấu trúc thư mục của một project Flutter</h3>
+      <p>Sau khi tạo, project có các thư mục và file sau. Phần lớn thời gian chỉ làm việc trong <span class="hl">lib/</span> và <span class="hl">pubspec.yaml</span>.</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Cấu trúc project</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>ten_project/
+├── android/                <span class="c"># Code native Android (Gradle, AndroidManifest.xml)</span>
+├── ios/                    <span class="c"># Code native iOS (Xcode project)</span>
+├── web/                    <span class="c"># File index.html cho bản Web</span>
+├── linux/ macos/ windows/  <span class="c"># Code native cho Desktop</span>
+├── lib/                    <span class="c"># TOÀN BỘ CODE DART CỦA APP</span>
+│   └── main.dart           <span class="c"># File chạy đầu tiên, chứa hàm main()</span>
+├── test/                   <span class="c"># Code kiểm thử (unit test, widget test)</span>
+├── build/                  <span class="c"># File sinh ra khi build, tự tạo lại được</span>
+├── .dart_tool/             <span class="c"># Cache của Dart, tự tạo lại được</span>
+├── pubspec.yaml            <span class="c"># Khai báo tên app, phiên bản, thư viện, ảnh/font</span>
+├── pubspec.lock            <span class="c"># Phiên bản chính xác của thư viện đã tải (tự sinh)</span>
+└── analysis_options.yaml   <span class="c"># Cấu hình luật kiểm tra code (lint) và formatter</span></code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thành phần</th><th>Là gì</th><th>Có sửa không</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>lib/</code></td>
+              <td>Nơi chứa toàn bộ code Dart. Flutter chỉ biên dịch code nằm trong thư mục này.</td>
+              <td><span class="hl-green">Sửa thường xuyên</span></td>
+            </tr>
+            <tr>
+              <td><code>lib/main.dart</code></td>
+              <td>Điểm bắt đầu của app. Khi chạy, Flutter tìm hàm <code>main()</code> trong file này đầu tiên.</td>
+              <td><span class="hl-green">Có</span></td>
+            </tr>
+            <tr>
+              <td><code>pubspec.yaml</code></td>
+              <td>File cấu hình project: tên, phiên bản, phiên bản Dart SDK, danh sách thư viện, khai báo ảnh và font.</td>
+              <td><span class="hl-green">Có</span></td>
+            </tr>
+            <tr>
+              <td><code>pubspec.lock</code></td>
+              <td>Ghi lại phiên bản chính xác của từng thư viện sau khi tải. Giúp máy khác tải đúng phiên bản giống bạn.</td>
+              <td><span class="hl-red">Không sửa tay</span></td>
+            </tr>
+            <tr>
+              <td><code>analysis_options.yaml</code></td>
+              <td>Cấu hình bộ phân tích code: bật/tắt luật lint, độ rộng dòng khi format.</td>
+              <td>Thỉnh thoảng</td>
+            </tr>
+            <tr>
+              <td><code>android/</code>, <code>ios/</code>, ...</td>
+              <td>Project native của từng nền tảng. Chỉ sửa khi cần cấp quyền (Internet, Camera...), đổi icon, đổi tên app.</td>
+              <td>Ít khi</td>
+            </tr>
+            <tr>
+              <td><code>test/</code></td>
+              <td>Code kiểm thử, chạy bằng <code>flutter test</code>.</td>
+              <td>Khi viết test</td>
+            </tr>
+            <tr>
+              <td><code>build/</code>, <code>.dart_tool/</code></td>
+              <td>Thư mục sinh tự động. Xoá đi không mất gì, lần build sau tự tạo lại (lệnh <code>flutter clean</code> làm việc này).</td>
+              <td><span class="hl-red">Không sửa</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 4. PUBSPEC & THƯ VIỆN ===================== -->
+      <h3>4. pubspec.yaml và cài thư viện</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Package (thư viện)</strong> là code người khác viết sẵn, đăng trên trang <code>pub.dev</code>. Ví dụ <code>http</code> để gọi API, <code>sqflite</code> để dùng SQLite.</p>
+        <p><strong>dependencies</strong> là thư viện <span class="hl">app cần khi chạy</span>. <strong>dev_dependencies</strong> là thư viện <span class="hl">chỉ cần lúc phát triển</span> (sinh code, test, lint), không đóng gói vào app.</p>
+        <p><strong>YAML</strong> là định dạng file dùng <span class="hl-red">thụt lề bằng dấu cách</span> để thể hiện cấp cha con. Thụt sai một dấu cách là lỗi. Không dùng phím Tab.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>pubspec.yaml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>name: ten_project                  <span class="c"># Tên project, dùng trong import 'package:ten_project/...'</span>
+description: "A new Flutter project."
+publish_to: 'none'                 <span class="c"># Không đăng lên pub.dev</span>
+version: 1.0.0+1                   <span class="c"># Phiên bản app: 1.0.0 là tên hiển thị, +1 là số build</span>
+
+environment:
+  sdk: ^3.12.2                     <span class="c"># Phiên bản Dart SDK tối thiểu</span>
+
+dependencies:                      <span class="c"># Thư viện dùng khi app chạy</span>
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  http: ^1.6.0                     <span class="c"># Thụt đúng 2 dấu cách so với dependencies</span>
+
+dev_dependencies:                  <span class="c"># Thư viện chỉ dùng lúc phát triển</span>
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:                          <span class="c"># Khai báo ảnh, file dùng trong app</span>
+    - assets/images/</code></pre>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">Ký hiệu <code>^</code> trong phiên bản</div>
+        <p><code>^1.6.0</code> nghĩa là chấp nhận mọi phiên bản <span class="hl">từ 1.6.0 đến dưới 2.0.0</span>. Thư viện được cập nhật bản vá nhưng không nhảy lên bản lớn có thể làm hỏng code.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Cách 1: Sửa pubspec.yaml rồi Pub get</div>
+          <ol>
+            <li>Mở <code>pubspec.yaml</code>, thêm tên thư viện vào dưới <code>dependencies:</code> hoặc <code>dev_dependencies:</code>, thụt 2 dấu cách.</li>
+            <li>Bấm <strong>Pub get</strong> ở thanh phía trên cửa sổ code (Android Studio tự hiện khi file thay đổi).</li>
+            <li>Hoặc chạy <code>flutter pub get</code> trong Terminal.</li>
+          </ol>
+          <p><code>pub get</code> là lệnh <span class="hl">tải các thư viện đã khai báo về máy</span>. Phải chạy mỗi khi sửa <code>pubspec.yaml</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Cách 2: Lệnh flutter pub add</div>
+          <p>Lệnh này tự ghi vào <code>pubspec.yaml</code> với phiên bản mới nhất phù hợp và tự chạy <code>pub get</code>, không lo sai thụt lề.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c"># Thêm vào dependencies (có thể thêm nhiều cái một lúc)</span>
+flutter pub add http shared_preferences
+
+<span class="c"># Thêm vào dev_dependencies: dùng cờ --dev</span>
+flutter pub add --dev build_runner
+
+<span class="c"># Gỡ thư viện</span>
+flutter pub remove http
+
+<span class="c"># Xem thư viện nào có bản mới hơn</span>
+flutter pub outdated</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 5. CHIA CODE TRONG LIB ===================== -->
+      <h3>5. Chia thư mục và file trong lib/</h3>
+      <p>App nhỏ có thể để hết trong <code>main.dart</code>, nhưng khi có nhiều màn hình nên <span class="hl">chia theo vai trò</span> để dễ tìm, dễ sửa. Cách chia phổ biến:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>lib/</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>lib/
+├── main.dart                     <span class="c"># Hàm main(), cấu hình MaterialApp</span>
+├── model/                        <span class="c"># Class dữ liệu: User, Product, Note...</span>
+│   ├── user.dart
+│   └── note.dart
+├── ui/                           <span class="c"># Các màn hình giao diện</span>
+│   ├── login_screen.dart
+│   └── note_list_screen.dart
+├── providers/                    <span class="c"># Quản lý state (dùng khi học Riverpod)</span>
+│   └── note_notifier.dart
+└── db/                           <span class="c"># Làm việc với database (dùng khi học SQLite)</span>
+    └── database_helper.dart</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thư mục</th><th>Chứa gì</th><th>Ví dụ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>model/</code></td><td><span class="hl">Class mô tả dữ liệu</span>: thuộc tính, constructor, chuyển đổi JSON. Không chứa giao diện.</td><td><code>class Note { int id; String title; }</code></td></tr>
+            <tr><td><code>ui/</code></td><td><span class="hl">Widget màn hình</span>: mỗi màn hình một file.</td><td><code>class NoteListScreen extends StatelessWidget</code></td></tr>
+            <tr><td><code>providers/</code></td><td><span class="hl">Logic và trạng thái</span> dùng chung giữa nhiều màn hình.</td><td><code>class NoteNotifier</code></td></tr>
+            <tr><td><code>db/</code></td><td><span class="hl">Code truy cập database</span>: mở DB, tạo bảng, thêm sửa xoá.</td><td><code>class DatabaseHelper</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Tạo thư mục và file trong Android Studio</div>
+          <ul>
+            <li><strong>Thư mục:</strong> chuột phải <code>lib</code> ở cửa sổ Project bên trái &rarr; <code>New &rarr; Directory</code> &rarr; nhập tên.</li>
+            <li><strong>File Dart:</strong> chuột phải thư mục &rarr; <code>New &rarr; Dart File</code> &rarr; nhập tên, không cần gõ đuôi <code>.dart</code>.</li>
+            <li>Mở cửa sổ Project nếu bị ẩn: <span class="kbd">Alt</span> + <span class="kbd">1</span> (Mac: <span class="kbd">Cmd</span> + <span class="kbd">1</span>).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Quy tắc đặt tên trong Dart</div>
+          <ul>
+            <li><strong>Tên file, thư mục:</strong> <code>snake_case</code> (chữ thường, gạch dưới), ví dụ <code>note_list_screen.dart</code>.</li>
+            <li><strong>Tên class:</strong> <code>UpperCamelCase</code>, ví dụ <code>NoteListScreen</code>.</li>
+            <li><strong>Tên biến, hàm:</strong> <code>lowerCamelCase</code>, ví dụ <code>noteList</code>, <code>loadData()</code>.</li>
+            <li><strong>Tên bắt đầu bằng <code>_</code>:</strong> <span class="hl">private</span>, chỉ dùng được trong cùng file, ví dụ <code>_counter</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4>Import file này vào file khác</h4>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>import</strong> là câu lệnh để <span class="hl">dùng class, hàm được viết ở file khác</span>. Mỗi file Dart là một thư viện riêng, muốn dùng gì ở file khác thì phải import file đó.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// 1. Thư viện có sẵn của Dart: tiền tố dart:</span>
+<span class="k">import</span> <span class="s">'dart:convert'</span>;
+
+<span class="c">// 2. Thư viện ngoài hoặc Flutter: tiền tố package:</span>
+<span class="k">import</span> <span class="s">'package:flutter/material.dart'</span>;
+<span class="k">import</span> <span class="s">'package:http/http.dart'</span> <span class="k">as</span> http;   <span class="c">// as: đặt tên rút gọn, gọi http.get(...)</span>
+
+<span class="c">// 3. File trong project, cách package (đường dẫn tính từ lib/)</span>
+<span class="k">import</span> <span class="s">'package:ten_project/model/note.dart'</span>;
+
+<span class="c">// 4. File trong project, cách đường dẫn tương đối (tính từ file hiện tại)</span>
+<span class="k">import</span> <span class="s">'../model/note.dart'</span>;</code></pre>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-title">Import tự động</div>
+        <p>Gõ tên class chưa import (bị gạch đỏ), đặt con trỏ vào đó, nhấn <span class="kbd">Alt</span> + <span class="kbd">Enter</span> (Mac: <span class="kbd">Option</span> + <span class="kbd">Enter</span>) &rarr; chọn <code>Import library '...'</code>. Android Studio tự thêm dòng import đúng.</p>
+      </div>
+
+      <!-- ===================== 6. CHẠY APP ===================== -->
+      <h3>6. Chạy app</h3>
+
+      <h4>Chọn thiết bị chạy</h4>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Emulator</strong> là <span class="hl">điện thoại Android ảo</span> chạy trên máy tính. Tạo trong <code>Tools &rarr; Device Manager</code> &rarr; <code>Create Virtual Device</code> &rarr; chọn mẫu máy (ví dụ Pixel) &rarr; chọn phiên bản Android &rarr; Finish.</p>
+        <p><strong>Thiết bị thật:</strong> bật <code>Developer options</code> và <code>USB debugging</code> trên điện thoại rồi cắm cáp.</p>
+        <p><strong>Chrome (web):</strong> chạy app như trang web, khởi động nhanh, tiện thử giao diện.</p>
+      </div>
+      <p>Thiết bị được chọn ở ô <strong>Device Selector</strong> trên thanh công cụ phía trên Android Studio.</p>
+
+      <h4>Run và Debug khác nhau thế nào</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Chế độ</th><th>Là gì</th><th>Phím tắt</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Run</strong></td>
+              <td>Chạy app bình thường. Breakpoint <span class="hl-red">không có tác dụng</span>.</td>
+              <td><span class="kbd">Shift</span> + <span class="kbd">F10</span> <br>Mac: <span class="kbd">Ctrl</span> + <span class="kbd">R</span></td>
+            </tr>
+            <tr>
+              <td><strong>Debug</strong></td>
+              <td>Chạy app và cho phép <span class="hl">dừng tại breakpoint</span> để xem giá trị biến, chạy từng dòng.</td>
+              <td><span class="kbd">Shift</span> + <span class="kbd">F9</span> <br>Mac: <span class="kbd">Ctrl</span> + <span class="kbd">D</span></td>
+            </tr>
+            <tr>
+              <td><strong>Stop</strong></td>
+              <td>Dừng app.</td>
+              <td><span class="kbd">Ctrl</span> + <span class="kbd">F2</span> <br>Mac: <span class="kbd">Cmd</span> + <span class="kbd">F2</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Hot Reload và Hot Restart</h4>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Hot Reload</strong>: nạp code mới vào app đang chạy, <span class="hl-green">giữ nguyên trạng thái</span> (giá trị biến, màn hình đang mở). Chỉ chạy lại hàm <code>build()</code>. Dùng khi sửa giao diện.</p>
+        <p><strong>Hot Restart</strong>: chạy lại app từ hàm <code>main()</code>, <span class="hl-red">mất toàn bộ trạng thái</span>. Nhanh hơn tắt app chạy lại.</p>
+        <p><strong>Stop rồi Run lại</strong>: build lại từ đầu. Bắt buộc khi thêm thư viện mới vào <code>pubspec.yaml</code> hoặc sửa code trong <code>android/</code>, <code>ios/</code>.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Bạn vừa sửa gì</th><th>Cần làm</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Giao diện trong <code>build()</code>: màu, chữ, padding, thêm Widget</td><td><span class="hl-green">Hot Reload</span></td></tr>
+            <tr><td>Hàm <code>main()</code>, <code>initState()</code>, giá trị khởi tạo của biến, biến toàn cục</td><td><span class="hl">Hot Restart</span></td></tr>
+            <tr><td>Đổi <code>StatelessWidget</code> thành <code>StatefulWidget</code> hoặc ngược lại</td><td><span class="hl">Hot Restart</span></td></tr>
+            <tr><td>Thêm thư viện trong <code>pubspec.yaml</code>, sửa code native</td><td><span class="hl-red">Stop rồi Run lại</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thao tác</th><th>Android Studio</th><th>Terminal (<code>flutter run</code>)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hot Reload</td>
+              <td>Nút tia sét, hoặc <span class="kbd">Ctrl</span> + <span class="kbd">\</span> (Mac: <span class="kbd">Cmd</span> + <span class="kbd">\</span>), hoặc lưu file <span class="kbd">Ctrl</span> + <span class="kbd">S</span> nếu bật "Perform hot reload on save"</td>
+              <td>Nhấn <code>r</code></td>
+            </tr>
+            <tr>
+              <td>Hot Restart</td>
+              <td>Nút mũi tên vòng, hoặc <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">\</span> (Mac: <span class="kbd">Cmd</span> + <span class="kbd">Shift</span> + <span class="kbd">\</span>)</td>
+              <td>Nhấn <code>R</code> (chữ hoa)</td>
+            </tr>
+            <tr>
+              <td>Thoát</td>
+              <td>Nút Stop</td>
+              <td>Nhấn <code>q</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>bash - Chạy bằng Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c"># Liệt kê thiết bị đang kết nối (emulator, điện thoại, chrome)</span>
+flutter devices
+
+<span class="c"># Liệt kê emulator đã tạo và mở một cái</span>
+flutter emulators
+flutter emulators --launch ten_emulator
+
+<span class="c"># Chạy app trên thiết bị mặc định</span>
+flutter run
+
+<span class="c"># Chạy trên thiết bị cụ thể (dùng id lấy từ flutter devices)</span>
+flutter run -d chrome
+flutter run -d emulator-5554</code></pre>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-title">Debug</div>
+        <p>Cách dùng breakpoint, in log, Flutter Inspector và bảng tra cứu lỗi nằm ở <a href="02_debug_loi.html" style="color:var(--accent-blue);">Phần 2. Debug và lỗi thường gặp</a>.</p>
+      </div>
+
+      <!-- ===================== 7. FORMAT CODE ===================== -->
+      <h3>7. Format code và kiểm tra code</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Format code</strong> là <span class="hl">tự động căn lề, xuống dòng, khoảng trắng</span> theo chuẩn chung của Dart. Không thay đổi logic, chỉ làm code dễ đọc và mọi người viết giống nhau.</p>
+        <p><strong>Lint / Analyzer</strong> là công cụ <span class="hl">đọc code và báo lỗi, cảnh báo</span> ngay khi đang gõ, trước khi chạy app. Gạch đỏ là lỗi (không chạy được), gạch vàng là cảnh báo, gạch xám là gợi ý.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Format trong Android Studio</div>
+          <ul>
+            <li><strong>Format file đang mở:</strong> <span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">L</span> (Mac: <span class="kbd">Cmd</span> + <span class="kbd">Option</span> + <span class="kbd">L</span>), hoặc <code>Code &rarr; Reformat Code</code>.</li>
+            <li><strong>Xoá import thừa:</strong> <span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">O</span> (Mac: <span class="kbd">Ctrl</span> + <span class="kbd">Option</span> + <span class="kbd">O</span>), hoặc <code>Code &rarr; Optimize Imports</code>.</li>
+            <li><strong>Format cả thư mục:</strong> chuột phải <code>lib</code> &rarr; <code>Reformat Code</code>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Format trong Terminal</div>
+          <div class="code-wrapper">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c"># Format toàn bộ project</span>
+dart format .
+
+<span class="c"># Format một file hoặc thư mục</span>
+dart format lib/main.dart
+dart format lib/</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h4>Tự động format khi lưu file</h4>
+      <p>Bật một lần, sau đó mỗi lần <span class="kbd">Ctrl</span> + <span class="kbd">S</span> code tự được format. Vị trí cài đặt tuỳ phiên bản:</p>
+      <ul>
+        <li><code>Settings &rarr; Languages &amp; Frameworks &rarr; Flutter</code>: tick <strong>Format code on save</strong>, <strong>Organize imports on save</strong>, <strong>Perform hot reload on save</strong>.</li>
+        <li>Nếu không thấy các mục trên: <code>Settings &rarr; Tools &rarr; Actions on Save</code>: tick <strong>Reformat code</strong> và <strong>Optimize imports</strong>.</li>
+      </ul>
+
+      <h4>Dấu phẩy cuối (trailing comma)</h4>
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Trailing comma</strong> là dấu phẩy đặt sau tham số cuối cùng. Formatter của Dart (từ Dart 3.7) <span class="hl">tự quyết định thêm hoặc bỏ dấu phẩy này</span>: nếu cả lệnh vừa một dòng thì gộp lại một dòng và bỏ phẩy, nếu dài quá thì tách mỗi tham số một dòng và thêm phẩy.</p>
+      </div>
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Kết quả sau khi format</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// Ngắn: formatter giữ một dòng</span>
+Text(<span class="s">'Hello'</span>, style: TextStyle(fontSize: 20))
+
+<span class="c">// Dài: formatter tự tách dòng và thêm dấu phẩy cuối</span>
+Container(
+  padding: <span class="k">const</span> EdgeInsets.all(16),
+  color: Colors.blue,
+  child: <span class="k">const</span> Text(<span class="s">'Hello Flutter'</span>, style: TextStyle(fontSize: 20)),
+)</code></pre>
+      </div>
+      <p>Muốn formatter <span class="hl">giữ nguyên dấu phẩy bạn tự gõ</span> (để ép tách dòng) và chỉnh độ rộng dòng, thêm vào <code>analysis_options.yaml</code>:</p>
+      <div class="code-wrapper">
+        <div class="code-header"><span>analysis_options.yaml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>include: package:flutter_lints/flutter.yaml
+
+formatter:
+  page_width: 100            <span class="c"># Số ký tự tối đa mỗi dòng (mặc định 80)</span>
+  trailing_commas: preserve  <span class="c"># Có dấu phẩy cuối thì luôn tách dòng</span>
+
+linter:
+  rules:
+    avoid_print: false       <span class="c"># Ví dụ: tắt cảnh báo khi dùng print</span></code></pre>
+      </div>
+
+      <h4>Kiểm tra lỗi toàn project</h4>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Android Studio</div>
+          <p>Mở cửa sổ <strong>Dart Analysis</strong> (cạnh dưới, hoặc <code>View &rarr; Tool Windows &rarr; Dart Analysis</code>). Danh sách tất cả lỗi, cảnh báo của project. Bấm đúp để nhảy tới dòng lỗi.</p>
+          <p>Đặt con trỏ vào chỗ gạch chân, nhấn <span class="kbd">Alt</span> + <span class="kbd">Enter</span> (Mac: <span class="kbd">Option</span> + <span class="kbd">Enter</span>) để xem gợi ý sửa nhanh.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Terminal</div>
+          <div class="code-wrapper">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c"># Liệt kê lỗi và cảnh báo</span>
+flutter analyze
+
+<span class="c"># Xem các lỗi có thể tự sửa</span>
+dart fix --dry-run
+
+<span class="c"># Tự sửa (ví dụ: thêm const còn thiếu)</span>
+dart fix --apply</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 8. PHÍM TẮT ===================== -->
+      <h3>8. Bảng phím tắt Android Studio hay dùng</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Thao tác</th><th>Windows/Linux</th><th>Mac</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Gợi ý sửa nhanh, import, bọc Widget (Wrap with...)</td><td><span class="kbd">Alt</span> + <span class="kbd">Enter</span></td><td><span class="kbd">Option</span> + <span class="kbd">Enter</span></td></tr>
+            <tr><td>Format code</td><td><span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">L</span></td><td><span class="kbd">Cmd</span> + <span class="kbd">Option</span> + <span class="kbd">L</span></td></tr>
+            <tr><td>Xoá import thừa</td><td><span class="kbd">Ctrl</span> + <span class="kbd">Alt</span> + <span class="kbd">O</span></td><td><span class="kbd">Ctrl</span> + <span class="kbd">Option</span> + <span class="kbd">O</span></td></tr>
+            <tr><td>Gợi ý code (autocomplete)</td><td><span class="kbd">Ctrl</span> + <span class="kbd">Space</span></td><td><span class="kbd">Ctrl</span> + <span class="kbd">Space</span></td></tr>
+            <tr><td>Nhảy tới định nghĩa của class, hàm</td><td><span class="kbd">Ctrl</span> + <span class="kbd">B</span> hoặc <span class="kbd">Ctrl</span> + Click</td><td><span class="kbd">Cmd</span> + <span class="kbd">B</span> hoặc <span class="kbd">Cmd</span> + Click</td></tr>
+            <tr><td>Tìm mọi thứ (file, class, cài đặt)</td><td><span class="kbd">Shift</span> 2 lần</td><td><span class="kbd">Shift</span> 2 lần</td></tr>
+            <tr><td>Đổi tên biến, class ở mọi nơi</td><td><span class="kbd">Shift</span> + <span class="kbd">F6</span></td><td><span class="kbd">Shift</span> + <span class="kbd">F6</span></td></tr>
+            <tr><td>Comment / bỏ comment dòng</td><td><span class="kbd">Ctrl</span> + <span class="kbd">/</span></td><td><span class="kbd">Cmd</span> + <span class="kbd">/</span></td></tr>
+            <tr><td>Nhân bản dòng</td><td><span class="kbd">Ctrl</span> + <span class="kbd">D</span></td><td><span class="kbd">Cmd</span> + <span class="kbd">D</span></td></tr>
+            <tr><td>Xoá dòng</td><td><span class="kbd">Ctrl</span> + <span class="kbd">Y</span></td><td><span class="kbd">Cmd</span> + <span class="kbd">Delete</span></td></tr>
+            <tr><td>Mở Terminal</td><td><span class="kbd">Alt</span> + <span class="kbd">F12</span></td><td><span class="kbd">Option</span> + <span class="kbd">F12</span></td></tr>
+            <tr><td>Mở cửa sổ Project</td><td><span class="kbd">Alt</span> + <span class="kbd">1</span></td><td><span class="kbd">Cmd</span> + <span class="kbd">1</span></td></tr>
+            <tr><td>Run / Debug / Stop</td><td><span class="kbd">Shift</span>+<span class="kbd">F10</span> / <span class="kbd">Shift</span>+<span class="kbd">F9</span> / <span class="kbd">Ctrl</span>+<span class="kbd">F2</span></td><td><span class="kbd">Ctrl</span>+<span class="kbd">R</span> / <span class="kbd">Ctrl</span>+<span class="kbd">D</span> / <span class="kbd">Cmd</span>+<span class="kbd">F2</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Nếu phím tắt không khớp, xem lại ở <code>Settings &rarr; Keymap</code> (mỗi máy có thể dùng keymap khác).</p>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

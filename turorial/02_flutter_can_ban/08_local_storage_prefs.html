@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 8. Local Storage: SharedPreferences, Lưu Object, Theme & JWT - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 8</span>
+        <span class="pill pill-green">Local Storage & Persistence</span>
+        <span class="pill pill-purple">Dự án: local_storage</span>
+      </div>
+      <div>
+        <a href="07_riverpod_state.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 7. Riverpod</a>
+        <a href="09_sqlite_database_crud.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Mục 9. SQLite &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 8. Lưu Trữ Dữ Liệu Cục Bộ (Local Storage) Với <code>shared_preferences</code> & Riverpod</h2>
+        <p>Hướng dẫn toàn diện từ cơ chế bản chất đến thực chiến: <strong>Local Storage là gì? Vì sao dùng? Dùng khi nào?</strong> So sánh các giải pháp lưu trữ, phân tích các thư viện đi kèm, từng bước nhỏ chi tiết xây dựng app Quản lý Ghi chú (CRUD Notes lưu JSON StringList) kết hợp <strong>Riverpod + Code Generation</strong>, lưu cấu hình cài đặt, và mô hình xác thực JWT Token thực tế.</p>
+      </div>
+
+      <!-- ===================== PHẦN 1: BẢN CHẤT LOCAL STORAGE ===================== -->
+      <h3>1. Bản Chất: Local Storage Là Gì? Dùng Thế Nào? Vì Sao Phải Dùng?</h3>
+
+      <h4>1.1. Local Storage là gì?</h4>
+      <p>Trong ứng dụng di động, các biến và State lưu trên RAM (bộ nhớ tạm) sẽ <strong>bị xóa sạch</strong> ngay khi người dùng vuốt đóng ứng dụng (Kill App) hoặc hệ điều hành thu hồi bộ nhớ. <strong>Local Storage (Lưu trữ cục bộ)</strong> là cơ chế ghi dữ liệu xuống <strong>bộ nhớ vật lý (Flash Storage/Disk)</strong> của điện thoại để dữ liệu vẫn tồn tại vĩnh viễn kể cả khi tắt máy, tắt nguồn khởi động lại.</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Bộ Nhớ RAM (State / Biến)</div>
+          <p>Tốc độ cực nhanh nhưng là <strong>bộ nhớ tạm thời (Volatile)</strong>. Tắt app, tắt màn hình lâu hoặc máy hết RAM là mất toàn bộ dữ liệu người dùng đang làm việc.</p>
+          <span class="pill pill-orange">Mất dữ liệu khi kill app</span>
+        </div>
+        <div class="card">
+          <div class="card-title">Local Storage (Disk / Máy máy)</div>
+          <p>Lưu dữ liệu bền vững ngay trên thiết bị <strong>(Persistence)</strong>. Mở lại ứng dụng là đọc ra ngay, không cần kết nối Internet / Wifi / 4G.</p>
+          <span class="pill pill-green">Bền vững, Offline-first</span>
+        </div>
+        <div class="card">
+          <div class="card-title">Remote Storage (Server Cloud API)</div>
+          <p>Lưu trên Database máy chủ (MySQL, Mongo, Firebase). Đồng bộ nhiều thiết bị nhưng <strong>bắt buộc phải có mạng</strong> và độ trễ cao.</p>
+          <span class="pill pill-blue">Cần Internet & Call API</span>
+        </div>
+      </div>
+
+      <h4>1.2. Vì sao và khi nào chúng ta dùng Local Storage?</h4>
+      <ul style="margin-left: 20px; line-height: 1.8; margin-bottom: 16px;">
+        <li><strong>Duy trì phiên đăng nhập (Auth Session):</strong> Lưu lại mã token <code>accessToken</code>, <code>refreshToken</code> sau khi Login API thành công, giúp người dùng không phải nhập lại mật khẩu mỗi lần mở app.</li>
+        <li><strong>Lưu cấu hình & Trải nghiệm cá nhân (User Preferences):</strong> Trạng thái Dark Mode/Light Mode, ngôn ngữ ứng dụng (vi/en), âm lượng, cờ đã xem màn hình giới thiệu (<code>isFirstOpen = false</code>).</li>
+        <li><strong>Bộ nhớ đệm Offline (Caching) & CRUD cơ bản:</strong> Lưu danh sách ghi chú (Notes), danh sách yêu thích, giỏ hàng tạm thời để khi mất mạng người dùng vẫn xem và chỉnh sửa được bình thường.</li>
+      </ul>
+
+      <h4>1.3. Mô hình luồng dữ liệu (Data Flow) khi khởi động App</h4>
+      <!-- Sơ đồ minh họa bằng HTML/CSS mô phỏng Flowchart -->
+      <div style="background:var(--code-bg); border:1px solid var(--border-color); border-radius:8px; padding:18px; margin:16px 0;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:12px; font-size:14px; text-align:center;">
+          <div style="background:var(--bg-tertiary); border:1px solid var(--accent-blue); padding:10px 14px; border-radius:6px; min-width:140px;">
+            📱 <strong>Mở Ứng Dụng</strong><br><small style="color:var(--text-secondary)">main() chạy</small>
+          </div>
+          <div style="color:var(--accent-blue); font-weight:bold;">&rarr;</div>
+          <div style="background:var(--bg-tertiary); border:1px solid var(--accent-orange); padding:10px 14px; border-radius:6px; min-width:150px;">
+            ⚙️ <strong>WidgetsFlutterBinding</strong><br><small style="color:var(--text-secondary)">Sẵn sàng Native Bridge</small>
+          </div>
+          <div style="color:var(--accent-orange); font-weight:bold;">&rarr;</div>
+          <div style="background:var(--bg-tertiary); border:1px solid var(--accent-green); padding:10px 14px; border-radius:6px; min-width:160px;">
+            💾 <strong>SharedPreferences</strong><br><small style="color:var(--text-secondary)">Lấy Instance từ Disk</small>
+          </div>
+          <div style="color:var(--accent-green); font-weight:bold;">&rarr;</div>
+          <div style="background:var(--bg-tertiary); border:1px solid var(--accent-purple); padding:10px 14px; border-radius:6px; min-width:150px;">
+            🔄 <strong>ProviderScope Override</strong><br><small style="color:var(--text-secondary)">Bơm vào Riverpod Tree</small>
+          </div>
+          <div style="color:var(--accent-purple); font-weight:bold;">&rarr;</div>
+          <div style="background:var(--bg-tertiary); border:1px solid #3fb950; padding:10px 14px; border-radius:6px; min-width:140px;">
+            🚀 <strong>Render Giao Diện</strong><br><small style="color:var(--text-secondary)">Hiển thị dữ liệu tức thì</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2: THƯ VIỆN & CÔNG CỤ ===================== -->
+      <h3>2. Giới Thiệu Các Thư Viện Sử Dụng & Bảng So Sánh</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:20%;">Tên Thư Viện</th>
+              <th style="width:18%;">Bản Chất Dưới Nền</th>
+              <th style="width:32%;">Ưu Điểm & Mục Đích</th>
+              <th style="width:30%;">Trường Hợp Nên Dùng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>shared_preferences</code></td>
+              <td>Android <code>SharedPreferences</code> / iOS <code>NSUserDefaults</code></td>
+              <td>Dễ dùng nhất, cực nhẹ, ghi dạng <strong>Key-Value</strong> cơ bản (String, int, double, bool, List&lt;String&gt;).</td>
+              <td>Lưu JWT token, cờ Login, cài đặt Theme, danh sách JSON nhỏ &lt; 2-3MB. <strong>(Chuẩn đề thi PE)</strong></td>
+            </tr>
+            <tr>
+              <td><code>flutter_secure_storage</code></td>
+              <td>Android KeyStore / iOS KeyChain</td>
+              <td>Tự động mã hóa phần cứng an toàn tuyệt đối chống decompile và root máy.</td>
+              <td>Lưu mật khẩu, khóa bí mật API, thông tin thẻ ngân hàng hoặc sinh trắc học.</td>
+            </tr>
+            <tr>
+              <td><code>sqflite</code></td>
+              <td>Hệ quản trị CSDL SQLite (SQL)</td>
+              <td>Hỗ trợ bảng quan hệ (Table, Foreign Key), câu truy vấn <code>SELECT/WHERE/JOIN</code>.</td>
+              <td>Ứng dụng POS bán hàng, quản lý kho offline hàng nghìn bản ghi cần lọc phức tạp.</td>
+            </tr>
+            <tr>
+              <td><code>flutter_riverpod</code> & <code>riverpod_annotation</code></td>
+              <td>State Management & DI</td>
+              <td>Tách rời logic lưu trữ ra khỏi Widget, cập nhật giao diện tự động ngay khi dữ liệu Disk thay đổi.</td>
+              <td>Quản lý State đồng bộ với Local Storage theo kiến trúc Clean Code.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 3: CÀI ĐẶT DỰ ÁN ===================== -->
+      <h3>3. Bước 1: Khai Báo Thư Viện Trong <code>pubspec.yaml</code></h3>
+      <p>Mở file <code>pubspec.yaml</code> trong dự án (như project <code>local_storage</code>) và bổ sung các gói phụ thuộc cần thiết:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>pubspec.yaml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>name: local_storage
+description: "A new Flutter project for Local Storage & Riverpod."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  # 1. Thư viện lưu trữ Key-Value vật lý
+  shared_preferences: ^2.5.6
+  # 2. Thư viện quản trị State reactive
+  flutter_riverpod: ^3.2.0
+  riverpod_annotation: ^4.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  # 3. Bộ đôi công cụ tự động sinh code .g.dart
+  build_runner:
+  riverpod_generator: ^4.0.2
+
+flutter:
+  uses-material-design: true</code></pre>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Cài đặt nhanh qua Terminal</strong>
+          <p>Thay vì sửa tay <code>pubspec.yaml</code>, bạn có thể chạy dòng lệnh sau ở cửa sổ Terminal:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>flutter pub add shared_preferences flutter_riverpod riverpod_annotation
+flutter pub add -d build_runner riverpod_generator</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4: CẤU TRÚC FOLDER ===================== -->
+      <h3>4. Bước 2: Tổ Chức Cấu Trúc Dự Án (Folder Structure)</h3>
+      <p>Để code mạch lạc, dễ mở rộng và không bị rối giữa giao diện và lưu trữ, dự án <code>local_storage</code> được tổ chức theo chuẩn kiến trúc:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Project Tree: local_storage/lib</span></div>
+        <pre><code>local_storage/
+└── lib/
+    ├── main.dart                                # Khởi tạo SharedPreferences & Bọc ProviderScope override
+    ├── model/
+    │   └── note.dart                            # Class Note chứa hàm parse JSON (fromJson & toJson)
+    ├── providers/
+    │   ├── shared_preferences_provider.dart     # Provider cung cấp instance SharedPreferences toàn app
+    │   ├── shared_preferences_provider.g.dart   # File auto-generate do riverpod sinh ra
+    │   ├── note_notifier.dart                   # Quản lý State danh sách Note & Thao tác ghi/đọc Disk
+    │   └── note_notifier.g.dart                 # File auto-generate cho NoteNotifier
+    └── ui/
+        └── note_list_screen.dart                # Giao diện hiển thị GridView, thêm Note & xoá Note</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5: BƯỚC THỰC HÀNH CHI TIẾT ===================== -->
+      <h3>5. Quy Trình 5 Bước Chi Tiết Xây Dựng Ứng Dụng Local Storage</h3>
+
+      <!-- BƯỚC 1: MODEL -->
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Tạo Model <code>Note</code> Hỗ Trợ Chuyển Đổi JSON (<code>lib/model/note.dart</code>)</strong>
+          <p><code>shared_preferences</code> không hỗ trợ lưu thẳng Object Dart tuỳ ý. Muốn lưu được một danh sách ghi chú, ta phải chuyển đổi Object sang <strong>Map JSON &rarr; Mã hóa chuỗi String (jsonEncode)</strong>.</p>
+        </div>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>lib/model/note.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>class Note {
+  int id;
+  String title;
+  String content;
+
+  Note(this.id, this.title, this.content);
+
+  // 1. Chuyển đổi từ Map JSON sang Object Note (Đọc từ máy lên)
+  factory Note.fromJson(Map&lt;String, dynamic&gt; json) {
+    return Note(
+      json['id'] as int,
+      json['title'] as String,
+      json['content'] as String,
+    );
+  }
+
+  // 2. Chuyển đổi từ Object Note sang Map JSON (Chuẩn bị ghi xuống máy)
+  Map&lt;String, dynamic&gt; toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+    };
+  }
+}</code></pre>
+      </div>
+
+      <!-- BƯỚC 2: PROVIDER BASE -->
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Khai Báo <code>sharedPreferencesProvider</code> (<code>lib/providers/shared_preferences_provider.dart</code>)</strong>
+          <p>Hàm lấy <code>SharedPreferences.getInstance()</code> là bất đồng bộ (<code>Future</code>). Để không phải <code>await</code> mỗi khi đọc hay ghi dữ liệu trong UI, ta tạo 1 Provider giữ giá trị đồng bộ và cố tình <code>throw UnimplementedError()</code> để ghi đè (override) lúc khởi động ứng dụng.</p>
+        </div>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>lib/providers/shared_preferences_provider.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+part 'shared_preferences_provider.g.dart';
+
+// Khai báo Provider cung cấp instance SharedPreferences cho toàn bộ ứng dụng
+@riverpod
+SharedPreferences sharedPreferences(Ref ref) {
+  // Chủ động throw Exception vì Provider này bắt buộc sẽ được ghi đè (overrideWithValue)
+  // ngay từ hàm main() trước khi bất kỳ Widget nào được vẽ
+  throw UnimplementedError('sharedPreferencesProvider must be overridden in ProviderScope');
+}</code></pre>
+      </div>
+
+      <!-- BƯỚC 3: MAIN.DART OVERRIDE -->
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Khởi Tạo Máy & Override Provider trong <code>lib/main.dart</code></strong>
+          <p>Sử dụng <code>WidgetsFlutterBinding.ensureInitialized()</code> để chắc chắn Flutter Engine đã kết nối với tầng hệ điều hành Native, sau đó lấy instance và truyền vào <code>overrides</code> của <code>ProviderScope</code>.</p>
+        </div>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>lib/main.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_storage/providers/shared_preferences_provider.dart';
+import 'package:local_storage/ui/note_list_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() async {
+  // 1. Đảm bảo cầu nối Flutter Engine với Native OS đã sẵn sàng trước khi gọi hàm Async
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Đọc khởi tạo SharedPreferences từ bộ nhớ máy người dùng
+  final prefsInstance = await SharedPreferences.getInstance();
+
+  runApp(
+    ProviderScope(
+      // 3. Ghi đè (override) provider với instance đã sẵn sàng
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefsInstance),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Local Storage Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const NoteListScreen(),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- BƯỚC 4: NOTIFIER VỚI CÁC THAO TÁC CRUD -->
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Xây Dựng <code>NoteNotifier</code> Thực Hiện Đọc/Ghi/Xóa/Sửa (<code>lib/providers/note_notifier.dart</code>)</strong>
+          <p>Notifier đóng vai trò giữ trạng thái <code>List&lt;Note&gt;</code> trên RAM và tự động đồng bộ hóa xuống bộ nhớ Disk qua chìa khóa <code>_notesKey = 'notes'</code>.</p>
+        </div>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>lib/providers/note_notifier.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>import 'dart:convert';
+import 'package:local_storage/model/note.dart';
+import 'package:local_storage/providers/shared_preferences_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'note_notifier.g.dart';
+
+@riverpod
+class NoteNotifier extends _$NoteNotifier {
+  // Key định danh duy nhất để lưu và đọc dữ liệu trong Local Storage
+  static const String _notesKey = 'notes';
+
+  // Hàm khởi tạo State: Chạy đầu tiên khi Widget đọc Provider
+  @override
+  List&lt;Note&gt; build() {
+    return _loadNotesFromStorage();
+  }
+
+  // ================= 1. READ (ĐỌC TỪ LOCAL STORAGE LÊN RAM) =================
+  List&lt;Note&gt; _loadNotesFromStorage() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    // Đọc danh sách chuỗi (StringList), nếu chưa có dữ liệu thì trả về mảng rỗng []
+    final List&lt;String&gt; notesJsonList = prefs.getStringList(_notesKey) ?? [];
+
+    // Duyệt từng chuỗi JSON -> giải mã jsonDecode -> chuyển thành Object Note
+    final notes = notesJsonList
+        .map((noteString) => Note.fromJson(jsonDecode(noteString) as Map&lt;String, dynamic&gt;))
+        .toList();
+
+    return notes;
+  }
+
+  // ================= 2. PERSIST (LƯU TOÀN BỘ STATE XUỐNG DISK) =================
+  Future&lt;void&gt; _saveNotesToStorage() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    // Biến toàn bộ Object Note trong state -> Map (toJson) -> Chuỗi JSON (jsonEncode)
+    final List&lt;String&gt; noteStringList =
+        state.map((note) => jsonEncode(note.toJson())).toList();
+
+    // Ghi xuống bộ nhớ máy qua SharedPreferences
+    await prefs.setStringList(_notesKey, noteStringList);
+  }
+
+  // ================= 3. CREATE (THÊM GHI CHÚ MỚI) =================
+  Future&lt;void&gt; addNote(String title, String content) async {
+    final newNote = Note(
+      DateTime.now().millisecondsSinceEpoch, // Sinh ID duy nhất theo mốc thời gian
+      title,
+      content,
+    );
+
+    // BẮT BUỘC: Tạo mảng mới bằng spread operator [...] để Riverpod phát hiện state thay đổi
+    // TUYỆT ĐỐI KHÔNG DÙNG: state.add(newNote) -> Không kích hoạt render lại UI
+    state = [...state, newNote];
+
+    // Lưu bền vững xuống Disk
+    await _saveNotesToStorage();
+  }
+
+  // ================= 4. DELETE (XÓA THEO ID) =================
+  Future&lt;void&gt; deleteNote(int id) async {
+    // Lọc lấy các note có ID khác với ID cần xóa
+    state = state.where((note) => note.id != id).toList();
+
+    // Đồng bộ lại Disk
+    await _saveNotesToStorage();
+  }
+
+  // ================= 5. UPDATE (SỬA NỘI DUNG GHI CHÚ) =================
+  Future&lt;void&gt; editNote(Note updatedNote) async {
+    // Duyệt mảng và thay thế note có ID tương ứng
+    state = [
+      for (final note in state)
+        if (note.id == updatedNote.id) updatedNote else note
+    ];
+
+    // Đồng bộ lại Disk
+    await _saveNotesToStorage();
+  }
+}</code></pre>
+      </div>
+
+      <div class="def">
+        <span class="def-term">Lưu ý cực kỳ quan trọng về Immutability</span>
+        <p>Trong Riverpod, <code>state</code> là bất biến (Immutable). Nếu bạn dùng <code>state.add(item)</code> hoặc <code>state.remove(item)</code>, vùng nhớ (Memory Reference) của List không đổi, Riverpod sẽ coi như State chưa từng thay đổi và giao diện <strong>sẽ đứng im không cập nhật</strong>. Hãy luôn gán mảng mới: <code>state = [...state, newItem];</code>.</p>
+      </div>
+
+      <!-- BƯỚC 5: TỰ ĐỘNG SINH CODE -->
+      <div class="step-box">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Chạy Lệnh Sinh Code Tự Động (<code>build_runner</code>)</strong>
+          <p>Mỗi khi khai báo <code>@riverpod</code> và <code>part '*.g.dart';</code>, bạn cần mở Terminal và chạy lệnh:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>dart run build_runner build --delete-conflicting-outputs</code></pre>
+          </div>
+          <p>Sau khi lệnh hoàn tất, 2 file <code>shared_preferences_provider.g.dart</code> và <code>note_notifier.g.dart</code> sẽ xuất hiện và xoá tan toàn bộ gạch đỏ!</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 6: GIAO DIỆN UI THỰC CHIẾN ===================== -->
+      <h3>6. Giao Diện Hiển Thị & Thao Tác (<code>lib/ui/note_list_screen.dart</code>)</h3>
+      <p>Màn hình kết hợp hiển thị lưới <code>GridView</code> 2 cột, nút bấm mở Dialog nhập liệu (Add Note), nút sửa và nút xóa tương tác trực tiếp với State.</p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>lib/ui/note_list_screen.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_storage/model/note.dart';
+import 'package:local_storage/providers/note_notifier.dart';
+
+// 1. Kế thừa ConsumerWidget để dùng đối tượng 'ref'
+class NoteListScreen extends ConsumerWidget {
+  const NoteListScreen({super.key});
+
+  // Hộp thoại nhập tiêu đề & nội dung ghi chú (Dùng chung cho cả Thêm và Sửa)
+  void _showNoteDialog(BuildContext context, WidgetRef ref, [Note? existingNote]) {
+    final titleController = TextEditingController(text: existingNote?.title ?? '');
+    final contentController = TextEditingController(text: existingNote?.content ?? '');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(existingNote == null ? 'Thêm Ghi Chú Mới' : 'Chỉnh Sửa Ghi Chú'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(
+                labelText: 'Tiêu đề',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: contentController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Nội dung',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final title = titleController.text.trim();
+              final content = contentController.text.trim();
+              if (title.isEmpty) return;
+
+              if (existingNote == null) {
+                // Gọi notifier để thêm mới
+                ref.read(noteProvider.notifier).addNote(title, content);
+              } else {
+                // Gọi notifier để cập nhật
+                ref.read(noteProvider.notifier).editNote(
+                  Note(existingNote.id, title, content),
+                );
+              }
+              Navigator.pop(ctx);
+            },
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 2. ref.watch lắng nghe danh sách notes. Bất kỳ khi nào State đổi, Widget sẽ tự vẽ lại!
+    final List&lt;Note&gt; notes = ref.watch(noteProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sổ Tay Ghi Chú (Local Storage)'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showNoteDialog(context, ref),
+        icon: const Icon(Icons.add),
+        label: const Text('Thêm Note'),
+      ),
+      body: notes.isEmpty
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.note_alt_outlined, size: 64, color: Colors.grey),
+                  SizedBox(height: 12),
+                  Text('Chưa có ghi chú nào trong máy!\nHãy bấm nút "Thêm Note" bên dưới.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 16)),
+                ],
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.95,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: notes.length,
+                itemBuilder: (context, index) {
+                  final note = notes[index];
+                  return Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  note.title,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                onPressed: () {
+                                  // Xóa note khỏi RAM & Local Storage
+                                  ref.read(noteProvider.notifier).deleteNote(note.id);
+                                },
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          Expanded(
+                            child: Text(
+                              note.content,
+                              style: const TextStyle(color: Colors.black87),
+                              overflow: TextOverflow.fade,
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: IconButton(
+                              icon: const Icon(Icons.edit_note, size: 22, color: Colors.blueAccent),
+                              onPressed: () => _showNoteDialog(context, ref, note),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7: CÁC CASE THỰC CHIẾN MỞ RỘNG ===================== -->
+      <h3>7. Các Kịch Bản Thực Chiến Khác Của Local Storage</h3>
+
+      <div class="grid-2">
+        <!-- CARD 1: LƯU THEME DARK MODE -->
+        <div class="card">
+          <div class="card-title">1. Lưu Trạng Thái Cài Đặt (Dark / Light Mode)</div>
+          <p>Lưu biến Boolean đơn giản vào bộ nhớ máy để mở app lên là giữ nguyên giao diện người dùng yêu thích:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Theme Settings Example</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>// 1. Lưu cờ Dark Mode
+Future&lt;void&gt; saveDarkMode(bool isDark) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('is_dark_mode', isDark);
+}
+
+// 2. Đọc khi khởi động
+Future&lt;bool&gt; loadDarkMode() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('is_dark_mode') ?? false; // mặc định sáng
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- CARD 2: LƯU TOKEN JWT -->
+        <div class="card">
+          <div class="card-title">2. Lưu JWT Token Khi Đăng Nhập (Login Auth)</div>
+          <p>Lưu chuỗi Access Token nhận về từ REST API sau khi Login thành công và tự động xóa khi Đăng xuất (Logout):</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Auth Storage Example</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>// Lưu Token sau khi POST Login thành công (200 OK)
+final prefs = await SharedPreferences.getInstance();
+await prefs.setString('accessToken', responseData['accessToken']);
+await prefs.setString('username', responseData['username']);
+
+// Kiểm tra khi vừa mở app
+final token = prefs.getString('accessToken');
+if (token != null) {
+  // Đã đăng nhập -> Nhảy thẳng vào HomeScreen
+} else {
+  // Chưa đăng nhập -> Hiện LoginScreen
+}
+
+// Khi người dùng bấm Logout
+await prefs.remove('accessToken');
+await prefs.remove('username');</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== BẢNG CÁC LỖI THƯỜNG GẶP ===================== -->
+      <h3>8. Bảng Lỗi Thường Gặp & Cách Khắc Phục (Troubleshooting)</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:28%;">Triệu chứng lỗi</th>
+              <th style="width:36%;">Nguyên nhân gốc rễ</th>
+              <th style="width:36%;">Cách khắc phục triệt để</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Binding has not been initialized</code></td>
+              <td>Gọi <code>SharedPreferences.getInstance()</code> trong hàm <code>main()</code> trước khi Flutter Engine kết nối xong.</td>
+              <td>Thêm dòng <code>WidgetsFlutterBinding.ensureInitialized();</code> lên dòng đầu tiên của <code>main()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>UnimplementedError</code> khi gọi <code>ref.read(sharedPreferencesProvider)</code></td>
+              <td>Quên truyền <code>overrides: [sharedPreferencesProvider.overrideWithValue(...)]</code> trong <code>ProviderScope</code>.</td>
+              <td>Kiểm tra lại cấu trúc file <code>main.dart</code>, đảm bảo <code>runApp(ProviderScope(overrides: [...], child: MyApp()))</code> đã có override.</td>
+            </tr>
+            <tr>
+              <td>Dữ liệu biến mất khi tắt app mở lại (Data not persisting)</td>
+              <td>Chỉ thay đổi <code>state</code> trên RAM mà quên gọi hàm ghi <code>await prefs.setStringList(...)</code> xuống Disk.</td>
+              <td>Mỗi lần thực hiện Create / Update / Delete xong, phải luôn gọi hàm <code>await _saveNotesToStorage();</code>.</td>
+            </tr>
+            <tr>
+              <td>Giao diện không tự động vẽ lại sau khi thêm hoặc xóa Note</td>
+              <td>Sử dụng phương thức làm biến đổi mảng gốc như <code>state.add()</code> thay vì tạo mảng mới.</td>
+              <td>Dùng cú pháp trải (spread operator): <code>state = [...state, newNote];</code>.</td>
+            </tr>
+            <tr>
+              <td>Báo lỗi đỏ không tìm thấy class <code>NoteNotifierProvider</code> hoặc file <code>.g.dart</code></td>
+              <td>Chưa chạy lệnh sinh mã tự động sau khi viết xong annotation <code>@riverpod</code>.</td>
+              <td>Chạy Terminal: <code>dart run build_runner build --delete-conflicting-outputs</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>
+

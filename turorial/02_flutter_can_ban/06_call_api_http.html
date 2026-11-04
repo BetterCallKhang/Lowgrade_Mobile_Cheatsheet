@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 6. Call REST API với gói http & dio - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 6</span>
+        <span class="pill pill-green">REST API: http & dio</span>
+      </div>
+      <div>
+        <a href="05_form_validation.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 5. Form & Validation</a>
+        <a href="07_riverpod_state.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Mục 7. Riverpod &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 6. Quy trình Gọi REST API thực chiến với gói <code>http</code> & <code>dio</code></h2>
+        <p>Hướng dẫn từng bước nhỏ (Step-by-step) cách làm việc với API: <strong>Soi trước cấu trúc JSON trả về &rarr; Xây dựng Model Class (<code>fromJson</code>/<code>toJson</code>) &rarr; Viết hàm gọi API (GET, POST) &rarr; Parse JSON & Bắt lỗi mạng</strong> chuẩn theo đúng đề bài thực hành và thi PE.</p>
+      </div>
+
+      <!-- ===================== DANH SÁCH API THỰC HÀNH MỞ ===================== -->
+      <h3>Các nguồn REST API mở miễn phí để luyện tập (Mock & Public APIs)</h3>
+      <div class="def">
+        <span class="def-term">Tài nguyên tham khảo trực tiếp</span>
+        <p>Trước khi viết code, bạn có thể bấm thẳng vào các đường link API mở bên dưới trên trình duyệt để soi cấu trúc JSON mẫu:</p>
+        <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+          <li><strong>Chi tiết 1 bài viết (Post ID 3):</strong> <a href="https://jsonplaceholder.typicode.com/posts/3" target="_blank" style="color:var(--accent-blue);"><code>https://jsonplaceholder.typicode.com/posts/3</code></a> (Trả về 1 Object)</li>
+          <li><strong>Danh sách tất cả bài viết:</strong> <a href="https://jsonplaceholder.typicode.com/posts" target="_blank" style="color:var(--accent-blue);"><code>https://jsonplaceholder.typicode.com/posts</code></a> (Trả về 1 List 100 posts)</li>
+          <li><strong>Danh sách người dùng (Users):</strong> <a href="https://jsonplaceholder.typicode.com/users" target="_blank" style="color:var(--accent-blue);"><code>https://jsonplaceholder.typicode.com/users</code></a> (Trả về List User có thông tin <code>id, name, email, phone, address...</code>)</li>
+          <li><strong>Danh sách sản phẩm (E-commerce):</strong> <a href="https://fakestoreapi.com/products" target="_blank" style="color:var(--accent-blue);"><code>https://fakestoreapi.com/products</code></a> (Dùng cho bài tập bán hàng, có hình ảnh, giá tiền, rating)</li>
+        </ul>
+      </div>
+
+      <!-- ===================== BƯỚC 1: CÀI PACKAGE ===================== -->
+      <h3>Bước 1: Cài đặt thư viện <code>http</code> vào dự án</h3>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Chạy lệnh cài đặt tự động qua Terminal</strong>
+          <p>Mở Terminal tại thư mục gốc của project Flutter (ví dụ thư mục <code>hello_world</code>) và gõ lệnh:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>flutter pub add http</code></pre>
+          </div>
+          <p style="margin-top: 8px;">Lệnh này sẽ tự động thêm <code>http: ^1.x.x</code> vào <code>pubspec.yaml</code> và tải thư viện về máy.</p>
+        </div>
+      </div>
+
+      <!-- ===================== BƯỚC 2: SOI DỮ LIỆU API ===================== -->
+      <h3>Bước 2: Soi cấu trúc JSON mà API trả về (Đề bài thực tế)</h3>
+
+      <div class="def">
+        <span class="def-term">Quy tắc vàng khi làm API</span>
+        <p><strong>Tuyệt đối không viết code mò mẫm!</strong> Trước khi gõ code, bạn phải mở trình duyệt hoặc phần mềm Postman/Thunder Client truy cập vào URL API để xem nó trả về cấu trúc gì (dạng Object <code>{ }</code> hay dạng List <code>[ ]</code>, gồm những trường nào, kiểu dữ liệu là số hay chữ).</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Đề bài: Cho URL API <code>https://jsonplaceholder.typicode.com/posts/3</code></div>
+        <p>Khi mở link trên trình duyệt, API trả về đoạn JSON nguyên thuỷ như sau:</p>
+        <div class="code-wrapper">
+          <div class="code-header"><span>json - Cấu trúc API trả về</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>{
+  "userId": 1,
+  "id": 3,
+  "title": "ea molestias quasi exercitationem repellat qui ipsa sit aut",
+  "body": "et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut"
+}</code></pre>
+        </div>
+        <p style="margin-top: 8px;"><strong>Phân tích dữ liệu:</strong></p>
+        <ul style="margin-left: 20px;">
+          <li>Đây là <strong>1 Object</strong> (bọc trong <code>{ }</code>), tương ứng với kiểu <code>Map&lt;String, dynamic&gt;</code> trong Dart.</li>
+          <li>Có 4 trường: <code>userId</code> (int), <code>id</code> (int), <code>title</code> (String), và <code>body</code> (String).</li>
+        </ul>
+      </div>
+
+      <!-- ===================== BƯỚC 3: TẠO MODEL CLASS ===================== -->
+      <h3>Bước 3: Tạo Model Class chuẩn (<code>Post.dart</code>)</h3>
+
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Tạo file <code>lib/Post.dart</code> dựa đúng theo các trường JSON vừa soi</strong>
+          <p>Tạo class có đủ các thuộc tính, constructor, factory <code>fromJson</code> để nhào nặn Map thành Object, và <code>toJson</code> / <code>toString</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>dart - lib/Post.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>class Post {
+  final int userId;
+  final int id;
+  final String title;
+  final String body;
+
+  <span class="c">// Constructor với Named Parameters (hoặc Positional tuỳ ý)</span>
+  Post({
+    required this.userId,
+    required this.id,
+    required this.title,
+    required this.body,
+  });
+
+  <span class="c">// Factory constructor: Nhận Map JSON và trả về một Object Post hoàn chỉnh</span>
+  <span class="c">// Kèm toán tử ?? fallback để tránh bị crash nếu API trả về null</span>
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      userId: json['userId'] as int? ?? 0,
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? '',
+      body: json['body'] as String? ?? '',
+    );
+  }
+
+  <span class="c">// Chuyển Object thành Map nếu muốn gửi lên server</span>
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'id': id,
+      'title': title,
+      'body': body,
+    };
+  }
+
+  <span class="c">// In thông tin đẹp mắt khi print(post)</span>
+  @override
+  String toString() {
+    return 'Post{userId: $userId, id: $id, title: "$title"}';
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== BƯỚC 4: VIẾT HÀM FETCH API ===================== -->
+      <h3>Bước 4: Viết hàm gọi API và chuyển đổi dữ liệu</h3>
+
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Quy trình xử lý chuẩn 4 bước bên trong hàm Fetch:</strong>
+          <ol style="margin-left: 20px; margin-top: 6px; line-height: 1.8;">
+            <li><strong>Chuyển chuỗi URL thành <code>Uri</code>:</strong> <code>Uri.parse(...)</code>.</li>
+            <li><strong>Gọi phương thức HTTP:</strong> <code>await http.get(url)</code>.</li>
+            <li><strong>Kiểm tra mã trạng thái (Status Code):</strong> Kiểm tra <code>response.statusCode == 200</code>.</li>
+            <li><strong>Giải mã chuỗi văn bản sang JSON Map/List:</strong> <code>jsonDecode(response.body)</code> rồi đẩy qua <code>Post.fromJson()</code>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - lib/main.dart - Hàm fetchPost và fetchAllPosts</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'dart:convert';               <span class="c">// Cần gói này để dùng hàm jsonDecode()</span>
+import 'package:http/http.dart' as http; <span class="c">// Import thư viện http đặt bí danh là 'http'</span>
+import 'Post.dart';
+
+<span class="c">// 1. Hàm GET 1 bài viết theo ID</span>
+Future<Post> fetchPost(int id) async {
+  final url = Uri.parse('https://jsonplaceholder.typicode.com/posts/$id');
+
+  try {
+    <span class="c">// Gửi yêu cầu GET lên server</span>
+    final response = await http.get(url);
+
+    <span class="c">// 200 = OK (Thành công)</span>
+    if (response.statusCode == 200) {
+      <span class="c">// response.body lúc này là 1 chuỗi String thô: '{"userId": 1, ...}'</span>
+      <span class="c">// jsonDecode sẽ biến chuỗi đó thành Map<String, dynamic></span>
+      final Map<String, dynamic> rawJson = jsonDecode(response.body);
+      
+      <span class="c">// Đưa Map vào Post.fromJson để có Object hoàn chỉnh</span>
+      return Post.fromJson(rawJson);
+    } else {
+      throw Exception('Server trả về mã lỗi: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Lỗi kết nối mạng: $e');
+  }
+}
+
+<span class="c">// 2. Hàm GET danh sách nhiều bài viết (List<Post>)</span>
+Future<List<Post>> fetchAllPosts() async {
+  final url = Uri.parse('https://jsonplaceholder.typicode.com/posts');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    <span class="c">// Vì API này trả về 1 mảng JSON bọc trong [ ... ], nên jsonDecode ra List</span>
+    final List<dynamic> jsonList = jsonDecode(response.body);
+
+    <span class="c">// Duyệt từng phần tử bằng .map() và đổi thành Post</span>
+    return jsonList.map((item) => Post.fromJson(item)).toList();
+  } else {
+    throw Exception('Không tải được danh sách');
+  }
+}
+
+<span class="c">// Hàm main chạy thử nghiệm</span>
+void main() async {
+  print('Đang gọi API lấy Post id = 3...');
+  var p = await fetchPost(3);
+  
+  print('--- KẾT QUẢ NHẬN ĐƯỢC ---');
+  print(p.toString());
+  print('Tiêu đề bài viết: ${p.title}');
+}</code></pre>
+      </div>
+
+      <!-- ===================== BƯỚC 5: GỬI DỮ LIỆU POST ===================== -->
+      <h3>Bước 5: Gửi dữ liệu mới lên Server (HTTP POST)</h3>
+
+      <div class="def">
+        <span class="def-term">Lưu ý khi gọi POST</span>
+        <p>Khi gửi dữ liệu (tạo tài khoản, tạo bài viết mới), bạn phải:</p>
+        <ul style="margin-left: 20px;">
+          <li>Kèm header <code>'Content-Type': 'application/json'</code> để server hiểu.</li>
+          <li>Dùng <code>jsonEncode(map)</code> để mã hoá Map trong Dart thành chuỗi JSON thô gửi đi.</li>
+        </ul>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Gọi HTTP POST</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>Future<Post> createPost(String title, String body, int userId) async {
+  final url = Uri.parse('https://jsonplaceholder.typicode.com/posts');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode({
+      'title': title,
+      'body': body,
+      'userId': userId,
+    }),
+  );
+
+  <span class="c">// 201 = Created (Tạo thành công)</span>
+  if (response.statusCode == 201) {
+    return Post.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Lỗi tạo bài viết: ${response.statusCode}');
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== BẢNG MÃ LỖI HTTP ===================== -->
+      <h3>6. Bảng tra cứu mã trạng thái HTTP (Status Code) hay gặp</h3>
+      <p>Tra cứu danh mục mã chuẩn đầy đủ tại: <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status" target="_blank" style="color:var(--accent-blue);"><strong>MDN Web Docs - HTTP Response Status Codes &rarr;</strong></a> hoặc <a href="https://httpstatuses.com/" target="_blank" style="color:var(--accent-blue);"><strong>httpstatuses.com &rarr;</strong></a></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Status Code</th><th>Tên mã</th><th>Ý nghĩa thực tế</th><th>Cách xử lý trong code Flutter</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="hl">200 OK</span></td>
+              <td>Thành công</td>
+              <td>Yêu cầu đã được server xử lý trọn vẹn (dùng cho GET, PUT).</td>
+              <td>Lấy <code>response.body</code> parse sang Model.</td>
+            </tr>
+            <tr>
+              <td><span class="hl">201 Created</span></td>
+              <td>Tạo mới thành công</td>
+              <td>Server đã lưu bản ghi mới thành công (thường là POST).</td>
+              <td>Thông báo Snackbar thành công trên UI và load lại danh sách.</td>
+            </tr>
+            <tr>
+              <td><span class="hl-red">400 Bad Request</span></td>
+              <td>Yêu cầu không hợp lệ</td>
+              <td>Dữ liệu gửi lên sai định dạng (thiếu trường, sai kiểu dữ liệu).</td>
+              <td>Kiểm tra lại payload trong <code>jsonEncode</code> hoặc log xem server báo thiếu trường nào.</td>
+            </tr>
+            <tr>
+              <td><span class="hl-red">401 Unauthorized</span></td>
+              <td>Chưa xác thực</td>
+              <td>Chưa đăng nhập, thiếu Header Bearer Token hoặc JWT hết hạn.</td>
+              <td>Xoá token lưu trong SharedPreferences và điều hướng về màn hình Login.</td>
+            </tr>
+            <tr>
+              <td><span class="hl-red">403 Forbidden</span></td>
+              <td>Bị từ chối truy cập</td>
+              <td>Đã đăng nhập nhưng không có quyền (ví dụ User thường cố vào trang Admin).</td>
+              <td>Hiển thị thông báo "Bạn không có quyền thực hiện chức năng này".</td>
+            </tr>
+            <tr>
+              <td><span class="hl-red">404 Not Found</span></td>
+              <td>Không tìm thấy</td>
+              <td>Đường dẫn URL bị sai chính tả hoặc ID bài viết không tồn tại.</td>
+              <td>Kiểm tra lại link URL hoặc hiển thị màn hình "Nội dung không tồn tại".</td>
+            </tr>
+            <tr>
+              <td><span class="hl-red">500 Server Error</span></td>
+              <td>Lỗi máy chủ</td>
+              <td>Lỗi sập phía backend (crash database, bug server).</td>
+              <td>Báo cho người dùng "Hệ thống đang bảo trì, vui lòng thử lại sau".</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== HƯỚNG DẪN DÙNG DIO ===================== -->
+      <h3>7. Nâng cao: Gọi API chuyên nghiệp với thư viện <code>dio</code></h3>
+
+      <div class="def">
+        <span class="def-term">Vì sao nhiều dự án Flutter lớn dùng Dio thay vì http?</span>
+        <p>Thư viện mặc định <code>http</code> tuy nhẹ và chuẩn nhưng có nhược điểm: phải dùng <code>Uri.parse()</code>, phải <code>jsonDecode()</code> thủ công, không tự gắn Token tự động. <strong><code>dio</code></strong> là thư viện mạng (networking) mạnh mẽ số 1 của Flutter với các tính năng vượt trội:</p>
+        <ul style="margin-left: 20px; margin-top: 6px; line-height: 1.8;">
+          <li><strong>Tự động Parse JSON:</strong> Không cần gõ <code>jsonDecode(response.body)</code>, <code>response.data</code> đã là <code>Map</code> hoặc <code>List</code> sẵn!</li>
+          <li><strong>BaseOptions & Timeout:</strong> Cấu hình URL gốc dùng chung (<code>baseUrl</code>) và thời gian chờ (Connect / Receive Timeout).</li>
+          <li><strong>Interceptors (Bộ đánh chặn):</strong> Tự động nhét Token JWT vào mọi request gửi đi, tự động in log đẹp mắt (Pretty Logger).</li>
+          <li><strong>Upload / Download file:</strong> Báo % tiến độ tải (Progress bar).</li>
+        </ul>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Cài đặt package <code>dio</code></strong>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>flutter pub add dio</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Code mẫu thực hành gọi API với Dio (So sánh cùng bài toán Post)</strong>
+          <p>Xem code mẫu dưới đây để thấy sự tinh gọn của Dio:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>dart - dio_service.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>import 'package:dio/dio.dart';
+import 'Post.dart';
+
+<span class="c">// 1. Khởi tạo đối tượng Dio cấu hình sẵn baseUrl và Timeout</span>
+final dio = Dio(
+  BaseOptions(
+    baseUrl: 'https://jsonplaceholder.typicode.com',
+    connectTimeout: const Duration(seconds: 10), <span class="c">// Quá 10s tự huỷ</span>
+    receiveTimeout: const Duration(seconds: 10),
+    headers: {
+      'Content-Type': 'application/json',
+      <span class="c">// 'Authorization': 'Bearer my_token_here', // Tự động đính kèm Token</span>
+    },
+  ),
+);
+
+<span class="c">// 2. Hàm GET 1 bài viết bằng Dio</span>
+Future<Post> fetchPostWithDio(int id) async {
+  try {
+    <span class="c">// Chỉ cần truyền đuôi path, không cần Uri.parse</span>
+    final response = await dio.get('/posts/$id');
+
+    <span class="c">// KHÔNG CẦN jsonDecode! response.data đã là Map<String, dynamic> sẵn</span>
+    return Post.fromJson(response.data);
+  } on DioException catch (e) {
+    <span class="c">// Dio bắt lỗi chuyên sâu: timeout, mất mạng, lỗi 404/500</span>
+    if (e.type == DioExceptionType.connectionTimeout) {
+      throw Exception('Kết nối mạng quá chậm, vui lòng thử lại');
+    }
+    throw Exception('Lỗi Dio: ${e.response?.statusCode} - ${e.message}');
+  }
+}
+
+<span class="c">// 3. Hàm GET danh sách bài viết bằng Dio</span>
+Future<List<Post>> fetchAllPostsWithDio() async {
+  try {
+    final response = await dio.get('/posts');
+    <span class="c">// response.data đã là List<dynamic></span>
+    final List<dynamic> list = response.data;
+    return list.map((item) => Post.fromJson(item)).toList();
+  } catch (e) {
+    throw Exception('Lỗi lấy danh sách: $e');
+  }
+}
+
+<span class="c">// 4. Hàm POST tạo bài viết mới bằng Dio</span>
+Future<Post> createPostWithDio(String title, String body, int userId) async {
+  try {
+    <span class="c">// Truyền thẳng Map vào 'data', KHÔNG CẦN jsonEncode()</span>
+    final response = await dio.post(
+      '/posts',
+      data: {
+        'title': title,
+        'body': body,
+        'userId': userId,
+      },
+    );
+
+    return Post.fromJson(response.data);
+  } catch (e) {
+    throw Exception('Lỗi tạo bài: $e');
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

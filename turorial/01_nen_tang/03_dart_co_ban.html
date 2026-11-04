@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 3. Dart cơ bản và Cú pháp - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 3</span>
+        <span class="pill pill-green">Dart Core & Syntax</span>
+      </div>
+      <div>
+        <a href="02_debug_loi.html" class="copy-btn" style="text-decoration:none;">&larr; Phần 2. Debug</a>
+        <a href="04_collections.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Phần 4. Tập dữ liệu &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 3. Dart cơ bản & Cú pháp cốt lõi</h2>
+        <p>Cẩm nang ngữ pháp nền tảng của Dart trong Flutter: Kiểu dữ liệu, Sound Null Safety, String Interpolation, Toán tử đặc thù (Arithmetic, Cast, Cascade, Null-aware), Các luồng xử lý điều khiển (if-else, switch-case, switch expression, vòng lặp) và Hàm & Tham số.</p>
+      </div>
+
+      <!-- ===================== 1. BIẾN VÀ NULL SAFETY ===================== -->
+      <h3>1. Khai báo biến và Sound Null Safety</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Sound Null Safety</strong> trong Dart đảm bảo rằng biến không thể chứa giá trị <code>null</code> trừ khi bạn chủ động thêm dấu chấm hỏi <code>?</code>. Trình biên dịch sẽ bắt lỗi ngay lúc gõ code, ngăn ngừa lỗi sập app runtime <code>NullPointerException</code>.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Từ khoá / Cú pháp</th><th>Ví dụ</th><th>Mục đích & Ý nghĩa</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>int</code>, <code>double</code>, <code>String</code>, <code>bool</code></td>
+              <td><code>String title = 'Flutter';</code><br><code>int count = 10;</code></td>
+              <td>Kiểu dữ liệu nguyên thuỷ. Mặc định <strong>Non-nullable</strong> (không bao giờ được nhận <code>null</code>).</td>
+            </tr>
+            <tr>
+              <td><code>dynamic</code> vs <code>Object?</code></td>
+              <td><code>dynamic value = 'abc';</code><br><code>value = 123;</code><br><code>value.someMethod();</code></td>
+              <td><strong>Bỏ qua kiểm tra kiểu lúc biên dịch</strong>, chấp nhận mọi kiểu và có thể gán lại sang kiểu khác. Thường thấy trong <code>Map&lt;String, dynamic&gt;</code> khi parse JSON. <span class="hl-red">Cảnh báo:</span> Dễ gây crash lúc chạy nếu gọi phương thức không tồn tại! Khác với <code>Object?</code> (vẫn kiểm tra kiểu chặt chẽ).</td>
+            </tr>
+            <tr>
+              <td><code>var</code>, <code>final</code>, <code>const</code></td>
+              <td><code>var a = 5;</code> (gán lại được)<br><code>final now = DateTime.now();</code><br><code>const pi = 3.14;</code></td>
+              <td><code>var</code>: Dart tự suy luận kiểu lúc khai báo (sau đó không thể gán sang kiểu khác).<br><code>final</code>: Gán 1 lần duy nhất lúc chạy (run-time).<br><code>const</code>: Hằng số bất biến lúc biên dịch (compile-time), giúp Flutter tối ưu bộ nhớ.</td>
+            </tr>
+            <tr>
+              <td>Dấu chấm hỏi <code>?</code> (Nullable)</td>
+              <td><code>String? username;</code><br><code>int? selectedId;</code></td>
+              <td>Cho phép biến nhận giá trị <code>null</code>. Ban đầu khi chưa gán thì mặc định là <code>null</code>.</td>
+            </tr>
+            <tr>
+              <td>Dấu chấm than <code>!</code> (Null assertion)</td>
+              <td><code>int len = username!.length;</code></td>
+              <td>Khẳng định với trình biên dịch là biến <strong>chắc chắn không null</strong>. Nếu lúc chạy bị null sẽ ném lỗi văng app ngay. Dùng cẩn thận!</td>
+            </tr>
+            <tr>
+              <td>Toán tử <code>??</code> và <code>??=</code></td>
+              <td><code>String name = input ?? 'Khách';</code><br><code>db ??= await openDB();</code></td>
+              <td><code>a ?? b</code>: Nếu <code>a</code> null thì lấy giá trị <code>b</code>.<br><code>a ??= b</code>: Nếu <code>a</code> đang null thì gán luôn <code>a = b</code>.</td>
+            </tr>
+            <tr>
+              <td>Truy cập an toàn <code>?.</code></td>
+              <td><code>int? len = user?.name?.length;</code></td>
+              <td>Nếu <code>user</code> hoặc <code>name</code> null thì dừng lại trả về <code>null</code> chứ không văng lỗi sập app.</td>
+            </tr>
+            <tr>
+              <td><code>late</code></td>
+              <td><code>late final TextEditingController _ctrl;</code></td>
+              <td>Báo cho Dart biết biến sẽ được gán giá trị trễ hơn (ví dụ trong <code>initState()</code>), nhưng chắc chắn có giá trị trước khi dùng.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 2. STRING INTERPOLATION ===================== -->
+      <h3>2. Chèn chuỗi (String Interpolation)</h3>
+
+      <div class="card">
+        <div class="card-title">String Interpolation với $ và ${}</div>
+        <p>Trong Dart, không nên dùng phép cộng chuỗi <code>"Hello " + name</code> chậm chạp. Thay vào đó, dùng <strong>String Interpolation</strong> để nhúng trực tiếp biến hoặc biểu thức tính toán vào chuỗi:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Cú pháp</th><th>Khi nào dùng</th><th>Ví dụ</th><th>Kết quả in ra</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>$bien</code></td>
+                <td>Khi chèn một <strong>biến đơn lẻ</strong> (tên định danh thông thường).</td>
+                <td><code>String name = 'Jon';<br>print('Xin chào $name!');</code></td>
+                <td><code>Xin chào Jon!</code></td>
+              </tr>
+              <tr>
+                <td><code>${bieu_thuc}</code></td>
+                <td>Khi bên trong là <strong>biểu thức, phép tính, hoặc truy cập thuộc tính/phương thức</strong> (có dấu chấm <code>.</code>, phép toán hoặc dấu ngoặc).</td>
+                <td><code>print('Độ dài: ${name.length}');<br>print('Sang năm: ${age + 1}');<br>print('Giá: ${product['price']}');</code></td>
+                <td><code>Độ dài: 3<br>Sang năm: 21<br>Giá: 75.5</code></td>
+              </tr>
+              <tr>
+                <td><code>\$</code> (Thoát ký tự)</td>
+                <td>Khi muốn in ra ký tự <strong>$ thật sự</strong> (ví dụ đơn vị tiền tệ USD).</td>
+                <td><code>double price = 9.99;<br>print('Giá tiền: \$$price');</code></td>
+                <td><code>Giá tiền: $9.99</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== 3. TOÁN TỬ TRONG DART ===================== -->
+      <h3>3. Các toán tử trong Dart (Operators)</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Ngoài các toán tử số học cơ bản, Dart có nhiều toán tử đặc thù rất mạnh mẽ như <strong>toán tử chia lấy nguyên (<code>~/</code>)</strong>, <strong>toán tử kiểm tra & ép kiểu (<code>is</code>, <code>is!</code>, <code>as</code>)</strong>, <strong>chuỗi toán tử Null-aware (<code>??</code>, <code>??=</code>, <code>?.</code>, <code>!</code>)</strong>, <strong>toán tử bậc 3 (<code>?:</code>)</strong>, và <strong>toán tử Cascade (<code>..</code>, <code>?..</code>)</strong>.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nhóm toán tử</th><th>Ký hiệu</th><th>Ý nghĩa & Ứng dụng</th><th>Ví dụ</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Số học (Arithmetic)</strong></td>
+              <td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>~/</code>, <code>%</code></td>
+              <td><code>/</code> luôn trả về <code>double</code>.<br><code>~/</code> chia lấy phần nguyên (trả về <code>int</code>).<br><code>%</code> chia lấy dư.</td>
+              <td><code>7 / 2 == 3.5</code><br><code>7 ~/ 2 == 3</code><br><code>7 % 2 == 1</code></td>
+            </tr>
+            <tr>
+              <td><strong>Kiểm tra & Ép kiểu</strong></td>
+              <td><code>is</code>, <code>is!</code>, <code>as</code></td>
+              <td><code>is</code>: Kiểm tra thuộc kiểu (true/false) + tự Type Promotion.<br><code>is!</code>: Không phải kiểu đó.<br><code>as</code>: Ép kiểu (ném lỗi nếu sai).</td>
+              <td><code>if (obj is String) print(obj.length);</code><br><code>(data as Map)['id']</code></td>
+            </tr>
+            <tr>
+              <td><strong>Gán & Gán kết hợp</strong></td>
+              <td><code>=</code>, <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>??=</code></td>
+              <td><code>a ??= b</code>: Chỉ gán giá trị <code>b</code> cho <code>a</code> nếu <code>a</code> đang là <code>null</code>.</td>
+              <td><code>int? count;</code><br><code>count ??= 10; // count thành 10</code></td>
+            </tr>
+            <tr>
+              <td><strong>Toán tử 3 ngôi (Ternary)</strong></td>
+              <td><code>điều_kiện ? a : b</code></td>
+              <td>Viết gọn if-else để gán giá trị hoặc hiển thị Widget theo trạng thái.</td>
+              <td><code>isLoading ? CircularProgressIndicator() : Text('Xong')</code></td>
+            </tr>
+            <tr>
+              <td><strong>Null-aware (An toàn Null)</strong></td>
+              <td><code>??</code>, <code>?.</code>, <code>!</code></td>
+              <td><code>a ?? b</code>: Lấy <code>b</code> nếu <code>a</code> null.<br><code>a?.b</code>: Truy cập an toàn.<br><code>a!</code>: Khẳng định khác null.</td>
+              <td><code>String title = name ?? 'Không tên';</code><br><code>int? len = text?.length;</code></td>
+            </tr>
+            <tr>
+              <td><strong>Toán tử Cascade</strong></td>
+              <td><code>..</code> hoặc <code>?..</code></td>
+              <td>Thực hiện một chuỗi thao tác/hàm/gán trên cùng một đối tượng mà không cần tạo biến tạm.</td>
+              <td><code>Paint()..color = Colors.red..strokeWidth = 2.0</code></td>
+            </tr>
+            <tr>
+              <td><strong>Toán tử Spread</strong></td>
+              <td><code>...</code> hoặc <code>...?</code></td>
+              <td>Trải các phần tử của một Collection vào Collection khác (<code>...?</code> bỏ qua nếu list bị null).</td>
+              <td><code>[1, ...[2, 3], ...?nullList]</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Minh hoạ thực tế các toán tử hay dùng nhất trong Flutter</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// 1. Toán tử chia lấy nguyên (~/) - Rất hay dùng chia hàng/cột trong GridView</span>
+int totalItems = 25;
+int itemsPerRow = 4;
+int fullRows = totalItems ~/ itemsPerRow; <span class="c">// = 6 hàng đầy đủ</span>
+int remainder = totalItems % itemsPerRow;  <span class="c">// = 1 phần tử lẻ</span>
+
+<span class="c">// 2. Toán tử kiểm tra kiểu (is) và Ép kiểu (as)</span>
+void processResponse(dynamic res) {
+  <span class="c">// Dart tự động Type Promotion: trong block if, res được coi là Map mà không cần ép kiểu</span>
+  if (res is Map<String, dynamic>) {
+    print('Tên người dùng: ${res['name']}');
+  } else if (res is! String) {
+    print('Không phải chuỗi và cũng không phải Map!');
+  }
+}
+
+<span class="c">// 3. Toán tử Null-aware (??, ??=, ?.)</span>
+String? inputName;
+String displayName = inputName ?? 'Khách'; <span class="c">// displayName = 'Khách'</span>
+
+List<String>? tags;
+tags ??= []; <span class="c">// Nếu tags đang null thì khởi tạo danh sách rỗng</span>
+tags.add('Flutter');
+
+<span class="c">// 4. Toán tử 3 ngôi (? :) trong render giao diện</span>
+bool isDarkMode = true;
+String currentTheme = isDarkMode ? 'Chế độ tối' : 'Chế độ sáng';
+
+<span class="c">// 5. Toán tử Cascade (..) - Cực tiện khi cấu hình Object</span>
+List<int> numbers = [3, 1, 2]
+  ..sort()       <span class="c">// Sắp xếp tại chỗ</span>
+  ..add(4);      <span class="c">// Thêm 4</span>
+<span class="c">// numbers bây giờ là [1, 2, 3, 4]</span></code></pre>
+      </div>
+
+      <!-- ===================== 4. CÁC LUỒNG XỬ LÝ (CONTROL FLOW) ===================== -->
+      <h3>4. Các luồng xử lý điều khiển (Control Flow: if-else, switch-case, vòng lặp)</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Dart cung cấp đầy đủ các cấu trúc điều khiển rẽ nhánh và vòng lặp quen thuộc (<code>if-else</code>, <code>switch-case</code>, <code>for</code>, <code>for-in</code>, <code>while</code>, <code>do-while</code>). Đặc biệt từ Dart 3.0, <strong>Switch Expression & Pattern Matching</strong> cho phép switch trả về giá trị trực tiếp cực kỳ ngắn gọn khi render Widget theo trạng thái State.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Cấu trúc</th><th>Cú pháp</th><th>Đặc điểm & Ứng dụng trong Flutter</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>if - else if - else</strong></td>
+              <td><code>if (condition) { ... } else { ... }</code></td>
+              <td>Rẽ nhánh logic theo điều kiện boolean. Dùng xử lý validate form, kiểm tra quyền đăng nhập, check null.</td>
+            </tr>
+            <tr>
+              <td><strong>switch - case truyền thống</strong></td>
+              <td><code>switch (val) { case A: ... break; default: ... }</code></td>
+              <td>So sánh một biến với nhiều giá trị cố định (int, String, Enum). Dùng để điều hướng màn hình hoặc phân loại lỗi.</td>
+            </tr>
+            <tr>
+              <td><strong>Switch Expression (Dart 3+)</strong></td>
+              <td><code>final widget = switch (state) { State.a => ..., _ => ... };</code></td>
+              <td>Cú pháp mới trả về giá trị trực tiếp, không cần <code>case</code> hay <code>break</code>. Rất thích hợp khi render giao diện theo Enum State (Loading / Success / Error).</td>
+            </tr>
+            <tr>
+              <td><strong>for &amp; for-in</strong></td>
+              <td><code>for (var item in list) { ... }</code><br><code>for (int i = 0; i &lt; n; i++)</code></td>
+              <td>Lặp qua danh sách dữ liệu để tính toán, gộp mảng hoặc sinh widget con.</td>
+            </tr>
+            <tr>
+              <td><strong>while &amp; do-while</strong></td>
+              <td><code>while (condition) { ... }</code></td>
+              <td>Lặp khi điều kiện còn đúng. Thường dùng trong thuật toán phân trang hoặc đọc dữ liệu theo stream/chunk.</td>
+            </tr>
+            <tr>
+              <td><strong>break &amp; continue</strong></td>
+              <td><code>break;</code> (thoát vòng lặp)<br><code>continue;</code> (bỏ qua bước hiện tại)</td>
+              <td>Điều khiển ngắt vòng lặp khi tìm thấy kết quả hoặc bỏ qua các phần tử không hợp lệ.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Minh hoạ thực tế các luồng xử lý điều khiển</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// 1. IF - ELSE VÀ TYPE PROMOTION</span>
+void checkLogin(String? token, int roleId) {
+  if (token == null || token.isEmpty) {
+    print('Chưa đăng nhập!');
+  } else if (roleId == 1) {
+    print('Chào mừng Quản trị viên (Admin)');
+  } else {
+    print('Chào mừng Người dùng');
+  }
+}
+
+<span class="c">// 2. SWITCH TRUYỀN THỐNG VỚI ENUM</span>
+enum AuthStatus { initial, loading, authenticated, unauthenticated }
+
+void handleStatus(AuthStatus status) {
+  switch (status) {
+    case AuthStatus.loading:
+      print('Đang tải dữ liệu...');
+      break;
+    case AuthStatus.authenticated:
+      print('Đã xác thực, chuyển vào trang Home');
+      break;
+    case AuthStatus.unauthenticated:
+    case AuthStatus.initial:
+      print('Vui lòng đăng nhập');
+      break;
+  }
+}
+
+<span class="c">// 3. SWITCH EXPRESSION HIỆN ĐẠI (Dart 3.0+ - Rất hay dùng trong Flutter UI)</span>
+String getStatusMessage(AuthStatus status) => switch (status) {
+  AuthStatus.loading => 'Vui lòng chờ...',
+  AuthStatus.authenticated => 'Đăng nhập thành công!',
+  AuthStatus.unauthenticated => 'Sai tài khoản hoặc mật khẩu',
+  _ => 'Trạng thái không xác định', <span class="c">// _ đại diện cho default</span>
+};
+
+<span class="c">// 4. CÁC LOẠI VÒNG LẶP (for, for-in, while, break, continue)</span>
+List<int> numbers = [1, 2, 3, 4, 5, 6];
+
+<span class="c">// Duyệt for-in bỏ qua số lẻ (continue) và dừng khi gặp số 6 (break)</span>
+for (var n in numbers) {
+  if (n % 2 != 0) continue; <span class="c">// Bỏ qua số lẻ</span>
+  if (n == 6) break;        <span class="c">// Gặp 6 thì dừng lặp</span>
+  print('Số chẵn: $n');     <span class="c">// In ra: 2, 4</span>
+}
+
+<span class="c">// Vòng lặp while</span>
+int count = 3;
+while (count > 0) {
+  print('Đếm ngược: $count');
+  count--;
+}</code></pre>
+      </div>
+
+      <!-- ===================== 5. HÀM VÀ THAM SỐ ===================== -->
+      <h3>5. Hàm (Functions) và Các loại Tham số</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Flutter dựng UI hoàn toàn bằng cách lồng các Widget (vốn là các class/constructor). Vì vậy, <strong>Named Parameters</strong> (tham số có tên, bọc trong cặp ngoặc nhọn <code>{}</code>) là cú pháp cốt lõi xuất hiện ở 99% code Flutter.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Loại tham số</th><th>Cú pháp khai báo</th><th>Ví dụ gọi hàm</th><th>Đặc điểm & Ứng dụng</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Vị trí thông thường (Bắt buộc)</strong></td>
+              <td><code>int add(int a, int b)</code></td>
+              <td><code>add(2, 5)</code></td>
+              <td>Bắt buộc truyền đủ tham số và theo đúng thứ tự.</td>
+            </tr>
+            <tr>
+              <td><strong>2. Vị trí tùy chọn (Optional Positional)</strong></td>
+              <td><code>void greet(String name, [int age = 18])</code></td>
+              <td><code>greet('An')</code><br><code>greet('An', 21)</code></td>
+              <td>Đặt trong <code>[ ]</code>, có thể gán giá trị mặc định hoặc kiểu <code>?</code> (nullable). Truyền theo thứ tự.</td>
+            </tr>
+            <tr>
+              <td><strong>3. Tham số có tên bình thường (Optional Named)</strong></td>
+              <td><code>void setOpt({String theme = 'dark', double font = 14})</code></td>
+              <td><code>setOpt()</code><br><code>setOpt(theme: 'light')</code></td>
+              <td>Đặt trong <code>{ }</code>, không bắt buộc truyền (có giá trị mặc định hoặc kiểu <code>?</code>), khi gọi phải gõ tên <code>theme: ...</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>4. Tham số có tên bắt buộc (Required Named)</strong></td>
+              <td><code>void showUser({required String name, required int id})</code></td>
+              <td><code>showUser(name: 'Minh', id: 1)</code><br><code>showUser(id: 2, name: 'Linh')</code></td>
+              <td>Dùng <code>required</code> trong <code>{ }</code>. Bắt buộc truyền tên tham số và đối số, thứ tự tùy ý. <strong>Cốt lõi của Flutter Widget Constructor!</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. Tham số vị trí (Positional: Thường & Tùy chọn <code>[ ]</code>)</div>
+          <p>Truyền theo đúng vị trí từ trái sang phải.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c">// Tham số bắt buộc thông thường:</span>
+int add(int a, int b) => a + b;
+
+<span class="c">// Tham số vị trí tuỳ chọn [ ] (kèm default value hoặc nullable ?):</span>
+void greet(String name, [int? age, int? gender]) {
+  print('Chào $name, $age tuổi');
+}
+void greetWithDefault(String name, [int age = 18]) {
+  print('Chào $name, $age tuổi');
+}
+
+<span class="c">// Cách gọi:</span>
+add(3, 5);                  <span class="c">// Bắt buộc 2 số</span>
+greet('Khang');             <span class="c">// age và gender là null</span>
+greet('Khang', 20);         <span class="c">// age = 20, gender = null</span>
+greetWithDefault('Khang');  <span class="c">// age mặc định là 18</span></code></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">2. Tham số có tên (Named: Bình thường & <code>required</code>)</div>
+          <p>Bọc trong <code>{ }</code>. Gọi bằng tên <code>paramName: value</code>, thứ tự tự do.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c">// A. Named bình thường (tuỳ chọn, có default value)</span>
+void describe({String color = "blue", String size = "medium"}) {
+  print("This item is $color and $size");
+}
+
+<span class="c">// B. Named bắt buộc (required - thiếu là báo lỗi đỏ ngay)</span>
+void greetUser({required String name, int age = 20}) {
+  print('Chào $name, $age tuổi');
+}
+
+<span class="c">// Cách gọi:</span>
+describe();                             <span class="c">// "This item is blue and medium"</span>
+describe(size: 'large');                <span class="c">// "This item is blue and large"</span>
+describe(color: 'red', size: 'small');  <span class="c">// Thứ tự đảo tuỳ ý</span>
+
+greetUser(name: "Mark");                <span class="c">// name bắt buộc, age lấy 20</span>
+greetUser(age: 25, name: "Alice");      <span class="c">// Đúng chuẩn Flutter Widget!</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 6. Lập trình Bất đồng bộ (Future & Stream) - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 6</span>
+        <span class="pill pill-green">Async: Future & Stream</span>
+      </div>
+      <div>
+        <a href="05_oop_model.html" class="copy-btn" style="text-decoration:none;">&larr; Phần 5. OOP & Model</a>
+        <a href="../02_flutter_can_ban/01_widgets_can_ban.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Phần 1. Flutter Widgets &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 6. Lập trình Bất đồng bộ trong Dart (Future & Stream)</h2>
+        <p>Giải thích tường tận từ gốc rễ: Tại sao cần bất đồng bộ? Cơ chế hoạt động của <strong>Future</strong> (kết quả ở tương lai), cách dữ liệu chuyền tay nhau qua chuỗi <strong><code>.then()</code></strong>, cú pháp hiện đại <strong><code>async / await</code></strong>, và hiểu cặn kẽ <strong>Stream</strong> (dòng nước chảy dữ liệu) với <strong><code>async*</code></strong> và <strong><code>yield</code></strong>.</p>
+      </div>
+
+      <!-- ===================== 1. VÌ SAO CẦN BẤT ĐỒNG BỘ? ===================== -->
+      <h3>1. Vì sao cần Bất đồng bộ? (Ví dụ đời thực dễ hiểu nhất)</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm cốt lõi</span>
+        <p>Dart và Flutter chạy trên <strong>một luồng duy nhất (Single Thread)</strong>. Hãy tưởng tượng ứng dụng của bạn như một người phục vụ quán cà phê:</p>
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li><strong>Đồng bộ (Synchronous - Chặn luồng):</strong> Khách gọi món phải pha mất 5 phút. Người phục vụ đứng im chờ pha xong mới quay lại phục vụ khách khác. Toàn bộ quán bị tê liệt. &rarr; Trong app Flutter: <span class="hl-red">Màn hình bị đơ (Freezing), vuốt không ăn, giật lag!</span></li>
+          <li><strong>Bất đồng bộ (Asynchronous - Không chặn luồng):</strong> Khách gọi món, người phục vụ ghi phiếu gửi vào quầy pha chế, rồi ngay lập tức quay sang tiếp đón khách tiếp theo. Khi quầy pha xong và rung chuông, người phục vụ mới mang nước ra cho khách đầu tiên. &rarr; App Flutter: <span class="hl">Giao diện luôn mượt mà 60/120 FPS</span> trong khi mạng đang tải ngầm ở nền.</li>
+        </ul>
+      </div>
+
+      <!-- ===================== 2. FUTURE LÀ GÌ? ===================== -->
+      <h3>2. Future&lt;T&gt; là gì? (Chiếc vé hẹn lấy kết quả)</h3>
+
+      <div class="def">
+        <span class="def-term">Hình tượng hoá</span>
+        <p><strong><code>Future&lt;T&gt;</code></strong> giống như một <span class="hl">Chiếc vé hẹn / Phiếu rung ở quán trà sữa</span>. Khi bạn gọi món, quán chưa có trà sữa ngay mà đưa cho bạn 1 chiếc thẻ rung (đại diện cho 1 ly trà sữa trong tương lai):</p>
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li><strong>Trạng thái Uncompleted (Đang chờ):</strong> Đang pha chế, chưa có kết quả.</li>
+          <li><strong>Trạng thái Completed with Data (Thành công):</strong> Thẻ rung lên, bạn nhận được ly trà sữa (giá trị kiểu <code>T</code>).</li>
+          <li><strong>Trạng thái Completed with Error (Thất bại):</strong> Hết trân châu, quán báo lỗi (ném ra <code>Exception</code>).</li>
+        </ul>
+      </div>
+
+      <!-- ===================== 3. .THEN() HOẠT ĐỘNG NHƯ THẾ NÀO? ===================== -->
+      <h3>3. Cơ chế hoạt động của <code>.then()</code> (Chuyền tay giá trị như dây chuyền)</h3>
+
+      <div class="callout">
+        <div class="callout-title">Bản chất của <code>.then((value) { ... })</code></div>
+        <p>Hàm <code>.then()</code> nghĩa là: <em>"Khi nào Future làm xong và có kết quả, hãy lấy kết quả đó nhét vào biến trong ngoặc tròn <code>(value)</code>, rồi chạy tiếp thân hàm phía sau!"</em></p>
+        <p>Nếu trong <code>.then()</code> bạn <code>return</code> ra một giá trị mới, giá trị đó sẽ tiếp tục được nhồi vào biến của <code>.then()</code> kế tiếp (như một dây chuyền sản xuất băng chuyền nhà máy).</p>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Dây chuyền .then() chuyền tay dữ liệu</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// Giả sử có một Future tạo ra số 1 sau khi chạy</span>
+Future<int> getOne() {
+  return Future(() => 1);
+}
+
+int addOne(int v) {
+  return v + 1;
+}
+
+void printIntValue(int v) {
+  print('Kết quả cuối cùng: $v');
+}
+
+void main() {
+  print('--- Bắt đầu ---');
+
+  <span class="c">// CÁCH 1: Viết tường minh bằng hàm mũi tên (Arrow function)</span>
+  Future(() => 1)
+      .then((v) {
+        <span class="c">// 'v' chính là số 1 được Future tạo ra và đưa vào đây</span>
+        print('Bước 1 nhận được: $v');
+        return v + 1; <span class="c">// return ra 2, chuyền tiếp cho .then kế tiếp</span>
+      })
+      .then((value) {
+        <span class="c">// 'value' nhận số 2 từ bước trước</span>
+        print('Bước 2 nhận được: $value');
+        return value * 10; <span class="c">// return ra 20</span>
+      })
+      .then((finalVal) {
+        <span class="c">// 'finalVal' nhận số 20</span>
+        print('Bước 3 in ra: $finalVal');
+      })
+      .catchError((error) {
+        <span class="c">// Bắt lỗi nếu bất kỳ bước nào phía trên bị sập</span>
+        print('Có lỗi xảy ra: $error');
+      });
+
+  <span class="c">// CÁCH 2: Truyền thẳng tên hàm (Function tear-off)</span>
+  <span class="c">// Giá trị trả về của bước trước sẽ tự động biến thành đối số đầu vào của hàm sau:</span>
+  Future(getOne)
+      .then(addOne)         <span class="c">// Lấy 1 đưa vào addOne(1) -> trả về 2</span>
+      .then(printIntValue); <span class="c">// Lấy 2 đưa vào printIntValue(2) -> in ra 2</span>
+
+  print('--- Kết thúc hàm main (Code này chạy trước cả .then do bất đồng bộ!) ---');
+}</code></pre>
+      </div>
+
+      <!-- ===================== 4. ASYNC VÀ AWAIT ===================== -->
+      <h3>4. Cú pháp hiện đại: <code>async</code> và <code>await</code></h3>
+
+      <div class="def">
+        <span class="def-term">Vì sao sinh ra async/await?</span>
+        <p>Khi dùng <code>.then()</code> nối nhau quá nhiều hoặc lồng nhau (Callback Hell), code sẽ rất khó đọc và khó bắt lỗi try-catch. Dart sinh ra cặp từ khoá <strong><code>async</code></strong> và <strong><code>await</code></strong> để bạn viết code bất đồng bộ trông tự nhiên y hệt như code chạy tuần tự từ trên xuống dưới.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Từ khoá</th><th>Đặt ở đâu?</th><th>Ý nghĩa & Quy tắc bắt buộc</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>async</code></td>
+              <td>Đặt ngay sau dấu ngoặc đơn tham số của hàm: <code>void main() async</code></td>
+              <td>Báo cho Dart biết: <em>"Hàm này có chứa tác vụ bất đồng bộ, hãy cho phép tôi dùng <code>await</code> bên trong!"</em>. Hàm có <code>async</code> luôn tự động bọc giá trị trả về trong một <code>Future</code>.</td>
+            </tr>
+            <tr>
+              <td><code>await</code></td>
+              <td>Đặt phía trước một biểu thức <code>Future</code>: <code>var u = await fetchUser();</code></td>
+              <td>Báo cho Dart: <em>"Hãy tạm dừng dòng này lại, đợi cho Future hoàn tất xong xuôi và bóc tách lấy giá trị thật gán vào biến, rồi mới chạy tiếp dòng bên dưới!"</em> (Trong lúc đợi, app vẫn mượt mà không bị treo). <strong>Chỉ được dùng bên trong hàm có <code>async</code>!</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - So sánh trực tiếp .then() và async/await</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// Hàm giả lập mất 2 giây mới lấy được tên User</span>
+Future<String> fetchUser() {
+  return Future.delayed(const Duration(seconds: 2), () => "Khang");
+}
+
+<span class="c">// ❌ Cách cũ (.then): Bị thụt lề, khó bắt try-catch bao quát</span>
+void testThen() {
+  fetchUser().then((u) {
+    print('Xin chào $u');
+  }).catchError((e) {
+    print('Lỗi: $e');
+  });
+}
+
+<span class="c">//  Cách mới (async / await): Rõ ràng, tuần tự, dùng try-catch chuẩn</span>
+Future<void> testAsyncAwait() async {
+  try {
+    print('Đang gửi yêu cầu...');
+    String u = await fetchUser(); <span class="c">// Đợi 2s, u nhận chuỗi "Khang"</span>
+    print('Xin chào $u');
+    print('Làm tiếp việc khác sau khi đã có user...');
+  } catch (e) {
+    print('Bắt lỗi mạng hoặc server: $e');
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== 5. STREAM LÀ GÌ? ===================== -->
+      <h3>5. Stream là gì? (Đường ống dẫn nước phát dữ liệu liên tục)</h3>
+
+      <div class="def">
+        <span class="def-term">Hình tượng hoá</span>
+        <p>Nếu <strong>Future</strong> chỉ là một <span class="hl">chiếc hộp đóng gói 1 món quà duy nhất</span> (mở ra là hết), thì <strong>Stream</strong> là một <span class="hl">đường ống dẫn nước (dòng chảy sự kiện)</span>:</p>
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li>Nước trong ống có thể chảy ra liên tục theo từng giọt, từng đợt, không biết trước khi nào hết.</li>
+          <li>Bạn đứng ở đầu ra mở vòi để hứng (<strong>lắng nghe / subscribe / listen</strong>). Mỗi khi có một giọt nước rơi ra, bạn xử lý giọt nước đó.</li>
+          <li>Khi nào nhà máy cắt nước hoặc bạn đóng van thì Stream kết thúc.</li>
+        </ul>
+      </div>
+
+      <h4>Các từ khoá của Stream mà ai cũng phải nhớ</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Từ khoá</th><th>Ý nghĩa dễ hiểu</th><th>Ví dụ</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Stream&lt;T&gt;</code></td>
+              <td>Kiểu trả về của dòng dữ liệu phát ra nhiều giá trị kiểu <code>T</code> theo thời gian.</td>
+              <td><code>Stream&lt;int&gt; countStream()</code></td>
+            </tr>
+            <tr>
+              <td><code>async*</code></td>
+              <td>Có dấu sao <code>*</code>! Đánh dấu hàm là một <strong>Generator Stream</strong> (máy phát ra dòng dữ liệu).</td>
+              <td><code>Stream&lt;int&gt; numbers() async* { ... }</code></td>
+            </tr>
+            <tr>
+              <td><code>yield</code></td>
+              <td>Nghĩa là "Phát ra / Bắn ra một giá trị vào đường ống" rồi chạy tiếp vòng lặp (khác với <code>return</code> là trả về rồi thoát hàm ngay).</td>
+              <td><code>yield 10; // Bắn số 10 vào ống cho ai đang nghe nhận</code></td>
+            </tr>
+            <tr>
+              <td><code>.listen()</code> hoặc <code>await for</code></td>
+              <td>Hành động "ghé tai vào nghe" hoặc "mở xô hứng dữ liệu" từ Stream.</td>
+              <td><code>stream.listen((val) => print(val));</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Ví dụ 1: Máy phát số đơn giản (numbers)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// Hàm async* tạo ra dòng dữ liệu bắn ra lần lượt 5, 10, 77</span>
+Stream<int> numbers() async* {
+  yield 5;
+  yield 10;
+  yield 77;
+}
+
+void main() {
+  <span class="c">// Dùng .listen() để đón nhận từng số</span>
+  numbers().listen((v) {
+    print('Nhận được: $v, nhân 3 thành: ${v * 3}');
+  });
+  <span class="c">// Kết quả in ra lần lượt:</span>
+  <span class="c">// Nhận được: 5, nhân 3 thành: 15</span>
+  <span class="c">// Nhận được: 10, nhân 3 thành: 30</span>
+  <span class="c">// Nhận được: 77, nhân 3 thành: 231</span>
+}</code></pre>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Ví dụ 2: Ứng dụng Xổ số ngẫu nhiên thời gian thực (luckyNumber)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'dart:math';
+
+<span class="c">// Đề bài: Cứ mỗi 0.5 giây bắn ra 1 số ngẫu nhiên (0 - 99).</span>
+<span class="c">// Khi nào trúng số 79 thì in "Grats" và đóng ống lại (dừng Stream).</span>
+Stream<int> luckyNumber() async* {
+  while (true) {
+    <span class="c">// Đợi 500 mili-giây (nửa giây)</span>
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    int n = Random().nextInt(100);
+    yield n; <span class="c">// Bắn số n ra cho bên ngoài hứng</span>
+
+    if (n == 79) {
+      print("Grats (Trúng giải độc đắc 79)!");
+      break; <span class="c">// Thoát vòng lặp while, Stream tự động đóng hoàn tất</span>
+    }
+  }
+}
+
+void main() async {
+  print('Bắt đầu quay thưởng...');
+  
+  <span class="c">// Duyệt Stream tự nhiên như duyệt mảng bằng cú pháp 'await for':</span>
+  await for (var v in luckyNumber()) {
+    print('Số vừa quay được: $v');
+  }
+  
+  print('Kết thúc buổi quay thưởng.');
+}</code></pre>
+      </div>
+
+      <!-- ===================== 6. TỔNG KẾT SO SÁNH ===================== -->
+      <h3>6. Bảng tổng kết phân biệt Future vs Stream</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tiêu chí</th><th>Future (Đơn lẻ)</th><th>Stream (Liên tục)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Số lượng kết quả</td>
+              <td>Chỉ <strong>1 lần duy nhất</strong> (Xong là kết thúc).</td>
+              <td><strong>Nhiều lần</strong> theo thời gian (0, 1 hoặc vô hạn).</td>
+            </tr>
+            <tr>
+              <td>Từ khoá định nghĩa</td>
+              <td><code>async</code></td>
+              <td><code>async*</code></td>
+            </tr>
+            <tr>
+              <td>Cách phát dữ liệu</td>
+              <td><code>return gia_tri;</code></td>
+              <td><code>yield gia_tri;</code></td>
+            </tr>
+            <tr>
+              <td>Cách nhận dữ liệu</td>
+              <td><code>await myFuture</code> hoặc <code>.then()</code></td>
+              <td><code>await for (var v in myStream)</code> hoặc <code>.listen()</code></td>
+            </tr>
+            <tr>
+              <td>Widget trong Flutter</td>
+              <td><code>FutureBuilder&lt;T&gt;</code> (gọi API lấy bài viết)</td>
+              <td><code>StreamBuilder&lt;T&gt;</code> (chat realtime, toạ độ GPS)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+
