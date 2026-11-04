@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 5. OOP và Model JSON - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 5</span>
+        <span class="pill pill-green">OOP & JSON Serialization</span>
+      </div>
+      <div>
+        <a href="04_collections.html" class="copy-btn" style="text-decoration:none;">&larr; Phần 4. Tập dữ liệu</a>
+        <a href="06_async_future_stream.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Phần 6. Async &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 5. Lập trình Hướng đối tượng (OOP) & Model Dữ liệu JSON</h2>
+        <p>Hướng dẫn toàn diện về OOP trong Dart: Class, Constructor chuẩn, Initializer list, Getter/Setter, Kế thừa, Interface ngầm định, Mixin, <strong>Extension Methods (Mở rộng chức năng)</strong>, và kiến trúc chuẩn của một Model dữ liệu thực chiến với <code>fromJson</code> / <code>toJson</code>.</p>
+      </div>
+
+      <!-- ===================== 1. CLASS & CONSTRUCTORS ===================== -->
+      <h3>1. Class, Thuộc tính Private và Các loại Constructor</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Trong Dart, không có từ khoá <code>private</code> hay <code>public</code>. Mọi thuộc tính hoặc class bắt đầu bằng dấu gạch dưới <code>_</code> (ví dụ: <code>_gender</code>, <code>_id</code>) sẽ mặc định là <strong>thư viện cục bộ (library-private)</strong>, chỉ truy cập được bên trong cùng một file.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Loại Constructor</th><th>Cú pháp Dart</th><th>Mục đích sử dụng</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Generative (Chuẩn ngắn gọn)</strong></td>
+              <td><code>Student(this.id, this.name, this._gender);</code></td>
+              <td>Gán trực tiếp giá trị tham số vào thuộc tính mà không cần viết thân hàm <code>{ this.id = id; }</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Named Constructor (Có tên)</strong></td>
+              <td><code>Student.guest(...)</code> hoặc <code>Student.empty()</code></td>
+              <td>Cho phép định nghĩa nhiều cách khởi tạo khác nhau cho cùng một class (thay thế nạp chồng hàm / constructor overloading).</td>
+            </tr>
+            <tr>
+              <td><strong>Initializer List</strong></td>
+              <td><code>Student.guest() : id = 'G01', name = 'Khách';</code></td>
+              <td>Khởi tạo giá trị cho thuộc tính trước khi thân hàm constructor thực sự chạy. Rất quan trọng với biến <code>final</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Factory Constructor</strong></td>
+              <td><code>factory Student.fromJson(Map&lt;String, dynamic&gt; json)</code></td>
+              <td>Không nhất thiết phải tạo mới một instance mới hoàn toàn; có thể trả về một instance từ cache, trả về lớp con, hoặc parse từ JSON.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Minh hoạ Class, Constructor, Getter & Setter (Student.dart)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>class Student {
+  String id;
+  String name;
+  int _gender; <span class="c">// Bắt đầu bằng _ là private (chỉ dùng trong file này)</span>
+
+  <span class="c">// 1. Constructor ngắn gọn theo chuẩn Dart</span>
+  Student(this.id, this.name, this._gender);
+
+  <span class="c">// 2. Named constructor + Initializer list (khởi tạo trước khi thân hàm chạy)</span>
+  Student.guest()
+      : id = 'GUEST_01',
+        name = 'Khách vãng lai',
+        _gender = 0;
+
+  <span class="c">// 3. Getter: Truy cập thuộc tính private từ bên ngoài</span>
+  int get gender => _gender;
+
+  <span class="c">// 4. Setter: Kiểm tra hợp lệ dữ liệu trước khi gán</span>
+  set gender(int val) {
+    if (val < 0 || val > 1) {
+      _gender = 0; <span class="c">// Mặc định 0 nếu truyền giá trị không hợp lệ</span>
+    } else {
+      _gender = val;
+    }
+  }
+
+  void displayInfo() {
+    print('Student: $id | Tên: $name | Giới tính: $_gender');
+  }
+}
+
+void main() {
+  <span class="c">// Sử dụng generative constructor</span>
+  var s1 = Student('SE123', 'Jon', 1);
+  s1.gender = -5; <span class="c">// Gọi setter validate -> gán về 0</span>
+  s1.displayInfo();
+
+  <span class="c">// Sử dụng named constructor</span>
+  var s2 = Student.guest();
+  s2.displayInfo();
+}</code></pre>
+      </div>
+
+      <!-- ===================== 2. KẾ THỪA, INTERFACE VÀ MIXIN ===================== -->
+      <h3>2. Kế thừa (Inheritance), Giao diện (Interface) và Mixin</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Dart là ngôn ngữ <strong>đơn kế thừa</strong> cho class (chỉ có thể <code>extends</code> 1 cha), nhưng cho phép triển khai <strong>nhiều interface</strong> (<code>implements</code>) và chia sẻ hành vi đa lớp thông qua <strong>Mixin</strong> (<code>with</code>).</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Từ khoá</th><th>Mục đích</th><th>Quy tắc cốt lõi trong Dart</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>extends</code></td>
+              <td>Kế thừa class cha hoặc abstract class.</td>
+              <td>Chỉ kế thừa đúng 1 class. Dùng <code>super(...)</code> để gọi constructor và hàm của cha.</td>
+            </tr>
+            <tr>
+              <td><code>implements</code></td>
+              <td>Hiện thực hoá interface (hợp đồng hàm).</td>
+              <td><strong>Mọi class trong Dart đều ngầm định là một interface!</strong> Có thể <code>implements</code> nhiều class, nhưng bắt buộc phải <code>@override</code> lại toàn bộ thuộc tính và phương thức.</td>
+            </tr>
+            <tr>
+              <td><code>mixin</code> &amp; <code>with</code></td>
+              <td>Tái sử dụng logic code ở nhiều class độc lập mà không cần phân cấp cây kế thừa.</td>
+              <td>Dùng <code>with MixinA, MixinB</code>. Nếu 2 mixin trùng tên phương thức, mixin khai báo <strong>sau cùng sẽ ghi đè (override)</strong> các mixin trước.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Kế thừa, Mixin và Interface thực chiến (animal.dart)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// 1. Khai báo Interface (Abstract class)</span>
+abstract class Printable {
+  void printInfo();
+}
+
+<span class="c">// 2. Khai báo 2 Mixin độc lập</span>
+mixin Flyable {
+  void fly() => print('Đang bay trên trời...');
+  void prepare() => print('Chuẩn bị sải cánh...');
+}
+
+mixin Swimmable {
+  void swim() => print('Đang bơi dưới nước...');
+  void prepare() => print('Chuẩn bị xuống nước...');
+}
+
+<span class="c">// 3. Class cha</span>
+class Animal {
+  String name;
+  Animal(this.name);
+}
+
+<span class="c">// 4. Duck: Kế thừa Animal, tái sử dụng Flyable & Swimmable, tuân thủ Printable</span>
+class Duck extends Animal with Flyable, Swimmable implements Printable {
+  int age;
+
+  Duck(String name, this.age) : super(name);
+
+  @override
+  void printInfo() {
+    print('Vịt: $name, $age tuổi');
+  }
+}
+
+void main() {
+  var d = Duck('Donald', 3);
+  d.printInfo();
+  d.fly();
+  d.swim();
+  
+  <span class="c">// Gọi prepare(): Swimmable đứng sau cùng nên hàm prepare() của Swimmable sẽ chạy</span>
+  d.prepare(); <span class="c">// In ra: "Chuẩn bị xuống nước..."</span>
+}</code></pre>
+      </div>
+
+      <!-- ===================== 3. EXTENSION METHODS ===================== -->
+      <h3>3. Extension Methods (Mở rộng phương thức cho Class có sẵn)</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm & Ứng dụng</span>
+        <p><strong>Extension Methods</strong> (từ khoá <code>extension on Type</code>) cho phép bạn <strong>bổ sung thêm hàm hoặc getter vào bất kỳ class nào</strong> (kể cả các class có sẵn của Dart hoặc Flutter SDK như <code>String</code>, <code>DateTime</code>, <code>BuildContext</code>, <code>int</code>) mà <strong>không cần phải sửa mã nguồn gốc hay dùng kế thừa</strong>.</p>
+        <p>Trong Flutter thực tế, Extension được dùng khắp nơi để: định dạng tiền tệ VNĐ, viết hoa chữ cái đầu, validate email, hoặc rút gọn <code>Theme.of(context)</code> và <code>MediaQuery.of(context)</code>.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Cú pháp khai báo</th><th>Ý nghĩa</th><th>Ví dụ gọi hàm</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>extension TenExtension on String { ... }</code></td>
+              <td>Mở rộng tính năng cho chuỗi <code>String</code>.</td>
+              <td><code>'khang'.capitalize() // "Khang"</code></td>
+            </tr>
+            <tr>
+              <td><code>extension on DateTime { ... }</code></td>
+              <td>Mở rộng tính năng format ngày tháng.</td>
+              <td><code>DateTime.now().toVnDate() // "04/11/2026"</code></td>
+            </tr>
+            <tr>
+              <td><code>extension on BuildContext { ... }</code></td>
+              <td>Rút gọn truy cập Theme, kích thước màn hình trong Flutter.</td>
+              <td><code>context.width // MediaQuery.of(context).size.width</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Các Extension thực chiến cực hay dùng trong dự án Flutter</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// ==================== 1. EXTENSION TRÊN STRING ====================</span>
+extension StringExtensions on String {
+  <span class="c">// Viết hoa chữ cái đầu tiên</span>
+  String capitalize() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1)}';
+  }
+
+  <span class="c">// Kiểm tra email hợp lệ</span>
+  bool get isValidEmail {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(this);
+  }
+
+  <span class="c">// Chuyển chuỗi sang số nguyên an toàn (không lo văng lỗiFormatException)</span>
+  int toIntOrZero() {
+    return int.tryParse(this) ?? 0;
+  }
+}
+
+<span class="c">// ==================== 2. EXTENSION TRÊN SỐ (INT / DOUBLE) ====================</span>
+extension CurrencyFormat on num {
+  <span class="c">// Định dạng số thành chuỗi tiền tệ VND: 50000 -> "50.000 đ"</span>
+  String toVnd() {
+    return '${toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ';
+  }
+}
+
+<span class="c">// ==================== 3. EXTENSION TRÊN BUILDCONTEXT (CỰC KỲ TIỆN CHO UI) ====================</span>
+<span class="c">// extension ContextHelper on BuildContext {</span>
+<span class="c">//   // Lấy nhanh chiều rộng, chiều cao màn hình:</span>
+<span class="c">//   double get screenWidth => MediaQuery.of(this).size.width;</span>
+<span class="c">//   double get screenHeight => MediaQuery.of(this).size.height;</span>
+<span class="c">//   // Lấy nhanh Theme:</span>
+<span class="c">//   ThemeData get theme => Theme.of(this);</span>
+<span class="c">// }</span>
+
+void main() {
+  <span class="c">// Sử dụng tự nhiên như phương thức nội tại của String và int:</span>
+  String title = 'flutter developer';
+  print(title.capitalize()); <span class="c">// "Flutter developer"</span>
+
+  String email = 'user@gmail.com';
+  print(email.isValidEmail);  <span class="c">// true</span>
+
+  int price = 1500000;
+  print(price.toVnd());      <span class="c">// "1.500.000 đ"</span>
+}</code></pre>
+      </div>
+
+      <!-- ===================== 4. MODEL DỮ LIỆU & JSON ===================== -->
+      <h3>4. Model Dữ liệu và Chuẩn hoá JSON (<code>fromJson</code> / <code>toJson</code>)</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Trong ứng dụng Flutter thực tế, dữ liệu nhận về từ REST API hoặc cơ sở dữ liệu SQLite đều ở dạng <code>Map&lt;String, dynamic&gt;</code>. Để code chặt chẽ, dễ bảo trì và gợi ý code tốt (type-safe), ta luôn tạo <strong>Model Class</strong> với cặp phương thức <code>fromJson</code> và <code>toJson</code>.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cấu trúc chuẩn của một Model Class trong Flutter</div>
+        <div class="code-wrapper">
+          <div class="code-header"><span>dart - Post.dart (Model chuẩn bài thi PE & Dự án thực tế)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>class Post {
+  final int userId;
+  final int id;
+  final String title;
+  final String body;
+
+  <span class="c">// Constructor với Named Parameters & required</span>
+  Post({
+    required this.userId,
+    required this.id,
+    required this.title,
+    required this.body,
+  });
+
+  <span class="c">// 1. fromJson: Chuyển đổi từ Map (JSON) sang Object Post</span>
+  <span class="c">// Sử dụng 'as ...? ?? fallback' để chống crash khi trường bị null hoặc sai kiểu</span>
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      userId: json['userId'] as int? ?? 0,
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? '',
+      body: json['body'] as String? ?? '',
+    );
+  }
+
+  <span class="c">// 2. toJson: Chuyển đổi từ Object Post sang Map để gửi POST/PUT lên API hoặc lưu SQLite</span>
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'id': id,
+      'title': title,
+      'body': body,
+    };
+  }
+
+  <span class="c">// 3. toString: Tiện lợi khi debug in log ra Terminal</span>
+  @override
+  String toString() {
+    return 'Post{id: $id, title: $title, userId: $userId}';
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== 5. BẢNG MẸO OOP HAY DÙNG ===================== -->
+      <h3>5. Bảng tổng kết và các lỗi OOP hay gặp</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Vấn đề / Cú pháp</th><th>Nguyên nhân / Bản chất</th><th>Giải pháp chuẩn</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>extension on Type</code></td>
+              <td>Thêm phương thức mở rộng cho class có sẵn mà không thể hoặc không muốn sửa code nguồn.</td>
+              <td>Dùng để format tiền tệ <code>price.toVnd()</code>, viết hoa <code>str.capitalize()</code>, validate dữ liệu.</td>
+            </tr>
+            <tr>
+              <td><code>factory</code> constructor</td>
+              <td>Không tự động tạo instance rỗng mà phải trả về một instance cụ thể (<code>return Post(...)</code>).</td>
+              <td>Dùng cho <code>fromJson</code> hoặc Singleton Pattern quản lý Database.</td>
+            </tr>
+            <tr>
+              <td>Lỗi: <code>Field must be initialized</code></td>
+              <td>Biến <code>final</code> không được phép null nhưng chưa có giá trị ban đầu.</td>
+              <td>Khai báo <code>required this.field</code> trong constructor hoặc dùng Initializer List <code>: field = ...</code>.</td>
+            </tr>
+            <tr>
+              <td>Xung đột hàm trong Mixin</td>
+              <td>Nhiều mixin cùng chứa hàm trùng tên.</td>
+              <td>Mixin nào đứng sau cùng trong danh sách <code>with M1, M2</code> sẽ có độ ưu tiên cao nhất và ghi đè các mixin trước.</td>
+            </tr>
+            <tr>
+              <td>Ép kiểu <code>as</code> bị crash lúc chạy</td>
+              <td>Dữ liệu JSON trả về kiểu <code>double</code> nhưng ép thành <code>as int</code> (hoặc bị null).</td>
+              <td>Dùng <code>(json['price'] as num?)?.toDouble() ?? 0.0</code> để an toàn cả <code>int</code> lẫn <code>double</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

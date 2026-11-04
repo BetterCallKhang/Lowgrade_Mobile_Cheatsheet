@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 4. Layout, Multi-Child Widgets & Responsive Design trong Flutter - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 4</span>
+        <span class="pill pill-green">Layout & Responsive Design</span>
+        <span class="pill pill-purple">Dự án: adaptive_layout</span>
+      </div>
+      <div>
+        <a href="03_navigation_route.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3. Navigation & Route</a>
+        <a href="05_form_validation.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Mục 5. Form & Validation &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 4. Toàn Diện Về Layout, Multi-Child Widgets & Responsive Design Trong Flutter</h2>
+        <p>Bản chất Layout trong Flutter hoạt động ra sao? Giải phẫu sâu BoxConstraints ("Constraints go down, Sizes go up, Parent sets position"). Phân tích trọn bộ các widget bố cục cốt lõi: Row, Column, Flex (MainAxisAlignment vs CrossAxisAlignment), Stack & Positioned/Align, GridView (.count, .builder, .custom), Expanded, Flexible, Wrap, FittedBox, AspectRatio, FractionallySizedBox. So sánh Responsive vs Adaptive và áp dụng MediaQuery, LayoutBuilder, OrientationBuilder vào bài tập thực hành adaptive_layout.</p>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3>1. Bản Chất Layout Trong Flutter & BoxConstraints</h3>
+      
+      <h4>1.1. Layout là gì? Vì sao cần hiểu BoxConstraints?</h4>
+      <p>Trong Flutter, <strong>Layout</strong> là quá trình hệ thống tính toán vị trí tọa độ (x, y) và kích thước (rộng x cao) của từng phần tử trên màn hình thiết bị.</p>
+      <p>Khác hoàn toàn với môi trường Web (nơi CSS cho phép đặt kích thước tùy ý như <code>width: 100%</code> hoặc <code>width: 500px</code> mà không quan tâm khung ngoài), Flutter hoạt động dựa trên cơ chế <strong>Ràng buộc hình hộp (BoxConstraints)</strong>. Một widget không thể tự do chọn kích thước mà phải tuân theo giới hạn do widget cha truyền xuống.</p>
+
+      <div class="def">
+        <span class="def-term">Quy tắc vàng 3 bước của Flutter Layout Engine:</span>
+        <ol style="margin-top: 8px; margin-bottom: 4px; padding-left: 20px; line-height: 1.8;">
+          <li><strong>Constraints go down (Ràng buộc đi xuống):</strong> Widget cha gửi các giới hạn (gồm 4 thông số: <code>minWidth</code>, <code>maxWidth</code>, <code>minHeight</code>, <code>maxHeight</code>) xuống cho widget con.</li>
+          <li><strong>Sizes go up (Kích thước đi lên):</strong> Widget con dựa vào ràng buộc nhận được từ cha để tự quyết định kích thước thực tế của mình (width x height), sau đó báo kích thước này ngược lên cho widget cha.</li>
+          <li><strong>Parent sets position (Widget cha định vị tọa độ):</strong> Sau khi biết kích thước của con, widget cha sẽ quyết định đặt con ở tọa độ nào trên trục X và trục Y (căn trái, căn giữa, hay góc trên bên phải).</li>
+        </ol>
+      </div>
+
+      <!-- SƠ ĐỒ SVG MINH HỌA QUY TẮC CONSTRAINTS GO DOWN, SIZES GO UP -->
+      <div class="card" style="margin-top: 20px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Sơ Đồ Minh Họa: Dòng Chảy Quyết Định Kích Thước Và Vị Trí</div>
+        <svg viewBox="0 0 850 260" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="240" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HỘP WIDGET CHA -->
+          <g>
+            <rect x="40" y="40" width="220" height="180" rx="10" fill="#1f2937" stroke="#388bfd" stroke-width="2" />
+            <text x="150" y="70" fill="#58a6ff" font-size="15" font-weight="bold" text-anchor="middle">Widget Cha (Parent)</text>
+            <text x="150" y="100" fill="#8b949e" font-size="12" text-anchor="middle">Ví dụ: Container, Column, SizedBox</text>
+            <rect x="60" y="125" width="180" height="70" rx="6" fill="#111827" stroke="#30363d" />
+            <text x="150" y="150" fill="#7ee787" font-size="12" text-anchor="middle">Nắm toàn quyền định vị</text>
+            <text x="150" y="175" fill="#e6edf3" font-size="12" font-weight="bold" text-anchor="middle">Tọa độ (X, Y) của Con</text>
+          </g>
+
+          <!-- MŨI TÊN ĐI XUỐNG: CONSTRAINTS -->
+          <g>
+            <path d="M 280 85 L 530 85" stroke="#f0883e" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrow-orange)" />
+            <text x="405" y="75" fill="#f0883e" font-size="12" font-weight="bold" text-anchor="middle">1. Constraints go down (Truyền ràng buộc)</text>
+            <text x="405" y="105" fill="#8b949e" font-size="11" text-anchor="middle">minWidth: 0, maxWidth: 300</text>
+          </g>
+
+          <!-- MŨI TÊN ĐI LÊN: SIZE -->
+          <g>
+            <path d="M 530 165 L 280 165" stroke="#7ee787" stroke-width="3" marker-end="url(#arrow-green)" />
+            <text x="405" y="155" fill="#7ee787" font-size="12" font-weight="bold" text-anchor="middle">2. Sizes go up (Báo lại kích thước đã chọn)</text>
+            <text x="405" y="185" fill="#8b949e" font-size="11" text-anchor="middle">Tôi chọn width: 250, height: 80</text>
+          </g>
+
+          <!-- HỘP WIDGET CON -->
+          <g>
+            <rect x="550" y="40" width="240" height="180" rx="10" fill="#1f2937" stroke="#2ea043" stroke-width="2" />
+            <text x="670" y="70" fill="#7ee787" font-size="15" font-weight="bold" text-anchor="middle">Widget Con (Child)</text>
+            <text x="670" y="100" fill="#8b949e" font-size="12" text-anchor="middle">Ví dụ: Text, Image, Card</text>
+            <rect x="570" y="125" width="200" height="70" rx="6" fill="#111827" stroke="#30363d" />
+            <text x="670" y="150" fill="#f0883e" font-size="12" text-anchor="middle">Không thể to hơn maxWidth</text>
+            <text x="670" y="175" fill="#e6edf3" font-size="12" font-weight="bold" text-anchor="middle">Không thể nhỏ hơn minWidth</text>
+          </g>
+
+          <defs>
+            <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f0883e" />
+            </marker>
+            <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#7ee787" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <h4>1.2. Giải phẫu cấu trúc class BoxConstraints</h4>
+      <p>Đối tượng <code>BoxConstraints</code> đóng gói 4 thông số số học (pixels logic):</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Thuộc tính</th>
+              <th style="width: 20%;">Kiểu dữ liệu</th>
+              <th>Ý nghĩa và ví dụ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>minWidth</code></td>
+              <td><code>double</code></td>
+              <td>Chiều rộng nhỏ nhất widget con bắt buộc phải đạt được (ví dụ: 0.0 hoặc 100.0).</td>
+            </tr>
+            <tr>
+              <td><code>maxWidth</code></td>
+              <td><code>double</code></td>
+              <td>Chiều rộng lớn nhất widget con được phép chiếm dụng. Nếu bằng <code>double.infinity</code> nghĩa là không bị giới hạn chiều ngang.</td>
+            </tr>
+            <tr>
+              <td><code>minHeight</code></td>
+              <td><code>double</code></td>
+              <td>Chiều cao nhỏ nhất widget con phải đạt được.</td>
+            </tr>
+            <tr>
+              <td><code>maxHeight</code></td>
+              <td><code>double</code></td>
+              <td>Chiều cao lớn nhất con được phép chiếm dụng.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Các kiểu ràng buộc thường gặp trong Flutter:</strong></p>
+      <ul>
+        <li><strong>Tight (Ràng buộc chặt):</strong> Khi <code>minWidth == maxWidth</code> và <code>minHeight == maxHeight</code>. Widget con không có sự lựa chọn nào khác, bắt buộc phải có kích thước đúng bằng con số đó (ví dụ: màn hình điện thoại ép <code>Scaffold</code> có tight constraints bằng đúng kích cỡ màn hình).</li>
+        <li><strong>Loose (Ràng buộc lỏng):</strong> Khi <code>minWidth == 0.0</code> và <code>minHeight == 0.0</code>. Widget con được tự do co nhỏ về 0 hoặc nở to tới <code>maxWidth</code>/<code>maxHeight</code>.</li>
+        <li><strong>Unbounded (Vô hạn):</strong> Khi <code>maxWidth</code> hoặc <code>maxHeight</code> bằng <code>double.infinity</code> (như bên trong trục cuộn của <code>ListView</code>). Đây là nguồn cơn của lỗi <code>Vertical viewport was given unbounded height</code> nếu lồng sai widget.</li>
+      </ul>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3>2. Bố Cục Tuyến Tính Một Chiều: Row, Column & Flex</h3>
+      <p>Khi muốn xếp các phần tử thành một hàng ngang hoặc một cột dọc, Flutter cung cấp bộ 3 widget: <code>Row</code>, <code>Column</code> và widget cha cơ sở của chúng là <code>Flex</code>.</p>
+
+      <h4>2.1. Phân biệt MainAxis (Trục chính) và CrossAxis (Trục phụ)</h4>
+      <p>Khái niệm này cực kỳ quan trọng và áp dụng xuyên suốt cho cả Row, Column và GridView:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20%;">Widget</th>
+              <th style="width: 40%;">MainAxis (Trục chính - Chiều xếp phần tử)</th>
+              <th style="width: 40%;">CrossAxis (Trục phụ - Chiều vuông góc)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>Row</code></strong></td>
+              <td><strong>Trục ngang (Horizontal):</strong> Từ trái sang phải (hoặc ngược lại tùy ngôn ngữ).</td>
+              <td><strong>Trục dọc (Vertical):</strong> Từ trên xuống dưới.</td>
+            </tr>
+            <tr>
+              <td><strong><code>Column</code></strong></td>
+              <td><strong>Trục dọc (Vertical):</strong> Từ trên xuống dưới.</td>
+              <td><strong>Trục ngang (Horizontal):</strong> Từ trái sang phải.</td>
+            </tr>
+            <tr>
+              <td><strong><code>Flex</code></strong></td>
+              <td>Tùy thuộc vào thuộc tính <code>direction: Axis.horizontal</code> hay <code>Axis.vertical</code>.</td>
+              <td>Trục vuông góc tương ứng với <code>direction</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SƠ ĐỒ SVG MINH HỌA MAINAXIS VÀ CROSSAXIS -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Sơ Đồ Minh Họa: Trục Chính (MainAxis) & Trục Phụ (CrossAxis)</div>
+        <svg viewBox="0 0 850 240" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="220" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HỘP ROW -->
+          <g>
+            <rect x="40" y="35" width="360" height="175" rx="8" fill="#1f2937" stroke="#388bfd" stroke-width="1.5" />
+            <text x="220" y="60" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle">Widget ROW (Hàng Ngang)</text>
+            
+            <!-- Trục chính của Row: Mũi tên ngang -->
+            <path d="M 60 90 L 370 90" stroke="#7ee787" stroke-width="3" marker-end="url(#arrow-green)" />
+            <text x="215" y="82" fill="#7ee787" font-size="11" font-weight="bold" text-anchor="middle">MainAxis (Trục chính: Ngang)</text>
+            
+            <!-- Trục phụ của Row: Mũi tên dọc -->
+            <path d="M 65 95 L 65 185" stroke="#f0883e" stroke-width="3" marker-end="url(#arrow-orange)" />
+            <text x="140" y="150" fill="#f0883e" font-size="11" font-weight="bold">CrossAxis (Trục phụ: Dọc)</text>
+            
+            <!-- Các item bên trong Row -->
+            <rect x="175" y="115" width="45" height="45" rx="4" fill="#30363d" />
+            <text x="197" y="142" fill="#e6edf3" font-size="11" text-anchor="middle">1</text>
+            <rect x="230" y="115" width="45" height="45" rx="4" fill="#30363d" />
+            <text x="252" y="142" fill="#e6edf3" font-size="11" text-anchor="middle">2</text>
+            <rect x="285" y="115" width="45" height="45" rx="4" fill="#30363d" />
+            <text x="307" y="142" fill="#e6edf3" font-size="11" text-anchor="middle">3</text>
+          </g>
+
+          <!-- HỘP COLUMN -->
+          <g>
+            <rect x="450" y="35" width="360" height="175" rx="8" fill="#1f2937" stroke="#388bfd" stroke-width="1.5" />
+            <text x="630" y="60" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle">Widget COLUMN (Cột Dọc)</text>
+            
+            <!-- Trục phụ của Column: Mũi tên ngang -->
+            <path d="M 470 90 L 780 90" stroke="#f0883e" stroke-width="3" marker-end="url(#arrow-orange)" />
+            <text x="630" y="82" fill="#f0883e" font-size="11" font-weight="bold" text-anchor="middle">CrossAxis (Trục phụ: Ngang)</text>
+            
+            <!-- Trục chính của Column: Mũi tên dọc -->
+            <path d="M 475 95 L 475 185" stroke="#7ee787" stroke-width="3" marker-end="url(#arrow-green)" />
+            <text x="560" y="140" fill="#7ee787" font-size="11" font-weight="bold">MainAxis (Trục chính: Dọc)</text>
+            
+            <!-- Các item bên trong Column -->
+            <rect x="670" y="100" width="100" height="22" rx="4" fill="#30363d" />
+            <text x="720" y="115" fill="#e6edf3" font-size="10" text-anchor="middle">Item 1</text>
+            <rect x="670" y="130" width="100" height="22" rx="4" fill="#30363d" />
+            <text x="720" y="145" fill="#e6edf3" font-size="10" text-anchor="middle">Item 2</text>
+            <rect x="670" y="160" width="100" height="22" rx="4" fill="#30363d" />
+            <text x="720" y="175" fill="#e6edf3" font-size="10" text-anchor="middle">Item 3</text>
+          </g>
+        </svg>
+      </div>
+
+      <h4>2.2. Chi tiết Constructor và Bảng thuộc tính của Row & Column</h4>
+      <p><code>Row</code> và <code>Column</code> đều kế thừa từ <code>Flex</code> nên chia sẻ chung các tham số cấu hình mạnh mẽ:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>Row({
+  Key? key,
+  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+  MainAxisSize mainAxisSize = MainAxisSize.max,
+  CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+  TextDirection? textDirection,
+  VerticalDirection verticalDirection = VerticalDirection.down,
+  TextBaseline? textBaseline,
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[],
+})</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Thuộc tính</th>
+              <th style="width: 30%;">Các giá trị có thể nhận</th>
+              <th>Giải thích chi tiết tác dụng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>mainAxisAlignment</code></td>
+              <td>
+                <code>MainAxisAlignment.start</code> (Mặc định)<br>
+                <code>MainAxisAlignment.end</code><br>
+                <code>MainAxisAlignment.center</code><br>
+                <code>MainAxisAlignment.spaceBetween</code><br>
+                <code>MainAxisAlignment.spaceAround</code><br>
+                <code>MainAxisAlignment.spaceEvenly</code>
+              </td>
+              <td>
+                Căn chỉnh vị trí các con trên <strong>trục chính</strong>:<br>
+                - <code>start/end/center</code>: Dồn về đầu / cuối / ở giữa.<br>
+                - <code>spaceBetween</code>: Phần tử đầu và cuối sát mép, chia đều khoảng trống ở giữa.<br>
+                - <code>spaceAround</code>: Khoảng trống 2 đầu bằng 1/2 khoảng trống giữa các con.<br>
+                - <code>spaceEvenly</code>: Mọi khoảng trống (kể cả 2 đầu mép) đều bằng nhau tuyệt đối.
+              </td>
+            </tr>
+            <tr>
+              <td><code>crossAxisAlignment</code></td>
+              <td>
+                <code>CrossAxisAlignment.center</code> (Mặc định)<br>
+                <code>CrossAxisAlignment.start</code><br>
+                <code>CrossAxisAlignment.end</code><br>
+                <code>CrossAxisAlignment.stretch</code><br>
+                <code>CrossAxisAlignment.baseline</code>
+              </td>
+              <td>
+                Căn chỉnh vị trí các con trên <strong>trục vuông góc (trục phụ)</strong>:<br>
+                - <code>start/end/center</code>: Căn mép trên/dưới (với Row) hoặc mép trái/phải (với Column).<br>
+                - <code>stretch</code>: Kéo giãn tất cả các con để lấp đầy toàn bộ kích thước của trục phụ.<br>
+                - <code>baseline</code>: Căn thẳng hàng chân chữ giữa các dòng text khác cỡ (bắt buộc dùng kèm <code>textBaseline: TextBaseline.alphabetic</code>).
+              </td>
+            </tr>
+            <tr>
+              <td><code>mainAxisSize</code></td>
+              <td>
+                <code>MainAxisSize.max</code> (Mặc định)<br>
+                <code>MainAxisSize.min</code>
+              </td>
+              <td>
+                Quyết định kích thước trục chính của Row/Column:<br>
+                - <code>max</code>: Chiếm toàn bộ khoảng không gian tối đa mà cha cấp (ví dụ Row kéo hết chiều ngang màn hình).<br>
+                - <code>min</code>: Co cụm lại vừa khít với tổng kích thước thực tế của các con bên trong.
+              </td>
+            </tr>
+            <tr>
+              <td><code>children</code></td>
+              <td><code>List&lt;Widget&gt;</code></td>
+              <td>Danh sách các widget con cần hiển thị lần lượt.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3>3. Bố Cục Xếp Lớp (Overlapping): Stack, Positioned & Align</h3>
+
+      <h4>3.1. Stack là gì? Khi nào cần dùng?</h4>
+      <p>Nếu như <code>Row</code> và <code>Column</code> xếp các widget nằm nối tiếp nhau trên một đường thẳng, thì <strong><code>Stack</code></strong> cho phép các widget <strong>xếp chồng đè lên nhau theo trục Z</strong> (tương tự như các lớp layer trong Photoshop hoặc thuộc tính <code>position: absolute</code> trong CSS).</p>
+      <p><strong>Trường hợp áp dụng thực tế:</strong></p>
+      <ul>
+        <li>Hiển thị biểu tượng giỏ hàng với một huy hiệu (Badge) số lượng màu đỏ đè lên góc trên bên phải.</li>
+        <li>Hiển thị nút Play đè lên giữa tấm ảnh thumbnail của video.</li>
+        <li>Tạo ảnh nền (Background Image) phủ mờ toàn màn hình, bên trên là form đăng nhập.</li>
+        <li>Tạo banner giảm giá với nhãn "Hot Sale" vắt chéo qua góc của Card sản phẩm.</li>
+      </ul>
+
+      <!-- SƠ ĐỒ SVG MINH HỌA STACK VÀ POSITIONED -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Sơ Đồ Minh Họa: Cơ Chế Xếp Lớp Của Stack & Positioned</div>
+        <svg viewBox="0 0 850 250" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="230" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HỘP LỚN LÀM NỀN (STACK CONTAINER) -->
+          <g>
+            <rect x="60" y="45" width="340" height="165" rx="8" fill="#1f2937" stroke="#388bfd" stroke-width="2" />
+            <text x="230" y="70" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle">Lớp 1 (Dưới cùng): Ảnh nền / Card lớn</text>
+            <text x="230" y="130" fill="#8b949e" font-size="13" text-anchor="middle">Widget khai báo đầu tiên trong children</text>
+            <text x="230" y="155" fill="#8b949e" font-size="12" text-anchor="middle">sẽ nằm ở lớp sâu nhất (đáy)</text>
+          </g>
+
+          <!-- VẬT THỂ XẾP ĐÈ 1: POSITIONED TOP RIGHT -->
+          <g>
+            <rect x="330" y="30" width="85" height="30" rx="15" fill="#f85149" stroke="#ffffff" stroke-width="1.5" />
+            <text x="372" y="50" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">GIẢM 50%</text>
+            <!-- Mũi tên chỉ dẫn tọa độ -->
+            <path d="M 430 45 L 490 45" stroke="#f85149" stroke-width="2" marker-end="url(#arrow-red)" />
+            <text x="500" y="50" fill="#ff7b72" font-size="12" font-weight="bold">Positioned(top: 0, right: 0)</text>
+          </g>
+
+          <!-- VẬT THỂ XẾP ĐÈ 2: ALIGN CENTER -->
+          <g>
+            <circle cx="230" cy="125" r="28" fill="rgba(0, 0, 0, 0.65)" stroke="#7ee787" stroke-width="2" />
+            <polygon points="222,113 222,137 244,125" fill="#7ee787" />
+            <!-- Mũi tên chỉ dẫn Align Center -->
+            <path d="M 230 160 L 230 195" stroke="#7ee787" stroke-width="2" marker-end="url(#arrow-green)" />
+            <text x="230" y="215" fill="#7ee787" font-size="12" font-weight="bold" text-anchor="middle">Align(alignment: Alignment.center) -> Nút Play</text>
+          </g>
+
+          <defs>
+            <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <h4>3.2. Chi tiết Constructor & Thuộc tính của Stack</h4>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>Stack({
+  Key? key,
+  AlignmentGeometry alignment = AlignmentDirectional.topStart,
+  TextDirection? textDirection,
+  StackFit fit = StackFit.loose,
+  Clip clipBehavior = Clip.hardEdge,
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[],
+})</code></pre>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Thuộc tính</th>
+              <th style="width: 30%;">Kiểu dữ liệu & Giá trị</th>
+              <th>Giải thích mục đích</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>alignment</code></td>
+              <td><code>AlignmentGeometry</code> (Mặc định: <code>topStart</code>)</td>
+              <td>Căn vị trí mặc định cho các widget con <strong>không dùng Positioned</strong> (ví dụ: <code>Alignment.center</code> sẽ đặt các widget con chưa định vị vào chính giữa khung Stack).</td>
+            </tr>
+            <tr>
+              <td><code>fit</code></td>
+              <td>
+                <code>StackFit.loose</code> (Mặc định)<br>
+                <code>StackFit.expand</code><br>
+                <code>StackFit.passthrough</code>
+              </td>
+              <td>
+                Cách Stack ép ràng buộc lên các con không định vị:<br>
+                - <code>loose</code>: Cho phép con tự do kích thước trong giới hạn.<br>
+                - <code>expand</code>: Ép các con không định vị phải giãn to bằng đúng kích thước tối đa của Stack.
+              </td>
+            </tr>
+            <tr>
+              <td><code>clipBehavior</code></td>
+              <td>
+                <code>Clip.hardEdge</code> (Mặc định)<br>
+                <code>Clip.none</code>
+              </td>
+              <td>Khi một widget con (đặt bằng Positioned với tọa độ âm như <code>top: -10</code>) thò ra ngoài khung của Stack: <code>Clip.hardEdge</code> sẽ cắt xén đi, còn <code>Clip.none</code> cho phép hiển thị tràn ra ngoài.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>3.3. Bộ đôi trợ thủ của Stack: Positioned và Align</h4>
+      <p>Một widget nằm trong <code>children</code> của <code>Stack</code> chỉ có thể đứng chính xác ở tọa độ mong muốn khi được bọc bởi <code>Positioned</code> hoặc <code>Align</code>:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20%;">Widget</th>
+              <th style="width: 40%;">Constructor & Thuộc tính</th>
+              <th>Khi nào nên dùng?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>Positioned</code></strong></td>
+              <td>
+                <code>Positioned({double? top, double? bottom, double? left, double? right, double? width, double? height, required Widget child})</code>
+              </td>
+              <td>
+                Khi cần ghim vị trí theo khoảng cách pixel tuyệt đối so với 4 cạnh của Stack. Ví dụ: <code>top: 8, right: 8</code> để ghim nút vào góc trên bên phải.
+              </td>
+            </tr>
+            <tr>
+              <td><strong><code>Align</code></strong></td>
+              <td>
+                <code>Align({AlignmentGeometry alignment = Alignment.center, double? widthFactor, double? heightFactor, Widget? child})</code>
+              </td>
+              <td>
+                Khi cần căn vị trí theo tỷ lệ tương đối mà không cần tính toán số pixel cụ thể. Ví dụ: <code>Alignment.center</code> (chính giữa), <code>Alignment.bottomCenter</code> (giữa mép đáy).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart - Ví dụ Card sản phẩm có Badge giảm giá và nút Yêu thích</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>SizedBox(
+  width: 220,
+  height: 280,
+  child: Stack(
+    children: [
+      // 1. Lớp đáy: Khung Card chứa hình ảnh và thông tin
+      Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          children: [
+            Expanded(child: Container(color: Colors.grey.shade200)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Áo Thun Nam Cao Cấp', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+
+      // 2. Lớp ghim góc trên bên trái: Nhãn Sale
+      Positioned(
+        top: 10,
+        left: 10,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6)),
+          child: const Text('GIẢM 30%', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+        ),
+      ),
+
+      // 3. Lớp ghim góc trên bên phải: Nút thả tim yêu thích
+      Positioned(
+        top: 6,
+        right: 6,
+        child: IconButton(
+          icon: const Icon(Icons.favorite_border, color: Colors.pink),
+          onPressed: () {},
+        ),
+      ),
+    ],
+  ),
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3>4. Bố Cục Dạng Lưới Hai Chiều: GridView Toàn Diện</h3>
+
+      <h4>4.1. GridView là gì? Phân biệt các Constructor</h4>
+      <p><code>GridView</code> là widget cho phép sắp xếp danh sách các phần tử theo dạng lưới 2 chiều (vừa chia theo cột, vừa cuộn theo hàng). Khác với việc tự tạo các thẻ <code>Row</code> lồng trong <code>Column</code>, <code>GridView</code> tích hợp sẵn cơ chế cuộn (Scrollable) và tái chế bộ nhớ (Virtualization).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Constructor</th>
+              <th style="width: 35%;">Cú pháp & Cơ chế</th>
+              <th>Trường hợp áp dụng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>GridView.count</code></strong></td>
+              <td>
+                <code>GridView.count({required int crossAxisCount, ...})</code><br>
+                Chỉ định cứng số lượng cột trên trục ngang.
+              </td>
+              <td>Dùng khi biết trước chính xác số cột (ví dụ điện thoại dọc hiển thị 2 cột, ngang hiển thị 3 cột). Thích hợp với danh sách tĩnh, số lượng phần tử ít.</td>
+            </tr>
+            <tr>
+              <td><strong><code>GridView.extent</code></strong></td>
+              <td>
+                <code>GridView.extent({required double maxCrossAxisExtent, ...})</code><br>
+                Chỉ định độ rộng tối đa của 1 ô (ví dụ 180px). Flutter tự tính số cột dựa vào độ rộng màn hình.
+              </td>
+              <td>Rất tiện cho màn hình Responsive tự động chia cột mà không cần viết lệnh if/else: màn hình 360px ra 2 cột, tablet 900px tự ra 5 cột.</td>
+            </tr>
+            <tr>
+              <td><strong><code>GridView.builder</code></strong></td>
+              <td>
+                <code>GridView.builder({required SliverGridDelegate gridDelegate, required IndexedWidgetBuilder itemBuilder, int? itemCount})</code>
+              </td>
+              <td><strong>Bắt buộc dùng khi danh sách lớn hoặc lấy từ API</strong> (100 - 10000 phần tử). Chỉ render các ô đang nhìn thấy trên màn hình, tiết kiệm tối đa RAM và chống giật lag.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>4.2. Khái niệm SliverGridDelegate: Cách phân chia kích cỡ ô lưới</h4>
+      <p>Bên trong <code>GridView.builder</code>, thuộc tính <code>gridDelegate</code> giữ vai trò quyết định cấu trúc lưới. Có 2 delegate phổ biến:</p>
+      <ul>
+        <li><strong><code>SliverGridDelegateWithFixedCrossAxisCount</code>:</strong> Cố định số cột (<code>crossAxisCount: 2</code>).</li>
+        <li><strong><code>SliverGridDelegateWithMaxCrossAxisExtent</code>:</strong> Cố định kích thước tối đa của mỗi ô (<code>maxCrossAxisExtent: 200</code>).</li>
+      </ul>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Thuộc tính của Delegate</th>
+              <th style="width: 20%;">Kiểu dữ liệu</th>
+              <th>Ý nghĩa & Lưu ý quan trọng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>crossAxisCount</code></td>
+              <td><code>int</code></td>
+              <td>Số lượng cột trong một hàng ngang (chỉ có trên delegate FixedCrossAxisCount).</td>
+            </tr>
+            <tr>
+              <td><code>crossAxisSpacing</code></td>
+              <td><code>double</code></td>
+              <td>Khoảng cách tính bằng pixel giữa các cột nằm cạnh nhau.</td>
+            </tr>
+            <tr>
+              <td><code>mainAxisSpacing</code></td>
+              <td><code>double</code></td>
+              <td>Khoảng cách tính bằng pixel giữa các hàng nằm trên dưới nhau.</td>
+            </tr>
+            <tr>
+              <td><code>childAspectRatio</code></td>
+              <td><code>double</code> (Mặc định: 1.0)</td>
+              <td><strong>Tỷ lệ chiều rộng chia cho chiều cao (Width / Height)</strong> của từng ô. Mặc định 1.0 là ô vuông. Nếu Card sản phẩm có ảnh và nhiều dòng chữ thì chiều cao phải lớn hơn chiều rộng, nên đặt khoảng <code>0.7</code> đến <code>0.8</code> để tránh lỗi tràn nội dung bên trong ô.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart - Cấu hình GridView.builder chuẩn tối ưu hiệu năng</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>GridView.builder(
+  padding: const EdgeInsets.all(12),
+  itemCount: 50, // 50 sản phẩm
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,        // 2 cột
+    crossAxisSpacing: 10,     // Cách ngang 10px
+    mainAxisSpacing: 10,      // Cách dọc 10px
+    childAspectRatio: 0.75,   // Tỷ lệ rộng/cao (chiều cao = chiều rộng / 0.75)
+  ),
+  itemBuilder: (context, index) {
+    return Card(
+      child: Center(child: Text('Món hàng #${index + 1}')),
+    );
+  },
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3>5. Các Widget Co Giãn Không Gian Linh Hoạt (Flex & Sizing)</h3>
+
+      <h4>5.1. So sánh chi tiết Expanded vs Flexible</h4>
+      <p>Cả <code>Expanded</code> và <code>Flexible</code> đều là các widget kiểm soát tỷ lệ phân chia không gian dọc theo trục chính của <code>Row</code>, <code>Column</code> hoặc <code>Flex</code>.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Tiêu chí so sánh</th>
+              <th style="width: 37%;">Expanded</th>
+              <th style="width: 38%;">Flexible</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bản chất cơ chế</strong></td>
+              <td><strong>Bắt buộc</strong> widget con phải giãn to chiếm <strong>toàn bộ</strong> khoảng không gian được chia (ngay cả khi nội dung của con rất bé).</td>
+              <td><strong>Cho phép</strong> widget con giữ nguyên kích thước tự nhiên của nó nếu nó nhỏ hơn, không ép phải căng phồng ra.</td>
+            </tr>
+            <tr>
+              <td><strong>Cấu hình fit bên dưới</strong></td>
+              <td>Tương đương với <code>Flexible(fit: FlexFit.tight)</code>.</td>
+              <td>Mặc định là <code>Flexible(fit: FlexFit.loose)</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Thuộc tính <code>flex</code></strong></td>
+              <td>Hệ số tỷ lệ phần chia diện tích (Mặc định <code>flex: 1</code>). Ví dụ con thứ nhất có <code>flex: 1</code>, con thứ hai có <code>flex: 2</code> thì con thứ hai chiếm gấp đôi diện tích con thứ nhất.</td>
+              <td>Giới hạn tối đa mà con được phép nở ra theo tỷ lệ phần chia.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MINH HỌA EXPANDED VS FLEXIBLE BẰNG SVG -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Minh Họa Trực Quan: Cách Expanded và Flexible Phân Phối Không Gian</div>
+        <svg viewBox="0 0 850 240" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="220" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HÀNG 1: EXPANDED TỶ LỆ 1 : 2 -->
+          <g>
+            <text x="30" y="40" fill="#58a6ff" font-size="13" font-weight="bold">Trường hợp 1: Row chứa Expanded(flex: 1) và Expanded(flex: 2)</text>
+            <rect x="30" y="55" width="790" height="50" rx="6" fill="#21262d" stroke="#30363d" />
+            <!-- Khối Flex 1: 1/3 = ~260px -->
+            <rect x="35" y="60" width="255" height="40" rx="4" fill="#1f6feb" />
+            <text x="162" y="85" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">Expanded(flex: 1) ~ 33.3%</text>
+            <!-- Khối Flex 2: 2/3 = ~525px -->
+            <rect x="295" y="60" width="520" height="40" rx="4" fill="#2ea043" />
+            <text x="555" y="85" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">Expanded(flex: 2) ~ 66.7%</text>
+          </g>
+
+          <!-- HÀNG 2: FLEXIBLE VỚI LOOSE FIT -->
+          <g>
+            <text x="30" y="140" fill="#f0883e" font-size="13" font-weight="bold">Trường hợp 2: Row chứa Flexible(fit: FlexFit.loose, flex: 2)</text>
+            <rect x="30" y="155" width="790" height="50" rx="6" fill="#21262d" stroke="#30363d" />
+            <!-- Khối Text chỉ chiếm đúng diện tích chữ của nó, không nuốt trọn toàn bộ -->
+            <rect x="35" y="160" width="180" height="40" rx="4" fill="#d29922" />
+            <text x="125" y="185" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">Nội dung ngắn (tự nhiên)</text>
+            <!-- Vùng không gian còn trống không bị ép giãn -->
+            <rect x="220" y="160" width="595" height="40" rx="4" fill="#30363d" stroke-dasharray="4" />
+            <text x="517" y="185" fill="#8b949e" font-size="12" text-anchor="middle">Khoảng trống còn thừa (Không bị ép căng phồng ra)</text>
+          </g>
+        </svg>
+      </div>
+
+      <h4>5.2. Wrap: Tự động xuống dòng khi hết chỗ (Ngăn ngừa vạch tràn màu vàng-đen)</h4>
+      <p>Khi đặt quá nhiều Widget (danh sách nhãn tags, filter chips) trong một <code>Row</code>, nếu tổng chiều rộng vượt quá chiều rộng màn hình, Flutter sẽ báo lỗi nghiêm trọng <code>A RenderFlex overflowed</code>. Widget <code>Wrap</code> giải quyết triệt để vấn đề này bằng cách tự động ngắt xuống hàng tiếp theo khi chạm mép.</p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart - Cú pháp và thuộc tính của Wrap</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>Wrap(
+  direction: Axis.horizontal,        // Hướng xếp phần tử (ngang hoặc dọc)
+  alignment: WrapAlignment.start,    // Căn chỉnh các phần tử trên hàng
+  spacing: 8.0,                      // Khoảng cách pixel giữa 2 chip cạnh nhau
+  runSpacing: 10.0,                  // Khoảng cách pixel giữa các hàng khi xuống dòng
+  runAlignment: WrapAlignment.start, // Căn chỉnh giữa các hàng
+  children: const [
+    Chip(label: Text('Flutter')),
+    Chip(label: Text('Responsive')),
+    Chip(label: Text('BoxConstraints')),
+    Chip(label: Text('Adaptive Layout')),
+    Chip(label: Text('SE1902 Mobile')),
+    Chip(label: Text('Dart OOP')),
+  ],
+)</code></pre>
+      </div>
+
+      <h4>5.3. Bộ ba widget định cỡ nâng cao: AspectRatio, FittedBox & FractionallySizedBox</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Tên Widget</th>
+              <th style="width: 35%;">Constructor & Thuộc tính</th>
+              <th>Giải thích mục đích và ví dụ thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>AspectRatio</code></td>
+              <td>
+                <code>AspectRatio({required double aspectRatio, Widget? child})</code><br>
+                Ví dụ: <code>aspectRatio: 16 / 9</code> hoặc <code>4 / 3</code> hoặc <code>1.0</code>
+              </td>
+              <td>Ép widget con giữ nguyên tỷ lệ khung hình cố định (Rộng chia Cao) dù kích thước màn hình thay đổi. Dùng khi làm khung video (16:9), ảnh đại diện vuông (1:1).</td>
+            </tr>
+            <tr>
+              <td><code>FittedBox</code></td>
+              <td>
+                <code>FittedBox({BoxFit fit = BoxFit.contain, AlignmentGeometry alignment = Alignment.center, Widget? child})</code>
+              </td>
+              <td>Tự động co nhỏ (scale down) hoặc phóng to widget con để vừa khít hoàn hảo vào khung cha mà không bị tràn mép. Cực kỳ hữu dụng khi bọc các đoạn chữ số tiền hoặc tiêu đề dài.</td>
+            </tr>
+            <tr>
+              <td><code>FractionallySizedBox</code></td>
+              <td>
+                <code>FractionallySizedBox({double? widthFactor, double? heightFactor, AlignmentGeometry alignment, Widget? child})</code>
+              </td>
+              <td>Định cỡ kích thước theo tỷ lệ phần trăm (0.0 đến 1.0) so với khung của widget cha. Ví dụ <code>widthFactor: 0.8</code> nghĩa là chiếm đúng 80% chiều rộng khung cha.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3>6. Kỹ Thuật Responsive Design & Adaptive Design Trong Flutter</h3>
+
+      <h4>6.1. Phân biệt Responsive Design và Adaptive Design</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20%;">Tiêu chí</th>
+              <th style="width: 40%;">Responsive Design (Thiết kế phản hồi)</th>
+              <th style="width: 40%;">Adaptive Design (Thiết kế thích ứng)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bản chất cốt lõi</strong></td>
+              <td>Thay đổi <strong>bố cục hình học</strong> (layout, số lượng cột, kích thước, giãn cách) dựa theo <strong>kích thước màn hình (Screen Size)</strong> hoặc <strong>hướng xoay (Orientation)</strong>.</td>
+              <td>Thay đổi <strong>hành vi người dùng, thành phần điều khiển (Component/Widget)</strong> dựa theo <strong>hệ điều hành (iOS, Android, Web, Desktop)</strong> hoặc <strong>thiết bị đầu vào (Cảm ứng, Chuột, Bàn phím)</strong>.</td>
+            </tr>
+            <tr>
+              <td><strong>Ví dụ thực tế</strong></td>
+              <td>Màn hình dọc hiển thị <code>GridView</code> 2 cột, xoay ngang tự động tăng lên 3 hoặc 4 cột. Màn hình tablet rộng thì thanh Menu nằm bên trái, màn hình điện thoại hẹp thì thanh Menu ẩn vào <code>Drawer</code>.</td>
+              <td>Trên iOS hiện hộp thoại <code>CupertinoAlertDialog</code> vuốt rung haptic, trên Android hiện <code>AlertDialog</code> kiểu Material 3. Trên chuột máy tính thì có con trỏ Hover và thanh cuộn Scrollbar, trên điện thoại thì vuốt chạm mượt mà.</td>
+            </tr>
+            <tr>
+              <td><strong>Công cụ đại diện</strong></td>
+              <td><code>MediaQuery</code>, <code>LayoutBuilder</code>, <code>OrientationBuilder</code>, <code>Expanded</code>, <code>Wrap</code>.</td>
+              <td><code>Platform.isIOS</code>, <code>TargetPlatform</code>, <code>AdaptiveSwitch</code>, <code>Slider.adaptive</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>6.2. Ba "Vũ Khí Cốt Lõi": MediaQuery, LayoutBuilder & OrientationBuilder</h4>
+
+      <p><strong>A. MediaQuery: Nhận diện thông số toàn màn hình thiết bị</strong></p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>final MediaQueryData mq = MediaQuery.of(context);
+final double screenWidth = mq.size.width;       // Chiều rộng toàn màn hình
+final double screenHeight = mq.size.height;     // Chiều cao toàn màn hình
+final bool isPortrait = mq.orientation == Orientation.portrait; // Kiểm tra xoay dọc
+final double topPadding = mq.padding.top;       // Tai thỏ, notch trên đỉnh
+final bool isKeyboardOpen = mq.viewInsets.bottom > 0; // Bàn phím ảo đang mở</code></pre>
+      </div>
+
+      <p><strong>B. LayoutBuilder: Đo đạc không gian của riêng widget cha cấp phát</strong></p>
+      <p>Đây là điểm người mới rất hay nhầm lẫn: <em>MediaQuery đo toàn màn hình thiết bị, còn LayoutBuilder chỉ đo không gian mà widget cha dành cho nó.</em></p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>LayoutBuilder(
+  builder: (BuildContext context, BoxConstraints constraints) {
+    if (constraints.maxWidth >= 600) {
+      // Đủ rộng: hiển thị 2 cột hoặc dạng Grid
+      return Row(children: [Expanded(child: SidePanel()), Expanded(child: MainView())]);
+    } else {
+      // Hẹp: hiển thị 1 cột dọc
+      return SingleColumnView();
+    }
+  },
+)</code></pre>
+      </div>
+
+      <p><strong>C. OrientationBuilder: Lắng nghe sự kiện xoay dọc / xoay ngang</strong></p>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>OrientationBuilder(
+  builder: (BuildContext context, Orientation orientation) {
+    return GridView.count(
+      crossAxisCount: orientation == Orientation.portrait ? 2 : 3,
+      children: List.generate(20, (index) => ProductCard(id: index + 1)),
+    );
+  },
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3>7. Thực Hành Chuyên Sâu Dự Án adaptive_layout</h3>
+
+      <!-- BÀI TẬP 1 -->
+      <h4>7.1. Bài tập 1: GridView 20 sản phẩm tự đổi số cột khi xoay (list_product.dart)</h4>
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>adaptive_layout/lib/list_product.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>import 'package:flutter/material.dart';
+
+// Widget nhận số lượng cột động thông qua constructor
+class ListProduct extends StatelessWidget {
+  final int col;
+
+  const ListProduct({super.key, required this.col});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: col,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      padding: const EdgeInsets.all(12),
+      children: List.generate(20, (index) {
+        final productId = index + 1;
+        return ProductItem(id: productId);
+      }),
+    );
+  }
+}
+
+class ProductItem extends StatelessWidget {
+  final int id;
+
+  const ProductItem({super.key, required this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.shopping_bag, size: 40, color: Colors.blueAccent),
+            const SizedBox(height: 8),
+            Text(
+              'Sản phẩm #$id',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 6),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Đã chọn sản phẩm #$id!')),
+                );
+              },
+              child: const Text('Thêm vào giỏ'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- BÀI TẬP 2 -->
+      <h4>7.2. Bài tập 2: Bố cục thích ứng kết hợp Menu Drawer và Side Navigation (home_screen.dart)</h4>
+      <div class="def">
+        <span class="def-term">Yêu cầu nghiệp vụ nâng cao:</span>
+        <ul style="margin-top: 6px; padding-left: 20px; line-height: 1.8;">
+          <li>Menu gồm 3 mục: <strong>Trang chủ</strong>, <strong>Đăng nhập</strong>, <strong>Cài đặt</strong>.</li>
+          <li><strong>Màn hình Dọc (Portrait):</strong> Menu ẩn vào <code>Drawer</code> của <code>Scaffold</code>. Danh sách hiển thị 2 cột.</li>
+          <li><strong>Màn hình Ngang (Landscape hoặc chiều rộng &gt;= 600px):</strong> Nút 3 gạch trên AppBar tự ẩn (gán <code>drawer: null</code>); Menu chuyển thành thanh Side Panel cố định bên trái chiếm 260px; danh sách bên phải chia thành 3 cột.</li>
+        </ul>
+      </div>
+
+      <!-- SƠ ĐỒ SVG BÀI TẬP 2 -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Sơ Đồ Minh Họa: Biến Đổi Giao Diện Khi Xoay Màn Hình</div>
+        <svg viewBox="0 0 850 310" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="290" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HÌNH BÊN TRÁI: DỌC (PORTRAIT) -->
+          <g>
+            <text x="180" y="38" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle">1. Màn hình Dọc (Portrait)</text>
+            <rect x="60" y="55" width="240" height="225" rx="10" fill="#0d1117" stroke="#30363d" stroke-width="2" />
+            <rect x="60" y="55" width="240" height="35" rx="6" fill="#1f6feb" />
+            <rect x="70" y="66" width="16" height="3" fill="#ffffff" />
+            <rect x="70" y="72" width="16" height="3" fill="#ffffff" />
+            <rect x="70" y="78" width="16" height="3" fill="#ffffff" />
+            <text x="100" y="77" fill="#ffffff" font-size="12" font-weight="bold">Shop App</text>
+            <rect x="72" y="105" width="102" height="65" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="123" y="142" fill="#8b949e" font-size="11" text-anchor="middle">Sp 1</text>
+            <rect x="186" y="105" width="102" height="65" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="237" y="142" fill="#8b949e" font-size="11" text-anchor="middle">Sp 2</text>
+            <rect x="72" y="180" width="102" height="65" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="123" y="217" fill="#8b949e" font-size="11" text-anchor="middle">Sp 3</text>
+            <rect x="186" y="180" width="102" height="65" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="237" y="217" fill="#8b949e" font-size="11" text-anchor="middle">Sp 4</text>
+          </g>
+
+          <!-- MŨI TÊN XOAY -->
+          <g>
+            <path d="M 330 160 L 390 160" stroke="#f0883e" stroke-width="2.5" marker-end="url(#arrow-orange)" />
+            <text x="360" y="145" fill="#f0883e" font-size="12" font-weight="bold" text-anchor="middle">Xoay ngang</text>
+          </g>
+
+          <!-- HÌNH BÊN PHẢI: NGANG (LANDSCAPE) -->
+          <g>
+            <text x="610" y="38" fill="#7ee787" font-size="14" font-weight="bold" text-anchor="middle">2. Màn hình Ngang (Side Panel + 3 Cột)</text>
+            <rect x="420" y="55" width="390" height="225" rx="10" fill="#0d1117" stroke="#30363d" stroke-width="2" />
+            <rect x="420" y="55" width="390" height="35" rx="6" fill="#1f6feb" />
+            <text x="440" y="77" fill="#ffffff" font-size="12" font-weight="bold">Shop App (Ngang / Tablet)</text>
+            
+            <!-- Side Panel cố định bên trái: width 115px -->
+            <rect x="425" y="95" width="115" height="175" rx="4" fill="#161b22" stroke="#30363d" />
+            <text x="482" y="120" fill="#58a6ff" font-size="11" font-weight="bold" text-anchor="middle">MENU CỐ ĐỊNH</text>
+            <rect x="432" y="132" width="100" height="24" rx="4" fill="#21262d" />
+            <text x="482" y="148" fill="#c9d1d9" font-size="10" text-anchor="middle">Trang chủ</text>
+            <rect x="432" y="162" width="100" height="24" rx="4" fill="#21262d" />
+            <text x="482" y="178" fill="#c9d1d9" font-size="10" text-anchor="middle">Đăng nhập</text>
+            <rect x="432" y="192" width="100" height="24" rx="4" fill="#21262d" />
+            <text x="482" y="208" fill="#c9d1d9" font-size="10" text-anchor="middle">Cài đặt</text>
+
+            <!-- Vùng GridView 3 cột bên phải -->
+            <rect x="550" y="95" width="80" height="75" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="590" y="137" fill="#8b949e" font-size="10" text-anchor="middle">Sp 1</text>
+            <rect x="637" y="95" width="80" height="75" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="677" y="137" fill="#8b949e" font-size="10" text-anchor="middle">Sp 2</text>
+            <rect x="724" y="95" width="80" height="75" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="764" y="137" fill="#8b949e" font-size="10" text-anchor="middle">Sp 3</text>
+
+            <rect x="550" y="180" width="80" height="85" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="590" y="227" fill="#8b949e" font-size="10" text-anchor="middle">Sp 4</text>
+            <rect x="637" y="180" width="80" height="85" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="677" y="227" fill="#8b949e" font-size="10" text-anchor="middle">Sp 5</text>
+            <rect x="724" y="180" width="80" height="85" rx="4" fill="#21262d" stroke="#30363d" />
+            <text x="764" y="227" fill="#8b949e" font-size="10" text-anchor="middle">Sp 6</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>adaptive_layout/lib/home_screen.dart</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code>import 'package:flutter/material.dart';
+import 'package:adaptive_layout/list_product.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  Widget _buildMenuList(BuildContext context) {
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        const UserAccountsDrawerHeader(
+          accountName: Text('Sinh viên SE1902'),
+          accountEmail: Text('student@fpt.edu.vn'),
+          currentAccountPicture: CircleAvatar(
+            backgroundColor: Colors.white,
+            child: Icon(Icons.person, color: Colors.blueAccent),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.home),
+          title: const Text('Trang chủ'),
+          onTap: () => Navigator.pop(context),
+        ),
+        ListTile(
+          leading: const Icon(Icons.login),
+          title: const Text('Đăng nhập'),
+          onTap: () => Navigator.pop(context),
+        ),
+        ListTile(
+          leading: const Icon(Icons.settings),
+          title: const Text('Cài đặt'),
+          onTap: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final bool isWideScreen = mediaQuery.size.width >= 600;
+    final bool useSideNavigation = isLandscape || isWideScreen;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Adaptive & Responsive Layout'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+
+      // Khi ở chế độ xoay ngang: gán drawer = null để ẩn nút 3 gạch
+      drawer: useSideNavigation ? null : Drawer(child: _buildMenuList(context)),
+
+      body: useSideNavigation
+          ? Row(
+              children: [
+                // Thanh menu cố định bên trái chiếm 260px
+                SizedBox(
+                  width: 260,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(right: BorderSide(color: Colors.grey.shade300, width: 1)),
+                    ),
+                    child: _buildMenuList(context),
+                  ),
+                ),
+                // Vùng bên phải hiển thị GridView 3 cột
+                const Expanded(
+                  child: ListProduct(col: 3),
+                ),
+              ],
+            )
+          : const ListProduct(col: 2), // Chế độ dọc: 2 cột tràn toàn màn hình
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3>8. Bảng Tra Cứu Xử Lý Lỗi Layout Thường Gặp (Cheat Sheet Fix Bug)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 30%;">Thông báo lỗi đỏ / vàng-đen</th>
+              <th style="width: 35%;">Nguyên nhân gốc rễ</th>
+              <th>Cách giải quyết chuẩn xác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>A RenderFlex overflowed by ... pixels</code></td>
+              <td>Dùng <code>Row</code> hoặc <code>Column</code> chứa các phần tử có tổng kích thước lớn hơn diện tích màn hình.</td>
+              <td>
+                - Với <code>Row</code>: Bọc widget con dài bằng <code>Expanded</code> hoặc chuyển sang dùng <code>Wrap</code>.<br>
+                - Với <code>Column</code>: Bọc ngoài bằng <code>SingleChildScrollView</code> hoặc dùng <code>ListView</code>.
+              </td>
+            </tr>
+            <tr>
+              <td><code>Vertical viewport was given unbounded height</code></td>
+              <td>Đặt một <code>ListView</code> hoặc <code>GridView</code> bên trong một <code>Column</code> mà không giới hạn chiều cao (chiều cao vô tận đè lên nhau).</td>
+              <td>
+                - Cách 1: Bọc <code>ListView</code>/<code>GridView</code> trong <code>Expanded</code>.<br>
+                - Cách 2: Thêm <code>shrinkWrap: true</code> và <code>physics: NeverScrollableScrollPhysics()</code> vào List/Grid.
+              </td>
+            </tr>
+            <tr>
+              <td><code>An InputDecorator cannot have an unbounded width</code></td>
+              <td>Đặt <code>TextField</code> hoặc <code>TextFormField</code> trực tiếp vào trong <code>Row</code> mà không có ràng buộc chiều ngang.</td>
+              <td>Bọc <code>TextField</code> bằng <code>Expanded</code> để nó chiếm hết pixel còn lại của hàng.</td>
+            </tr>
+            <tr>
+              <td><code>Incorrect use of ParentDataWidget</code></td>
+              <td>Đặt <code>Expanded</code> hoặc <code>Flexible</code> bên ngoài <code>Row</code>/<code>Column</code>/<code>Flex</code> (ví dụ đặt trực tiếp làm con của Container hoặc Stack).</td>
+              <td><code>Expanded</code> và <code>Flexible</code> chỉ có tác dụng và hợp lệ khi là con trực tiếp của <code>Row</code>, <code>Column</code> hoặc <code>Flex</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

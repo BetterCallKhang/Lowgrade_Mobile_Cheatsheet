@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 8. Toàn diện về Flutter Widgets & Giao diện căn bản - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 8</span>
+        <span class="pill pill-green">Flutter Widgets Căn Bản</span>
+        <span class="pill pill-purple">Dự án: widget_intro</span>
+      </div>
+      <div>
+        <a href="../01_nen_tang/06_async_future_stream.html" class="copy-btn" style="text-decoration:none;">&larr; Phần 6. Async</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Trang chủ &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 8. Cẩm Nang Toàn Diện Về Flutter Widgets & Giao Diện Căn Bản</h2>
+        <p>Hướng dẫn chi tiết, trực quan từ bản chất <strong>"Mọi thứ trong Flutter đều là Widget"</strong>, bộ 3 cây
+          dựng hình (<code>Widget Tree</code>, <code>Element Tree</code>, <code>Render Tree</code>), vòng đời của
+          <code>StatefulWidget</code>, giải phẫu khung sườn <code>MaterialApp</code> & <code>Scaffold</code>, cho đến
+          danh sách hiển thị dữ liệu (<code>ListView</code>, <code>Card</code>, <code>ListTile</code>,
+          <code>GridView</code> kèm ảnh) và toàn bộ các Input Widget phổ biến nhất.
+        </p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title"> Nội dung bài học gồm 8 phần lớn:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Khái niệm Widget & Câu thần chú "Everything is a
+              Widget"</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Giải mã Bộ Ba Cây: Widget Tree - Element Tree -
+              Render Tree</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. StatelessWidget vs StatefulWidget & Vòng đời State
+              Lifecycle</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Giải phẫu cấu trúc gốc: MaterialApp và Scaffold
+              Anatomy</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Bản chất State & Cơ chế setState() hoạt động ra
+              sao?</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Hiển thị danh sách cuộn: ListView, Card, ListTile &
+              Chèn hình ảnh</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Lưới dữ liệu đa cột: GridView, GridView.builder,
+              GridView.count</a></li>
+          <li><a href="#sec-8" style="color:var(--accent-blue);">8. Bộ sưu tập các Widget tương tác: Button, TextField,
+              Checkbox, Switch, Radio, Slider</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== 1. WIDGET LÀ GÌ ===================== -->
+      <h3 id="sec-1">1. Widget trong Flutter là gì? "Everything is a Widget"</h3>
+      <div class="def">
+        <span class="def-term">Định nghĩa cốt lõi</span>
+        <p>Trong Flutter, <strong>Widget là khối xây dựng cơ bản (building block) của giao diện người dùng</strong>.
+          Khác với lập trình Android gốc (viết XML) hay Web (viết HTML/CSS riêng, JavaScript riêng), Flutter gom toàn bộ
+          giao diện, bố cục căn chỉnh (Layout), màu sắc, phông chữ và cả hiệu ứng tương tác thành các lớp đối tượng Dart
+          gọi là <strong>Widget</strong>.</p>
+      </div>
+
+      <p>Câu nói nổi tiếng của đội ngũ phát triển Flutter: <em>"Everything in Flutter is a Widget"</em> (Mọi thứ đều là
+        Widget):</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Loại Widget</th>
+              <th>Ví dụ tiêu biểu</th>
+              <th>Nhiệm vụ & Chức năng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Widget hiển thị nội dung (Visual)</strong></td>
+              <td><code>Text</code>, <code>Image</code>, <code>Icon</code>, <code>CircleAvatar</code></td>
+              <td>Vẽ các thành phần mắt nhìn thấy được: chữ, hình chụp, biểu tượng.</td>
+            </tr>
+            <tr>
+              <td><strong>Widget bố cục & căn chỉnh (Layout)</strong></td>
+              <td><code>Row</code>, <code>Column</code>, <code>Stack</code>, <code>Center</code>, <code>Padding</code>,
+                <code>SizedBox</code>
+              </td>
+              <td>Sắp xếp vị trí các widget con: nằm ngang, nằm dọc, đè lên nhau, tạo khoảng cách đệm.</td>
+            </tr>
+            <tr>
+              <td><strong>Widget tương tác (Interactive/Input)</strong></td>
+              <td><code>ElevatedButton</code>, <code>TextField</code>, <code>Checkbox</code>, <code>Switch</code>,
+                <code>Slider</code>
+              </td>
+              <td>Lắng nghe thao tác người dùng: bấm, gõ phím, bật/tắt, kéo thanh trượt.</td>
+            </tr>
+            <tr>
+              <td><strong>Widget cấu trúc & điều hướng (Structure)</strong></td>
+              <td><code>MaterialApp</code>, <code>Scaffold</code>, <code>AppBar</code>, <code>BottomNavigationBar</code>
+              </td>
+              <td>Cung cấp bộ khung chuẩn Material Design của Google cho ứng dụng.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 2. BỘ BA CÂY WIDGET - ELEMENT - RENDER ===================== -->
+      <h3 id="sec-2">2. Giải mã Bộ Ba Cây: Widget Tree &rarr; Element Tree &rarr; Render Tree</h3>
+      <p>Tại sao Flutter lại đạt được tốc độ mượt mà <strong>60fps - 120fps</strong>? Bí mật nằm ở kiến trúc 3 tầng cây
+        rendering bên dưới:</p>
+
+      <div class="tree-diagram">
+        <div class="tree-box">
+          <h4> 1. Widget Tree (Bản thiết kế - Blueprint)</h4>
+          <p>Là cây code do <strong>chính bạn viết ra</strong>. Widget có tính chất <strong>Immutable</strong> (bất biến
+            - không thể thay đổi giá trị một khi đã tạo). Mỗi khi màn hình cập nhật, widget cũ bị vứt đi và tạo mới lại
+            siêu nhanh (rẻ về mặt bộ nhớ và CPU).</p>
+          <div class="code-wrapper">
+            <pre><code>Text('Xin chào', style: TextStyle(...))</code></pre>
+          </div>
+        </div>
+        <div class="tree-box">
+          <h4> 2. Element Tree (Bộ điều phối - Manager)</h4>
+          <p>Là cầu nối sống giữa Widget và RenderObject. Element giữ trạng thái thực tế và vòng đời (Lifecycle). Nó so
+            sánh (diffing) widget cũ và widget mới: nếu kiểu class và <code>Key</code> không đổi, nó chỉ cập nhật thuộc
+            tính mà <strong>không tạo lại RenderObject</strong>.</p>
+        </div>
+        <div class="tree-box">
+          <h4> 3. Render Tree (Thợ vẽ - Painter)</h4>
+          <p>Là cây chứa các <code>RenderObject</code>. Đây là tầng trực tiếp tính toán tọa độ (kích thước width,
+            height), đo lường ràng buộc layout và gọi hàm vẽ đồ họa lên màn hình (Canvas). Tầng này rất tốn tài nguyên,
+            nên Flutter luôn tái sử dụng tối đa.</p>
+        </div>
+      </div>
+
+      <div class="def">
+        <span class="def-term">Quy trình làm việc khi bạn bấm nút thay đổi giao diện (Hot Reload hoặc setState)</span>
+        <ol style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+          <li>Bạn gọi <code>setState()</code>, hàm <code>build()</code> chạy lại và tạo ra một <strong>Widget Tree
+              mới</strong>.</li>
+          <li><strong>Element Tree</strong> kiểm tra: <em>"Widget mới này có cùng Runtime Type và Key với Widget trước
+              không?"</em></li>
+          <li>Nếu cùng loại: Element giữ nguyên đối tượng <strong>RenderObject</strong> cũ, chỉ bảo nó: <em>"Cập nhật
+              lại chuỗi text thành chuỗi mới đi!"</em>.</li>
+          <li>Nhờ đó, Flutter không cần phải huỷ toàn bộ UI đi vẽ lại từ đầu &rarr; Hiệu năng đạt 60fps cực kỳ nhẹ
+            nhàng!</li>
+        </ol>
+      </div>
+
+      <!-- ===================== 3. STATELESS VS STATEFUL & LIFECYCLE ===================== -->
+      <h3 id="sec-3">3. Phân biệt StatelessWidget và StatefulWidget & Vòng đời State Lifecycle</h3>
+      <p>Khi tạo bất kỳ màn hình hoặc component nào trong Flutter, quyết định đầu tiên là chọn
+        <strong>Stateless</strong> hay <strong>Stateful</strong>.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"> StatelessWidget (Giao diện Tĩnh)</div>
+          <p><strong>Bản chất:</strong> Màn hình hoặc widget chỉ hiển thị dữ liệu tĩnh được truyền vào từ bên ngoài qua
+            Constructor. Bản thân nó <strong>không có dữ liệu nội tại tự biến đổi</strong> theo thời gian.</p>
+          <p><strong>Ví dụ:</strong> Nhãn chữ <code>Text</code>, icon <code>Icon(Icons.star)</code>, màn hình tĩnh Giới
+            thiệu ứng dụng (About Screen).</p>
+          <p><strong>Phím tắt tạo nhanh trong Android Studio:</strong> Gõ <code>stless</code> rồi bấm phím <span
+              class="kbd">Tab</span> hoặc <span class="kbd">Enter</span>.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>StatelessWidget mẫu</span><button class="copy-btn"
+                onclick="copyCode(this)">Copy</button></div>
+            <pre><code>import 'package:flutter/material.dart';
+
+class MyHeader extends StatelessWidget {
+  final String title;
+  const MyHeader({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.blueAccent,
+      child: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontSize: 18),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"> StatefulWidget (Giao diện Động)</div>
+          <p><strong>Bản chất:</strong> Widget có dữ liệu nội tại (gọi là <strong>State</strong>) có thể thay đổi sau
+            khi người dùng bấm nút, nhập form, gạt switch hoặc nhận phản hồi từ API.</p>
+          <p><strong>Ví dụ:</strong> Form đăng nhập (chứa ô nhập text và nút bấm), bộ đếm số lượt thích, danh sách tải
+            thêm trang.</p>
+          <p><strong>Phím tắt tạo nhanh:</strong> Gõ <code>stful</code> rồi bấm <span class="kbd">Tab</span> hoặc <span
+              class="kbd">Enter</span>.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>StatefulWidget gồm 2 class</span><button class="copy-btn"
+                onclick="copyCode(this)">Copy</button></div>
+            <pre><code>import 'package:flutter/material.dart';
+
+// Class 1: Khai báo Widget (Immutable)
+class CounterScreen extends StatefulWidget {
+  const CounterScreen({super.key});
+
+  @override
+  State<CounterScreen> createState() => _CounterScreenState();
+}
+
+// Class 2: Lưu giữ State & Xử lý Logic (Mutable)
+class _CounterScreenState extends State<CounterScreen> {
+  int _counter = 0;
+
+  void _increment() {
+    setState(() {
+      _counter++; // Thay đổi giá trị và báo Flutter vẽ lại
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(child: Text('Số lần bấm: $_counter')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _increment,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h4>Vòng đời chi tiết của StatefulWidget (State Lifecycle)</h4>
+      <p>Một <code>StatefulWidget</code> trải qua các giai đoạn từ lúc sinh ra trên màn hình cho tới khi bị huỷ khỏi bộ
+        nhớ. Hiểu rõ từng giai đoạn giúp bạn tránh lỗi rò rỉ bộ nhớ (memory leak) hoặc gọi API sai thời điểm:</p>
+
+      <div class="lifecycle-step">
+        <span class="badge badge-info" style="font-size:14px; min-width:130px;">1. createState()</span>
+        <div>
+          <strong>Khởi tạo đối tượng State</strong>
+          <p>Được gọi ngay khi StatefulWidget được gắn vào cây widget. Trả về instance của class
+            <code>State&lt;T&gt;</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <span class="badge badge-warning" style="font-size:14px; min-width:130px;">2. initState()</span>
+        <div>
+          <strong>Chạy 1 lần duy nhất khi State được sinh ra</strong>
+          <p>Nơi lý tưởng để: khởi tạo biến, đăng ký lắng nghe controller (<code>TextEditingController</code>,
+            <code>ScrollController</code>, <code>AnimationController</code>), hoặc kích hoạt hàm gọi API lần đầu tiên.
+          </p>
+          <p><em>Quy tắc:</em> Bắt buộc phải gọi <code>super.initState()</code> ngay dòng đầu tiên.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <span class="badge badge-default" style="font-size:14px; min-width:130px;">3. didChangeDependencies()</span>
+        <div>
+          <strong>Chạy sau initState() hoặc khi dữ liệu kế thừa thay đổi</strong>
+          <p>Được gọi khi các đối tượng mà widget phụ thuộc (như <code>InheritedWidget</code>,
+            <code>Theme.of(context)</code>, <code>MediaQuery.of(context)</code>) có sự thay đổi giá trị.
+          </p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step" style="border-left-color: var(--accent-green);">
+        <span class="badge badge-success" style="font-size:14px; min-width:130px;">4. build()</span>
+        <div>
+          <strong>Xây dựng và vẽ giao diện UI (Chạy nhiều lần)</strong>
+          <p>Hàm quan trọng nhất, trả về cây widget sẽ hiển thị. Hàm này sẽ được tự động gọi lại <strong>mỗi khi bạn
+              kích hoạt <code>setState()</code></strong>.</p>
+          <p><em>Lưu ý vàng:</em> <strong>Không bao giờ</strong> gọi hàm bất đồng bộ <code>async</code> hoặc gọi API
+            trực tiếp trong <code>build()</code> vì sẽ khiến app gọi API liên tục vô tận!</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <span class="badge badge-purple" style="font-size:14px; min-width:130px;">5. didUpdateWidget()</span>
+        <div>
+          <strong>Khi Widget cha build lại và truyền thông số mới</strong>
+          <p>Được gọi khi widget cha cấu hình lại và muốn truyền các thuộc tính (props) mới vào widget hiện tại.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step">
+        <span class="badge badge-default" style="font-size:14px; min-width:130px;">6. deactivate()</span>
+        <div>
+          <strong>Tạm thời tháo gỡ khỏi Element Tree</strong>
+          <p>Xảy ra khi State bị gỡ khỏi cây widget, nhưng vẫn có khả năng được tái sử dụng lại ở vị trí khác trước khi
+            frame kết thúc.</p>
+        </div>
+      </div>
+
+      <div class="lifecycle-step" style="border-left-color: var(--accent-red);">
+        <span class="badge badge-danger" style="font-size:14px; min-width:130px;">7. dispose()</span>
+        <div>
+          <strong>Huỷ vĩnh viễn đối tượng State khỏi bộ nhớ</strong>
+          <p>Được gọi khi màn hình bị đóng lại (Pop màn hình, chuyển trang vĩnh viễn). Đây là nơi <strong>bắt buộc phải
+              giải phóng tài nguyên</strong>:</p>
+          <div class="code-wrapper" style="margin-top:6px;">
+            <pre><code>@override
+void dispose() {
+  myController.dispose(); // Giải phóng controller tránh leak RAM
+  streamSubscription.cancel(); // Huỷ đăng ký Stream
+  super.dispose(); // Gọi hàm cha ở dòng cuối cùng
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== 4. MATERIALAPP & SCAFFOLD ANATOMY ===================== -->
+      <h3 id="sec-4">4. Giải phẫu Bộ Khung Gốc: MaterialApp và Scaffold Anatomy</h3>
+
+      <h4>4.1. MaterialApp - Bộ não định hình toàn bộ ứng dụng</h4>
+      <p><strong>Nó là gì và nằm ở đâu?</strong> <code>MaterialApp</code> là widget bọc ngoài cùng của toàn bộ ứng dụng
+        Flutter, thường nằm trong hàm <code>runApp()</code> tại file <code>main.dart</code>. Nó thiết lập phong cách
+        thiết kế Material Design, quản lý hệ thống phân trang định tuyến (Navigation/Routes), và áp dụng bộ màu sắc
+        (ThemeData).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tham số phổ biến</th>
+              <th>Kiểu dữ liệu</th>
+              <th>Ý nghĩa & Cách dùng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>home</code></td>
+              <td><code>Widget</code></td>
+              <td>Màn hình xuất hiện đầu tiên khi khởi động ứng dụng (ví dụ: <code>HomeScreen()</code>).</td>
+            </tr>
+            <tr>
+              <td><code>title</code></td>
+              <td><code>String</code></td>
+              <td>Tên ứng dụng khi xem ở danh sách ứng dụng gần đây (Recent Apps) trên điện thoại.</td>
+            </tr>
+            <tr>
+              <td><code>theme</code></td>
+              <td><code>ThemeData</code></td>
+              <td>Định nghĩa bộ màu chủ đạo, font chữ mặc định cho toàn bộ app (Dark/Light Mode).</td>
+            </tr>
+            <tr>
+              <td><code>debugShowCheckedModeBanner</code></td>
+              <td><code>bool</code></td>
+              <td>Đặt <code>false</code> để ẩn dải ruy-băng chữ <strong>"DEBUG"</strong> màu đỏ ở góc trên màn hình.
+              </td>
+            </tr>
+            <tr>
+              <td><code>routes</code></td>
+              <td><code>Map&lt;String, WidgetBuilder&gt;</code></td>
+              <td>Bảng định danh đường dẫn trang (Named Routes) dùng khi chuyển trang bằng chuỗi (ví dụ:
+                <code>'/login': (context) =&gt; LoginScreen()</code>).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Ví dụ cấu hình MaterialApp chuẩn mực trong main.dart</span><button
+            class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Học Flutter Căn Bản',
+      debugShowCheckedModeBanner: false, // Ẩn chữ DEBUG
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MainScreen(),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <h4>4.2. Scaffold Anatomy - Khung sườn cấu tạo một màn hình điện thoại</h4>
+      <p>Nếu <code>MaterialApp</code> là cả ngôi nhà, thì <code>Scaffold</code> chính là <strong>bộ khung chịu lực cho
+          từng căn phòng (từng màn hình)</strong>. Nó cung cấp đầy đủ các vị trí chuẩn mực: thanh tiêu đề trên cùng
+        (AppBar), vùng nội dung chính (body), menu vuốt sang (Drawer), nút bấm tròn nổi (FloatingActionButton) và thanh
+        điều hướng đáy (BottomNavigationBar).</p>
+
+      <!-- Sơ đồ trực quan Scaffold -->
+      <div class="scaffold-diagram">
+        <div class="scaffold-part scaffold-appbar">
+          <span>☰ (Drawer icon)</span>
+          <span>appBar: AppBar(title: Text('Tiêu đề'))</span>
+          <span>⋮</span>
+        </div>
+        <div class="scaffold-body-wrap">
+          <div class="scaffold-part scaffold-drawer">
+            <span>drawer:<br>Drawer(child: ...)</span>
+          </div>
+          <div class="scaffold-part scaffold-body">
+            <span><strong>body:</strong> Widget</span>
+            <span style="font-size:12px; color:#64748b; margin-top:6px;">(Khu vực hiển thị nội dung chính: Column,
+              ListView, Form...)</span>
+            <div class="scaffold-fab">+</div>
+          </div>
+        </div>
+        <div class="scaffold-part scaffold-bottomnav">
+          <span> bottomNavigationBar: BottomNavigationBar</span>
+          <span> Tìm kiếm</span>
+          <span> Cá nhân</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Vị trí (Slot) trong Scaffold</th>
+              <th>Widget thường dùng</th>
+              <th>Mục đích sử dụng thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>appBar</code></td>
+              <td><code>AppBar</code></td>
+              <td>Thanh cố định trên đầu màn hình chứa nút Back, Title, và các action icons.</td>
+            </tr>
+            <tr>
+              <td><code>body</code></td>
+              <td><code>Widget</code> (Bắt buộc phải có để thấy nội dung)</td>
+              <td>Phần diện tích lớn nhất chứa giao diện chính của trang.</td>
+            </tr>
+            <tr>
+              <td><code>floatingActionButton</code></td>
+              <td><code>FloatingActionButton</code></td>
+              <td>Nút tròn nổi bật ở góc dưới, thường dùng cho hành động trọng tâm: Thêm mới, Soạn tin nhắn.</td>
+            </tr>
+            <tr>
+              <td><code>drawer</code></td>
+              <td><code>Drawer</code></td>
+              <td>Menu trượt ra từ cạnh trái khi vuốt hoặc bấm vào nút menu 3 gạch <code>Icons.menu</code>.</td>
+            </tr>
+            <tr>
+              <td><code>bottomNavigationBar</code></td>
+              <td><code>BottomNavigationBar</code> hoặc <code>NavigationBar</code></td>
+              <td>Thanh menu chân trang chứa 3-5 tab chuyển đổi màn hình chính.</td>
+            </tr>
+            <tr>
+              <td><code>backgroundColor</code></td>
+              <td><code>Color</code></td>
+              <td>Màu nền cho toàn bộ trang màn hình đó.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Ví dụ Scaffold hoàn chỉnh chuẩn Material 3</span><button class="copy-btn"
+            onclick="copyCode(this)">Copy</button></div>
+        <pre><code>class MainScreen extends StatelessWidget {
+  const MainScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Trang Chủ'),
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: const [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blueAccent),
+              child: Text('Menu Ứng Dụng', style: TextStyle(color: Colors.white, fontSize: 20)),
+            ),
+            ListTile(leading: Icon(Icons.home), title: Text('Trang chủ')),
+            ListTile(leading: Icon(Icons.settings), title: Text('Cài đặt')),
+          ],
+        ),
+      ),
+      body: const Center(
+        child: Text('Nội dung chính hiển thị tại đây!', style: TextStyle(fontSize: 16)),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== 5. STATE VÀ SETSTATE ===================== -->
+      <h3 id="sec-5">5. Định nghĩa State và Cơ chế setState() Hoạt Động Ra Sao?</h3>
+
+      <div class="def">
+        <span class="def-term">State là gì?</span>
+        <p><strong>State</strong> là bất kỳ thông tin hay dữ liệu nào trong ứng dụng mà có thể <strong>thay đổi theo
+            thời gian</strong> và cần được phản ánh trực quan lên màn hình giao diện. Ví dụ: nội dung người dùng gõ vào
+          ô tìm kiếm, trạng thái tick chọn checkbox, số lượng sản phẩm trong giỏ hàng, hoặc danh sách người dùng tải về
+          từ server.</p>
+      </div>
+
+      <div class="def">
+        <span class="def-term">setState() là gì và vì sao bắt buộc phải dùng?</span>
+        <p>Nếu bạn chỉ thay đổi một biến: <code>counter = counter + 1;</code> mà không bọc trong
+          <code>setState()</code>, thì giá trị của biến trong RAM máy tính <strong>thực sự đã tăng</strong>, nhưng màn
+          hình điện thoại <strong>vẫn hiển thị con số cũ</strong>! Bởi vì hệ thống Flutter không hề biết rằng dữ liệu
+          vừa bị thay đổi.
+        </p>
+        <p>Khi bạn gọi <code>setState(() { counter++; })</code>, bạn đang gửi một tín hiệu thông báo cho Flutter:
+          <em>"Nội bộ State đã thay đổi rồi, hãy đánh dấu widget này là 'dirty' và gọi lại hàm <code>build()</code> để
+            vẽ lại màn hình với dữ liệu mới ngay đi!"</em>
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="border-color: var(--accent-red);">
+          <div class="card-title" style="color:var(--accent-red);"> Cách làm SAI (UI không bao giờ cập nhật)</div>
+          <div class="code-wrapper">
+            <pre><code>void _onButtonPressed() {
+  _isFavorited = true; // Biến đổi trong RAM nhưng UI đóng băng!
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="card" style="border-color: var(--accent-green);">
+          <div class="card-title" style="color:var(--accent-green);"> Cách làm ĐÚNG CHUẨN</div>
+          <div class="code-wrapper">
+            <pre><code>void _onButtonPressed() {
+  setState(() {
+    _isFavorited = !_isFavorited; // Flutter lập tức vẽ lại giao diện
+  });
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <strong> 3 Lưu ý quan trọng khi dùng setState():</strong>
+        <ul style="margin-left: 20px; margin-top: 6px; line-height: 1.8;">
+          <li>Chỉ có thể gọi <code>setState()</code> bên trong class <code>State</code> của một
+            <code>StatefulWidget</code> (StatelessWidget không có hàm này).
+          </li>
+          <li>Không để các tác vụ nặng (như gọi API bằng <code>http.get</code> hoặc đọc file ghi đĩa) bên trong hàm
+            callback của <code>setState()</code>. Hãy đợi lấy được dữ liệu xong rồi mới gọi <code>setState()</code> để
+            gán vào biến.</li>
+          <li>Nếu widget đã bị tháo khỏi màn hình (unmounted) mà gọi <code>setState()</code> sẽ gây crash. Luôn kiểm tra
+            <code>if (mounted) setState(...)</code> khi làm việc với hàm bất đồng bộ <code>async</code>.
+          </li>
+        </ul>
+      </div>
+
+            <!-- ===================== 6. LISTVIEW, CARD, LISTTILE ===================== -->
+      <h3 id="sec-6">6. Hiển Thị Danh Sách Cuộn: ListView, Card, ListTile & Chèn Hình Ảnh</h3>
+
+      <div class="note-box" style="border-left: 4px solid var(--accent-yellow); margin-bottom: 24px;">
+        <strong style="font-size: 15px; color: var(--accent-yellow);">💡 Giải đáp cốt lõi: ListView và GridView có các Constructor đặc biệt không? Tham số của chúng khác nhau ra sao?</strong>
+        <p style="margin-top: 6px;"><strong>CÂU TRẢ LỜI LÀ: CÓ!</strong> Cả hai đều sở hữu các Constructor đặt tên đặc biệt (như <code>.builder</code>, <code>.separated</code>, <code>.count</code>, <code>.extent</code>).</p>
+        <ul style="margin-left: 20px; margin-top: 6px; line-height: 1.8;">
+          <li><strong>Điểm GIỐNG NHAU:</strong> Các tham số điều khiển cuộn (<code>padding</code>, <code>physics</code>, <code>reverse</code>, <code>shrinkWrap</code>, <code>controller</code>, <code>scrollDirection</code>) hoàn toàn như nhau ở mọi constructor.</li>
+          <li><strong>Điểm KHÁC NHAU:</strong> Khác biệt ở cách nhận dữ liệu: Constructor mặc định bắt buộc dùng mảng <code>children: [...]</code> (tốn RAM vì dựng hết một lúc), còn Constructor <code>.builder</code> dùng <code>itemCount</code> + <code>itemBuilder</code> (tiết kiệm RAM theo cơ chế Lazy Loading chỉ render những gì nhìn thấy trên màn hình).</li>
+        </ul>
+      </div>
+      <p>Khi danh sách phần tử vượt quá chiều cao màn hình điện thoại, nếu dùng <code>Column</code> sẽ lập tức dính lỗi sọc vàng-đen (<strong>A RenderFlex overflowed by ... pixels</strong>). Giải pháp cứu cánh chính là <strong>ListView</strong>.</p>
+
+            <h4>6.1. Bản Chất Các Constructor của ListView: Tham Số Giống & Khác Nhau Ra Sao?</h4>
+      <div class="def">
+        <span class="def-term">Câu trả lời cốt lõi</span>
+        <p><strong>CÓ!</strong> Cả <code>ListView</code> và <code>GridView</code> đều có <strong>các Constructor đặt tên (Named Constructors) đặc biệt</strong> phục vụ từng mục đích và bài toán tối ưu bộ nhớ khác nhau. 
+        Về cơ bản: <strong>Các tham số điều khiển cuộn chung</strong> (như <code>padding</code>, <code>physics</code>, <code>reverse</code>, <code>shrinkWrap</code>, <code>controller</code>) thì <strong>HOÀN TOÀN GIỐNG NHAU</strong> giữa mọi constructor. Điểm khác biệt chí mạng nằm ở <strong>CÁCH NÓ NHẬN DỮ LIỆU CON (Data Source)</strong>:</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Constructor của ListView</th>
+              <th>Tham số RIÊNG BIỆT (Khác nhau)</th>
+              <th>Tham số CHUNG (Giống nhau)</th>
+              <th>Bản chất hoạt động & Khi nào dùng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ListView(...)</code><br><span class="widget-tag">Mặc định</span></td>
+              <td>
+                • <code>children: List&lt;Widget&gt;</code> (Bắt buộc truyền sẵn 1 mảng các widget tĩnh).
+              </td>
+              <td rowspan="4">
+                • <code>padding</code><br>
+                • <code>scrollDirection</code><br>
+                • <code>reverse</code><br>
+                • <code>physics</code><br>
+                • <code>shrinkWrap</code><br>
+                • <code>controller</code>
+              </td>
+              <td><strong>Dựng sẵn tất cả trong RAM (Eager loading):</strong> Nếu có 1000 item thì Flutter sẽ tốn RAM render cả 1000 con ngay lập tức dù người dùng chưa cuộn tới. <em>Chỉ dùng cho danh sách ngắn cố định dưới 15 phần tử (Menu Cài đặt, Form điền)</em>.</td>
+            </tr>
+            <tr>
+              <td><code>ListView.builder(...)</code><br><span class="badge badge-success">Dùng 90% thực tế</span></td>
+              <td>
+                • <code>itemCount: int?</code> (Số lượng phần tử)<br>
+                • <code>itemBuilder: (context, index)</code> (Hàm vẽ item theo chỉ mục).
+                <br><em>(KHÔNG có tham số <code>children</code>)</em>
+              </td>
+              <td><strong>Lười dựng hình (Lazy/On-demand loading):</strong> Item nào cuộn lọt vào màn hình thì mới gọi <code>itemBuilder</code> để render. Cuộn ra khỏi màn hình sẽ được thu hồi bộ nhớ. <em>Bắt buộc dùng khi làm việc với API hoặc danh sách hàng nghìn mục</em>.</td>
+            </tr>
+            <tr>
+              <td><code>ListView.separated(...)</code><br><span class="badge badge-info">Có đường ngăn cách</span></td>
+              <td>
+                • <code>itemCount: int</code> (Bắt buộc)<br>
+                • <code>itemBuilder: (context, index)</code><br>
+                • <code>separatorBuilder: (context, index)</code> (Hàm vẽ thanh phân cách giữa 2 item kề nhau).
+              </td>
+              <td>Tương tự <code>builder</code> nhưng tự động chèn thanh vạch phân cách (thường là <code>Divider()</code>) ở giữa các hàng mà bạn không cần phải tính toán index chẵn/lẻ thủ công.</td>
+            </tr>
+            <tr>
+              <td><code>ListView.custom(...)</code><br><span class="badge badge-purple">Nâng cao</span></td>
+              <td>
+                • <code>childrenDelegate: SliverChildDelegate</code> (Tự custom thuật toán tái sử dụng widget).
+              </td>
+              <td>Dành cho các chuyên gia muốn can thiệp sâu vào cơ chế tái chế (recycling pool) hoặc caching nâng cao của Flutter.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>6.2. Cặp bài trùng Card & ListTile - Bộ đôi hiển thị danh sách chuẩn Google</h4>
+      <p>Trong thực tế làm đồ án hoặc bài thi, mỗi hàng trong danh sách hầu như đều được bọc trong một <code>Card</code> (tạo hiệu ứng bóng đổ, bo góc) kết hợp cùng <code>ListTile</code>.</p>
+
+      <!-- Minh hoạ trực quan ListTile -->
+      <div class="preview-phone">
+        <p style="color:#8b949e; font-size:12px; margin-bottom:8px;"> Minh hoạ giao diện thực tế thẻ Card + ListTile trên điện thoại:</p>
+        <div class="visual-list-tile">
+          <div class="lead">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span style=\'color:white;\'>A</span>'" />
+          </div>
+          <div class="content">
+            <div class="title">Nguyễn Văn A (id: 1)</div>
+            <div class="subtitle">Email: anguyen@example.com • Trạng thái: Online</div>
+          </div>
+          <div class="trail">➔</div>
+        </div>
+        <div class="visual-list-tile">
+          <div class="lead">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span style=\'color:white;\'>B</span>'" />
+          </div>
+          <div class="content">
+            <div class="title">Trần Thị B (id: 2)</div>
+            <div class="subtitle">Email: btran@example.com • Trạng thái: Đang bận</div>
+          </div>
+          <div class="trail">➔</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Thuộc tính ListTile</th>
+              <th>Kiểu dữ liệu</th>
+              <th>Mục đích sử dụng & Ý nghĩa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>leading</code></td>
+              <td><code>Widget?</code></td>
+              <td>Vị trí đầu hàng bên trái: thường là ảnh tròn đại diện <code>CircleAvatar</code> hoặc <code>Icon</code>.</td>
+            </tr>
+            <tr>
+              <td><code>title</code></td>
+              <td><code>Widget?</code></td>
+              <td>Dòng chữ tiêu đề in đậm chính.</td>
+            </tr>
+            <tr>
+              <td><code>subtitle</code></td>
+              <td><code>Widget?</code></td>
+              <td>Dòng mô tả phụ phía dưới tiêu đề (chữ nhỏ hơn, màu xám mờ).</td>
+            </tr>
+            <tr>
+              <td><code>trailing</code></td>
+              <td><code>Widget?</code></td>
+              <td>Cuối hàng bên phải: thường là icon mũi tên <code>Icon(Icons.arrow_forward_ios)</code> hoặc nút bấm icon xoá/sửa.</td>
+            </tr>
+            <tr>
+              <td><code>onTap</code></td>
+              <td><code>VoidCallback?</code></td>
+              <td>Hàm kích hoạt khi người dùng bấm chuột/chạm tay vào hàng đó (chuyển sang trang chi tiết).</td>
+            </tr>
+            <tr>
+              <td><code>dense</code></td>
+              <td><code>bool?</code></td>
+              <td>Đặt <code>true</code> để thu nhỏ chiều cao dòng và cỡ chữ gọn gàng hơn.</td>
+            </tr>
+            <tr>
+              <td><code>tileColor</code></td>
+              <td><code>Color?</code></td>
+              <td>Màu nền riêng cho từng hàng ListTile.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Thuộc tính Card</th>
+              <th>Kiểu dữ liệu</th>
+              <th>Công dụng thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>elevation</code></td>
+              <td><code>double?</code></td>
+              <td>Độ cao đổ bóng tạo cảm giác nổi 3D (mặc định 1.0; đặt 3-6 để nổi rõ hơn).</td>
+            </tr>
+            <tr>
+              <td><code>shape</code></td>
+              <td><code>ShapeBorder?</code></td>
+              <td>Định dạng bo viền góc card (ví dụ: <code>RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))</code>).</td>
+            </tr>
+            <tr>
+              <td><code>margin</code></td>
+              <td><code>EdgeInsetsGeometry?</code></td>
+              <td>Khoảng cách lề ngoài giữa các Card với nhau.</td>
+            </tr>
+            <tr>
+              <td><code>clipBehavior</code></td>
+              <td><code>Clip</code></td>
+              <td>Đặt <code>Clip.antiAlias</code> để khi chứa hình ảnh bên trong không bị lòi góc ra ngoài mép bo tròn của Card.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Code mẫu: ListView.builder kết hợp Card, ListTile và Ảnh mạng Image.network</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+
+class UserListDemo extends StatelessWidget {
+  final List&lt;Map&lt;String, String&gt;&gt; users = [
+    {
+      'name': 'Nguyễn Văn A',
+      'email': 'anguyen@gmail.com',
+      'avatar': 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80'
+    },
+    {
+      'name': 'Lê Thị Hoa',
+      'email': 'hoale@gmail.com',
+      'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80'
+    },
+    {
+      'name': 'Phạm Hoàng Long',
+      'email': 'longpham@gmail.com',
+      'avatar': 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80'
+    },
+  ];
+
+  UserListDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Danh Sách Người Dùng')),
+      body: ListView.builder(
+        itemCount: users.length,
+        padding: const EdgeInsets.all(12),
+        itemBuilder: (context, index) {
+          final user = users[index];
+          return Card(
+            elevation: 3,
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(user['avatar']!),
+                radius: 24,
+              ),
+              title: Text(user['name']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(user['email']!),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Đã chọn ${user['name']}')),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== 7. GRIDVIEW VÀ CÁC HÀM ===================== -->
+      <h3 id="sec-7">7. Hiển Thị Lưới Đa Cột: GridView và Các Hàm Khởi Tạo Kèm Hình Ảnh</h3>
+      <p>Khi bạn cần thiết kế giao diện danh mục sản phẩm thương mại điện tử, album ảnh hoặc danh sách thẻ dạng ô vuông nhiều cột (2 cột, 3 cột), <code>GridView</code> là lựa chọn số một.</p>
+
+      <!-- Minh hoạ trực quan GridView -->
+      <div class="preview-phone">
+        <p style="color:#8b949e; font-size:12px; margin-bottom:8px;"> Minh hoạ hiển thị GridView 2 cột có kèm hình ảnh thực tế:</p>
+        <div class="grid-mockup">
+          <div class="grid-item-mockup">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&auto=format&fit=crop&q=80" alt="Nike Red" onerror="this.outerHTML='<div class=\'img-placeholder\'>Ảnh 1</div>'" />
+            <span style="font-size:12px; font-weight:bold;">Nike Air Max</span>
+            <span style="font-size:11px; color:#3fb950;">2.450.000 đ</span>
+          </div>
+          <div class="grid-item-mockup">
+            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=200&auto=format&fit=crop&q=80" alt="Sneaker White" onerror="this.outerHTML='<div class=\'img-placeholder\'>Ảnh 2</div>'" />
+            <span style="font-size:12px; font-weight:bold;">Adidas Chunky</span>
+            <span style="font-size:11px; color:#3fb950;">1.890.000 đ</span>
+          </div>
+          <div class="grid-item-mockup">
+            <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=200&auto=format&fit=crop&q=80" alt="Puma Black" onerror="this.outerHTML='<div class=\'img-placeholder\'>Ảnh 3</div>'" />
+            <span style="font-size:12px; font-weight:bold;">Puma Runner</span>
+            <span style="font-size:11px; color:#3fb950;">1.250.000 đ</span>
+          </div>
+          <div class="grid-item-mockup">
+            <img src="https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=200&auto=format&fit=crop&q=80" alt="Vans Old Skool" onerror="this.outerHTML='<div class=\'img-placeholder\'>Ảnh 4</div>'" />
+            <span style="font-size:12px; font-weight:bold;">Vans Classic</span>
+            <span style="font-size:11px; color:#3fb950;">990.000 đ</span>
+          </div>
+        </div>
+      </div>
+
+      <h4>7.1. Bảng Chi Tiết Toàn Bộ Thuộc Tính & Tham Số của GridView</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên Tham Số</th>
+              <th>Kiểu Dữ Liệu</th>
+              <th>Ý nghĩa & Hướng Dẫn Sử Dụng Chi Tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>gridDelegate</code></td>
+              <td><code>SliverGridDelegate</code></td>
+              <td><strong>Cốt lõi của GridView:</strong> Quyết định cách bố trí chia cột, gồm 2 loại:
+                <br>• <code>SliverGridDelegateWithFixedCrossAxisCount</code>: Cố định số cột (ví dụ 2 cột).
+                <br>• <code>SliverGridDelegateWithMaxCrossAxisExtent</code>: Tự động chia cột theo kích thước màn hình.
+              </td>
+            </tr>
+            <tr>
+              <td><code>crossAxisCount</code></td>
+              <td><code>int</code></td>
+              <td><strong>Số lượng cột</strong> hiển thị trên màn hình (dùng trong <code>GridView.count</code> hoặc delegate fixed count). Thường là 2 hoặc 3 cột trên Mobile.</td>
+            </tr>
+            <tr>
+              <td><code>crossAxisSpacing</code></td>
+              <td><code>double</code></td>
+              <td>Khoảng cách khoảng hở <strong>theo chiều ngang</strong> giữa 2 cột kề nhau (ví dụ: 10px).</td>
+            </tr>
+            <tr>
+              <td><code>mainAxisSpacing</code></td>
+              <td><code>double</code></td>
+              <td>Khoảng cách khoảng hở <strong>theo chiều dọc</strong> giữa hàng trên và hàng dưới (ví dụ: 10px).</td>
+            </tr>
+            <tr>
+              <td><code>childAspectRatio</code></td>
+              <td><code>double</code></td>
+              <td><strong>Tỉ lệ giữa (Chiều Rộng / Chiều Cao)</strong> của mỗi ô con.
+                <br>• Mặc định = 1.0 (Ô vuông vức).
+                <br>• Nếu ô chứa hình ảnh + 2 dòng chữ bên dưới &rarr; nên đặt từ <code>0.7</code> đến <code>0.8</code> để ô có đủ chiều cao chứa chữ mà không bị lỗi tràn pixel.
+              </td>
+            </tr>
+            <tr>
+              <td><code>itemCount</code></td>
+              <td><code>int?</code></td>
+              <td>Tổng số lượng ô cần hiển thị trong <code>GridView.builder</code>.</td>
+            </tr>
+            <tr>
+              <td><code>itemBuilder</code></td>
+              <td><code>Widget Function(BuildContext, int)</code></td>
+              <td>Hàm sinh ra widget của từng ô thứ <code>index</code> (Lazy render tối ưu bộ nhớ).</td>
+            </tr>
+            <tr>
+              <td><code>padding</code></td>
+              <td><code>EdgeInsetsGeometry?</code></td>
+              <td>Lề thụt vào của toàn bộ lưới so với cạnh màn hình thiết bị.</td>
+            </tr>
+            <tr>
+              <td><code>physics</code> & <code>shrinkWrap</code></td>
+              <td><code>ScrollPhysics?</code> & <code>bool</code></td>
+              <td>Tương tự như ListView: dùng để khoá cuộn hoặc co giãn vừa vặn kích thước nội dung.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+            <h4>7.2. Bản Chất Các Constructor của GridView: Tham Số Khác Nhau Thế Nào?</h4>
+      <div class="def">
+        <span class="def-term">Quy tắc vàng khi chọn Constructor của GridView</span>
+        <p>Giống như ListView, toàn bộ các tham số cuộn (<code>padding</code>, <code>physics</code>, <code>shrinkWrap</code>, <code>reverse</code>) là <strong>giống nhau</strong>. Sự khác biệt chỉ nằm ở 2 yếu tố: <strong>"Dữ liệu tĩnh hay động?"</strong> và <strong>"Chia cột theo số lượng cố định hay theo độ rộng pixel?"</strong>:</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Constructor của GridView</th>
+              <th>Tham số ĐẶC TRƯNG RIÊNG BIỆT</th>
+              <th>Tham số CHUNG</th>
+              <th>Ứng dụng thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GridView.count(...)</code><br><span class="badge badge-warning">Cột cố định - Dữ liệu tĩnh</span></td>
+              <td>
+                • <code>crossAxisCount: int</code> (Bắt buộc: số cột cố định, ví dụ <code>2</code>)<br>
+                • <code>children: List&lt;Widget&gt;</code> (Mảng widget dựng sẵn)<br>
+                • <code>crossAxisSpacing</code>, <code>mainAxisSpacing</code>, <code>childAspectRatio</code>
+              </td>
+              <td rowspan="4">
+                • <code>padding</code><br>
+                • <code>scrollDirection</code><br>
+                • <code>reverse</code><br>
+                • <code>physics</code><br>
+                • <code>shrinkWrap</code><br>
+                • <code>controller</code>
+              </td>
+              <td>Cách viết nhanh gọn nhất khi có ít phần tử tĩnh và bạn chỉ muốn chia đúng 2 hoặc 3 cột cố định (ví dụ màn hình Dashboard có 4 nút chức năng to). Không tối ưu cho danh sách dài.</td>
+            </tr>
+            <tr>
+              <td><code>GridView.extent(...)</code><br><span class="badge badge-info">Tự chia cột Responsive</span></td>
+              <td>
+                • <code>maxCrossAxisExtent: double</code> (Độ rộng tối đa của 1 ô pixel, ví dụ <code>150.0</code>)<br>
+                • <code>children: List&lt;Widget&gt;</code> (Mảng widget tĩnh)<br>
+                • <code>crossAxisSpacing</code>, <code>mainAxisSpacing</code>, <code>childAspectRatio</code>
+              </td>
+              <td><strong>Tự động Responsive:</strong> Flutter sẽ tự đo chiều rộng màn hình. Màn điện thoại nhỏ chia làm 2 cột; khi xoay ngang hoặc mở trên Tablet/Web màn to sẽ tự nở thành 4 - 6 cột mà bạn không cần code MediaQuery!</td>
+            </tr>
+            <tr>
+              <td><code>GridView.builder(...)</code><br><span class="badge badge-success">Chuẩn công nghiệp (API)</span></td>
+              <td>
+                • <code>gridDelegate: SliverGridDelegate</code> (Bắt buộc: nhận <code>SliverGridDelegateWithFixedCrossAxisCount</code> hoặc <code>WithMaxCrossAxisExtent</code>)<br>
+                • <code>itemCount: int?</code><br>
+                • <code>itemBuilder: (context, index)</code><br>
+                <em>(Tuyệt đối KHÔNG dùng <code>children</code>)</em>
+              </td>
+              <td><strong>Cơ chế Lazy Loading tối ưu hiệu năng:</strong> Bắt buộc dùng khi tải danh sách sản phẩm, ảnh từ Server/API về để không bị sụt FPS hoặc tràn bộ nhớ.</td>
+            </tr>
+            <tr>
+              <td><code>GridView.custom(...)</code><br><span class="badge badge-purple">Toàn quyền kiểm soát</span></td>
+              <td>
+                • <code>gridDelegate: SliverGridDelegate</code><br>
+                • <code>childrenDelegate: SliverChildDelegate</code>
+              </td>
+              <td>Dùng khi cần tự xây dựng cơ chế quản lý vòng đời item dạng lưới đặc thù.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Code mẫu: GridView.builder 2 cột hiển thị sản phẩm kèm ảnh hoàn chỉnh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+
+class ProductGridDemo extends StatelessWidget {
+  final List&lt;Map&lt;String, dynamic&gt;&gt; products = [
+    {
+      'title': 'Nike Air Max',
+      'price': '2.450.000đ',
+      'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&auto=format&fit=crop&q=80',
+    },
+    {
+      'title': 'Adidas Chunky',
+      'price': '1.890.000đ',
+      'image': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300&auto=format&fit=crop&q=80',
+    },
+    {
+      'title': 'Puma Runner',
+      'price': '1.250.000đ',
+      'image': 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=300&auto=format&fit=crop&q=80',
+    },
+    {
+      'title': 'Vans Classic',
+      'price': '990.000đ',
+      'image': 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=300&auto=format&fit=crop&q=80',
+    },
+  ];
+
+  ProductGridDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Cửa Hàng Giày Sneaker')),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(12),
+        itemCount: products.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,         // 2 cột
+          crossAxisSpacing: 12,      // Khoảng cách ngang giữa các ô
+          mainAxisSpacing: 12,       // Khoảng cách dọc giữa các ô
+          childAspectRatio: 0.75,    // Tỉ lệ chiều rộng / chiều cao giúp ô đủ chỗ chứa ảnh và chữ
+        ),
+        itemBuilder: (context, index) {
+          final item = products[index];
+          return Card(
+            elevation: 3,
+            clipBehavior: Clip.antiAlias, // Bo tròn ảnh theo viền Card
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Image.network(
+                    item['image'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Center(child: Icon(Icons.broken_image, size: 40)),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(height: 4),
+                      Text(item['price'], style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== 8. CÁC WIDGET THƯỜNG DÙNG ===================== -->
+      <h3 id="sec-8">8. Bộ Sưu Tập Các Widget Nhập Liệu Thường Dùng (Kèm Giao Diện Trực Quan & Bảng Thuộc Tính)</h3>
+      <p>Dưới đây là cẩm nang trực quan chi tiết cho từng loại widget tương tác người dùng, có hình ảnh mockup thực tế trên màn hình và bảng giải thích rõ từng thuộc tính (tham khảo từ <code>widget_intro/lib/ui/screen_one.dart</code>):</p>
+
+      <!-- 8.1 Button -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">🔘 1. Các loại nút bấm (ElevatedButton, OutlinedButton, TextButton)</div>
+        <p>Flutter chia làm 3 cấp bậc nút theo độ ưu tiên thị giác (Hierarchy):</p>
+
+        <!-- Preview Button -->
+        <div class="widget-preview-box">
+          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="ui-row-demo">
+            <div class="ui-btn ui-btn-elevated">
+              <span>🚀 ElevatedButton</span>
+            </div>
+            <div class="ui-btn ui-btn-outlined">
+              <span>⚙️ OutlinedButton</span>
+            </div>
+            <div class="ui-btn ui-btn-text">
+              <span>Quên mật khẩu? (TextButton)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Ý nghĩa & Cách dùng thực tế</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>onPressed</code></td>
+                <td><code>VoidCallback?</code></td>
+                <td><strong>Bắt buộc:</strong> Hàm thực thi khi người dùng nhấn nút. Nếu truyền <code>null</code>, nút sẽ tự động bị <strong>Disabled (bị mờ, không thể bấm)</strong>.</td>
+              </tr>
+              <tr>
+                <td><code>child</code></td>
+                <td><code>Widget</code></td>
+                <td>Nội dung bên trong nút (thường là <code>Text('Lưu')</code> hoặc <code>Row</code> lồng icon).</td>
+              </tr>
+              <tr>
+                <td><code>style</code></td>
+                <td><code>ButtonStyle?</code></td>
+                <td>Tuỳ biến màu nền (<code>backgroundColor</code>), màu chữ (<code>foregroundColor</code>), độ bo viền (<code>shape</code>), khoảng đệm (<code>padding</code>) thông qua hàm <code>ElevatedButton.styleFrom(...)</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header"><span>Ví dụ Button hoàn chỉnh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>ElevatedButton(
+  onPressed: () {
+    print('Người dùng vừa bấm nút!');
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.blueAccent,
+    foregroundColor: Colors.white,
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  ),
+  child: const Text('Xác Nhận Đăng Ký'),
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- 8.2 TextField -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">⌨️ 2. Ô nhập dữ liệu (TextField & InputDecoration)</div>
+        <p>Cho phép người dùng nhập văn bản, email, số điện thoại hoặc mật khẩu:</p>
+
+        <!-- Preview TextField -->
+        <div class="widget-preview-box">
+          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="ui-input-demo">
+            <span class="icon">✉️</span>
+            <div>
+              <div style="font-size:11px; color:#60a5fa; font-weight:600;">Email tài khoản</div>
+              <span class="text">user.prm393@gmail.com</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Ý nghĩa & Hướng dẫn sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>controller</code></td>
+                <td><code>TextEditingController?</code></td>
+                <td>Đối tượng quản lý nội dung: dùng để đọc dữ liệu (<code>controller.text</code>), gán giá trị mặc định, hoặc xoá rỗng (<code>controller.clear()</code>). <em>Nhớ dispose() ở State!</em></td>
+              </tr>
+              <tr>
+                <td><code>obscureText</code></td>
+                <td><code>bool</code></td>
+                <td>Mặc định <code>false</code>. Đặt <code>true</code> để giấu ký tự thành dấu chấm tròn đen (bắt buộc dùng cho ô Mật khẩu).</td>
+              </tr>
+              <tr>
+                <td><code>keyboardType</code></td>
+                <td><code>TextInputType</code></td>
+                <td>Loại bàn phím bật lên trên điện thoại: <code>TextInputType.emailAddress</code>, <code>TextInputType.phone</code>, <code>TextInputType.number</code>.</td>
+              </tr>
+              <tr>
+                <td><code>decoration</code></td>
+                <td><code>InputDecoration</code></td>
+                <td>Trang trí ô: <code>labelText</code> (nhãn chữ nổi), <code>hintText</code> (chữ gợi ý mờ), <code>prefixIcon</code> (icon đầu ô), <code>border: OutlineInputBorder()</code>.</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>ValueChanged&lt;String&gt;?</code></td>
+                <td>Callback chạy ngay lập tức mỗi khi bàn phím gõ thêm hoặc xoá 1 ký tự.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header"><span>Ví dụ TextField ô nhập mật khẩu an toàn</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>TextField(
+  controller: _passwordController,
+  obscureText: true, // Ẩn mật khẩu
+  keyboardType: TextInputType.text,
+  decoration: const InputDecoration(
+    labelText: 'Mật khẩu bảo mật',
+    hintText: 'Nhập ít nhất 6 ký tự',
+    prefixIcon: Icon(Icons.lock_outline),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
+  ),
+  onChanged: (text) {
+    print('Độ dài mật khẩu: ${text.length}');
+  },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- 8.3 Checkbox & CheckboxListTile -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">☑️ 3. Hộp chọn (Checkbox & CheckboxListTile)</div>
+        <p>Dùng cho các tuỳ chọn bật/tắt độc lập hoặc chọn nhiều mục cùng lúc (Multi-choice):</p>
+
+        <!-- Preview Checkbox -->
+        <div class="widget-preview-box">
+          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="ui-toggle-row">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="ui-checkbox-box">✓</div>
+              <span style="font-size:13px; color:#e6edf3;">Tôi đồng ý với điều khoản & chính sách</span>
+            </div>
+            <span class="widget-tag">value: true</span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Công dụng thực tế</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>value</code></td>
+                <td><code>bool?</code></td>
+                <td><strong>Bắt buộc:</strong> Trạng thái chọn hiện tại (<code>true</code> là tích chọn, <code>false</code> là bỏ chọn).</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>ValueChanged&lt;bool?&gt;?</code></td>
+                <td>Hàm callback nhận giá trị mới khi người dùng chạm vào checkbox. Cần gọi <code>setState()</code> bên trong.</td>
+              </tr>
+              <tr>
+                <td><code>title</code></td>
+                <td><code>Widget?</code></td>
+                <td>Dòng chữ giải thích đi liền kề (trong <code>CheckboxListTile</code>).</td>
+              </tr>
+              <tr>
+                <td><code>controlAffinity</code></td>
+                <td><code>ListTileControlAffinity</code></td>
+                <td>Vị trí của ô tick: <code>leading</code> (nằm bên trái dòng chữ), <code>trailing</code> (nằm bên phải cùng).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header"><span>Ví dụ CheckboxListTile chuẩn mực</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>bool _agreeTerms = true;
+
+CheckboxListTile(
+  title: const Text('Tôi đồng ý với các điều khoản ứng dụng'),
+  subtitle: const Text('Bắt buộc phải tích chọn để tiếp tục tạo tài khoản'),
+  value: _agreeTerms,
+  controlAffinity: ListTileControlAffinity.leading, // Checkbox nằm bên trái
+  activeColor: Colors.blueAccent, // Màu xanh khi được tick
+  onChanged: (bool? newValue) {
+    setState(() {
+      _agreeTerms = newValue ?? false;
+    });
+  },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- 8.4 Switch & SwitchListTile -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">🔘 4. Cần gạt bật tắt (Switch & SwitchListTile)</div>
+        <p>Thường dùng trong màn hình Cài đặt (Settings): bật/tắt Wi-Fi, nhận thông báo đẩy, chế độ giao diện tối (Dark Mode):</p>
+
+        <!-- Preview Switch -->
+        <div class="widget-preview-box">
+          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="ui-toggle-row">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span>🌙</span>
+              <div>
+                <div style="font-size:13px; font-weight:600; color:#e6edf3;">Chế độ giao diện tối</div>
+                <div style="font-size:11px; color:#8b949e;">Tiết kiệm pin cho màn hình OLED</div>
+              </div>
+            </div>
+            <div class="ui-toggle-pill"></div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Ý nghĩa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>value</code></td>
+                <td><code>bool</code></td>
+                <td>Trạng thái hiện tại của công tắc: <code>true</code> (Bật) hoặc <code>false</code> (Tắt).</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>ValueChanged&lt;bool&gt;?</code></td>
+                <td>Callback trả về boolean mới khi gạt switch, dùng để gọi <code>setState()</code>.</td>
+              </tr>
+              <tr>
+                <td><code>secondary</code></td>
+                <td><code>Widget?</code></td>
+                <td>Icon hoặc avatar nằm ở đầu hàng bên trái (ví dụ: <code>Icon(Icons.dark_mode)</code>).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header"><span>Ví dụ SwitchListTile Dark Mode</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>bool _isDarkMode = true;
+
+SwitchListTile(
+  title: const Text('Giao diện tối (Dark Mode)'),
+  subtitle: const Text('Giúp giảm mỏi mắt vào ban đêm'),
+  secondary: const Icon(Icons.nightlight_round),
+  value: _isDarkMode,
+  onChanged: (bool value) {
+    setState(() {
+      _isDarkMode = value;
+    });
+  },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- 8.5 Radio & RadioListTile -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">📻 5. Nhóm chọn duy nhất (Radio & RadioListTile)</div>
+        <p>Dùng khi người dùng <strong>chỉ được phép chọn 1 trong nhiều phương án</strong> (ví dụ: Giới tính, Phương thức thanh toán):</p>
+
+        <!-- Preview Radio -->
+        <div class="widget-preview-box">
+          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="ui-toggle-row">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div class="ui-radio-outer"><div class="ui-radio-inner"></div></div>
+                <span style="font-size:13px; color:#e6edf3;">💵 Thanh toán Tiền mặt (COD) - <strong>Đang chọn</strong></span>
+              </div>
+            </div>
+            <div class="ui-toggle-row">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div class="ui-radio-outer" style="border-color:#484f58;"></div>
+                <span style="font-size:13px; color:#8b949e;">💳 Chuyển khoản Ngân hàng</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Quy tắc hoạt động sống còn</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>value</code></td>
+                <td><code>T</code></td>
+                <td><strong>Giá trị riêng biệt</strong> của chính radio này (ví dụ: 1 hoặc 'COD').</td>
+              </tr>
+              <tr>
+                <td><code>groupValue</code></td>
+                <td><code>T?</code></td>
+                <td><strong>Biến lưu giá trị chung của cả nhóm:</strong> Khi <code>groupValue == value</code>, chấm tròn sẽ được tô xanh báo hiệu đã chọn.</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>ValueChanged&lt;T?&gt;?</code></td>
+                <td>Khi người dùng chạm vào radio này, hàm sẽ truyền <code>value</code> vào để bạn cập nhật <code>groupValue</code> trong <code>setState()</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header"><span>Ví dụ nhóm Radio chọn phương thức thanh toán</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>int _selectedPayment = 1; // 1: Tiền mặt, 2: Ngân hàng
+
+Column(
+  children: [
+    RadioListTile&lt;int&gt;(
+      value: 1,
+      groupValue: _selectedPayment,
+      title: const Text('Tiền mặt (COD)'),
+      subtitle: const Text('Thanh toán khi nhận hàng tận nhà'),
+      onChanged: (int? val) {
+        setState(() =&gt; _selectedPayment = val!);
+      },
+    ),
+    RadioListTile&lt;int&gt;(
+      value: 2,
+      groupValue: _selectedPayment,
+      title: const Text('Chuyển khoản Ngân hàng'),
+      subtitle: const Text('Quét mã VietQR nhanh chóng'),
+      onChanged: (int? val) {
+        setState(() =&gt; _selectedPayment = val!);
+      },
+    ),
+  ],
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- 8.6 Slider -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-title">🎚️ 6. Thanh trượt chọn giá trị liên tục (Slider)</div>
+        <p>Dùng để chỉnh âm lượng, độ sáng màn hình, hoặc thanh lọc tầm giá sản phẩm:</p>
+
+        <!-- Preview Slider -->
+        <div class="widget-preview-box">
+          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="ui-slider-demo">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:#c9d1d9;">
+              <span>Mức âm lượng:</span>
+              <strong style="color:#a78bfa;">65%</strong>
+            </div>
+            <div class="ui-slider-track">
+              <div class="ui-slider-fill"></div>
+              <div class="ui-slider-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Công dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>value</code></td>
+                <td><code>double</code></td>
+                <td>Giá trị hiện tại của con trượt (bắt buộc phải nằm giữa <code>min</code> và <code>max</code>).</td>
+              </tr>
+              <tr>
+                <td><code>min</code> và <code>max</code></td>
+                <td><code>double</code></td>
+                <td>Giới hạn nhỏ nhất (mặc định 0.0) và lớn nhất (mặc định 1.0).</td>
+              </tr>
+              <tr>
+                <td><code>divisions</code></td>
+                <td><code>int?</code></td>
+                <td>Số nấc chia rời rạc: nếu đặt 10 thì con trượt sẽ nhảy theo từng khấc 10%.</td>
+              </tr>
+              <tr>
+                <td><code>label</code></td>
+                <td><code>String?</code></td>
+                <td>Bong bóng hiển thị giá trị số nổi lên trên con trượt khi ngón tay đang đè kéo.</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>ValueChanged&lt;double&gt;?</code></td>
+                <td>Callback trả về giá trị số thực mới để cập nhật qua <code>setState()</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header"><span>Ví dụ Slider điều chỉnh âm lượng</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>double _volume = 65.0;
+
+Column(
+  children: [
+    Text('Âm lượng: ${_volume.round()}%'),
+    Slider(
+      value: _volume,
+      min: 0,
+      max: 100,
+      divisions: 20, // Chia làm 20 nấc (mỗi nấc 5%)
+      label: '${_volume.round()}%',
+      activeColor: Colors.deepPurpleAccent,
+      onChanged: (double val) {
+        setState(() {
+          _volume = val;
+        });
+      },
+    ),
+  ],
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== TỔNG KẾT ===================== -->
+      <h3>Tổng Kết & Sơ Đồ Tư Duy Ghi Nhớ</h3>
+      <div class="def">
+        <span class="def-term">Tóm tắt các điểm bắt buộc phải nhớ</span>
+        <ul style="margin-left: 20px; margin-top: 8px; line-height: 2;">
+          <li>Mọi thành phần nhìn thấy trên màn hình đều là <strong>Widget</strong>.</li>
+          <li>Widget Tree là bản thiết kế tạm thời; Element Tree quản lý vòng đời; Render Tree thực hiện tính toán và vẽ
+            đồ họa.</li>
+          <li>Chỉ dùng <strong>StatefulWidget</strong> khi có dữ liệu nội bộ tự thay đổi qua
+            <strong>setState()</strong>.
+          </li>
+          <li>Gốc của ứng dụng luôn là <strong>MaterialApp</strong>; Khung của từng trang màn hình luôn là
+            <strong>Scaffold</strong>.
+          </li>
+          <li>Luôn giải phóng controller trong hàm <code>dispose()</code> của State để tránh rò rỉ bộ nhớ.</li>
+          <li>Khi hiển thị danh sách dài: ưu tiên tuyệt đối dùng <code>ListView.builder</code> và
+            <code>GridView.builder</code> để ứng dụng mượt mà không tốn RAM.
+          </li>
+        </ul>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

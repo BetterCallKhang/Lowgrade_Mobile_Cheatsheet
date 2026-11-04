@@ -1,0 +1,104 @@
+// Sidebar Component - Lowgrade Mobile Cheatsheet
+(function () {
+  const menuConfig = [
+    {
+      group: null, // Standalone item
+      items: [
+        { title: "Trang chủ & Mục lục", href: "index.html", id: "home" }
+      ]
+    },
+    {
+      group: "Nền tảng",
+      items: [
+        { title: "1. Setup, Format, Cấu trúc", href: "01_nen_tang/01_setup_format_cautruc.html" },
+        { title: "2. Debug và lỗi thường gặp", href: "01_nen_tang/02_debug_loi.html" },
+        { title: "3. Dart cơ bản & Luồng xử lý", href: "01_nen_tang/03_dart_co_ban.html" },
+        { title: "4. Tập dữ liệu & Generics", href: "01_nen_tang/04_collections.html" },
+        { title: "5. OOP & Model JSON", href: "01_nen_tang/05_oop_model.html" },
+        { title: "6. Bất đồng bộ (Future & Stream)", href: "01_nen_tang/06_async_future_stream.html" }
+      ]
+    },
+    {
+      group: "Flutter Căn Bản & Giao Diện",
+      items: [
+        { title: "1. Toàn diện về Flutter Widgets", href: "02_flutter_can_ban/01_widgets_can_ban.html" },
+        { title: "2. ThemeData và Drawer", href: "02_flutter_can_ban/02_theme_drawer.html" },
+        { title: "3. Navigation & Route", href: "02_flutter_can_ban/03_navigation_route.html" },
+        { title: "4. Layout & Responsive Design", href: "02_flutter_can_ban/04_layout_responsive.html" },
+        { title: "5. Form, Controller & Validation", href: "02_flutter_can_ban/05_form_validation.html" },
+        { title: "6. Call REST API với http", href: "02_flutter_can_ban/06_call_api_http.html" },
+        { title: "7. Quản lý State Riverpod", href: "02_flutter_can_ban/07_riverpod_state.html" },
+        { title: "8. Local Storage & Prefs", href: "02_flutter_can_ban/08_local_storage_prefs.html" },
+        { title: "9. SQLite Local & CRUD", href: "02_flutter_can_ban/09_sqlite_database_crud.html" }
+      ]
+    }
+  ];
+
+  function renderSidebar() {
+    // Determine relative root prefix
+    // If current path includes subfolder like 01_nen_tang or 02_flutter_can_ban, prefix is '../'
+    // Else it is ''
+    const currentPath = window.location.pathname.replace(/\\/g, '/');
+    let prefix = '';
+    if (currentPath.includes('/01_nen_tang/') || currentPath.includes('/02_flutter_can_ban/')) {
+      prefix = '../';
+    }
+
+    // Determine current file name or relative match
+    const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'index.html';
+
+    let html = `
+    <div class="sidebar-header">
+      <h1>Flutter Cheatsheet</h1>
+      <p>Dart + Flutter + Android Studio</p>
+    </div>
+    <div class="search-box">
+      <input type="text" placeholder="Lọc nhanh trong trang..." oninput="filterPageContent(this.value)" />
+    </div>
+    <nav class="nav-menu">
+    `;
+
+    menuConfig.forEach(section => {
+      html += `<div class="nav-group">`;
+      if (section.group) {
+        html += `<div class="nav-group-header" onclick="toggleNavGroup(this)">${section.group}</div>`;
+        html += `<div class="nav-group-content">`;
+      }
+
+      section.items.forEach(item => {
+        if (item.disabled) {
+          html += `<span class="nav-item disabled"><span>${item.title}</span><span class="nav-badge">${item.badge || 'chưa soạn'}</span></span>`;
+        } else {
+          const itemHref = prefix + item.href;
+          const targetFilename = item.href.substring(item.href.lastIndexOf('/') + 1);
+          const isActive = (filename === targetFilename) || (item.id === 'home' && (filename === '' || filename === 'index.html'));
+          const activeClass = isActive ? ' active' : '';
+
+          html += `<a class="nav-item${activeClass}" href="${itemHref}"><span>${item.title}</span></a>`;
+        }
+      });
+
+      if (section.group) {
+        html += `</div>`;
+      }
+      html += `</div>`;
+    });
+
+    html += `</nav>`;
+
+    let sidebarEl = document.querySelector('aside.sidebar');
+    if (!sidebarEl) {
+      sidebarEl = document.createElement('aside');
+      sidebarEl.className = 'sidebar';
+      document.body.insertAdjacentElement('afterbegin', sidebarEl);
+    }
+    sidebarEl.innerHTML = html;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderSidebar);
+  } else {
+    renderSidebar();
+  }
+})();
+

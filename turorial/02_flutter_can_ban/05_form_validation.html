@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 5. Form, TextEditingController & Validation trong Flutter - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 5</span>
+        <span class="pill pill-green">Form & Validation</span>
+        <span class="pill pill-purple">Dự án: form_validation_demo</span>
+      </div>
+      <div>
+        <a href="04_layout_responsive.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 4. Layout & Responsive</a>
+        <a href="06_call_api_http.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Mục 6. Call API &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 5. Chuyên Sâu Form, TextEditingController & Validation Trong Flutter</h2>
+        <p>Bản chất Form và Validation, nguyên tắc kỷ luật hủy bộ nhớ (Disposal Discipline), chọn đúng bàn phím (Right Keyboard), cơ chế điều khiển tiêu điểm FocusNode & Keyboard Actions (textInputAction, onFieldSubmitted), hạ bàn phím ảo (Dismissing Keyboard), bố cục an toàn cuộn (Scroll Safety Form Layout Patterns), chữ ký hàm Validator, Helpers Regex, quy trình Submit Flow 4 bước và trải nghiệm bất đồng bộ Async UX (Loading State & Disabled Button).</p>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3>1. Tổng Quan: Form & Validation Là Gì? Vì Sao Cần Nó?</h3>
+      
+      <h4>1.1. Form là gì?</h4>
+      <p>Trong phát triển ứng dụng di động, <strong>Form</strong> là một vùng giao diện tập hợp một hoặc nhiều trường nhập liệu (input fields) như ô nhập văn bản, mật khẩu, ô tích chọn (checkbox), công tắc gạt (switch), danh sách thả xuống (dropdown)... dùng để thu thập thông tin từ phía người dùng gửi về hệ thống.</p>
+      <p>Trong Flutter, widget <code>Form</code> đóng vai trò là một container vô hình (không vẽ viền hay màu nền) bao bọc các widget con có dạng <code>FormField</code> (tiêu biểu nhất là <code>TextFormField</code>). Widget <code>Form</code> quản lý tập trung trạng thái tổng thể của tất cả các trường con thông qua đối tượng <code>FormState</code>.</p>
+
+      <h4>1.2. Validation là gì?</h4>
+      <p><strong>Validation</strong> (Kiểm tra tính hợp lệ của dữ liệu) là quá trình thẩm định các giá trị mà người dùng đã nhập xem có thỏa mãn các quy tắc nghiệp vụ (Business Rules) do ứng dụng đặt ra trước khi dữ liệu được gửi đi lưu trữ hoặc xử lý tiếp.</p>
+      <p>Ví dụ về các quy tắc Validation phổ biến:</p>
+      <ul>
+        <li>Không được để trống các trường bắt buộc (Tên đăng nhập, Mật khẩu, Số điện thoại).</li>
+        <li>Chuỗi nhập vào phải đạt độ dài tối thiểu hoặc tối đa (Mật khẩu ít nhất 6 ký tự, Tên từ 3 đến 50 ký tự).</li>
+        <li>Định dạng phải đúng cú pháp quy chuẩn (Địa chỉ email chứa ký tự @ và tên miền, Số điện thoại đúng 10 chữ số).</li>
+        <li>Giá trị phải nằm trong khoảng cho phép (Tuổi từ 1 đến 120, Giá tiền lớn hơn 0).</li>
+        <li>Quan hệ logic giữa các trường (Mật khẩu xác nhận phải trùng khớp chính xác với Mật khẩu đã nhập).</li>
+      </ul>
+
+      <h4>1.3. Vì sao bắt buộc phải dùng Form và Validation?</h4>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. Bảo vệ tính toàn vẹn dữ liệu (Data Integrity)</div>
+          <p>Nếu không kiểm tra dữ liệu ở phía client (ứng dụng), người dùng có thể gửi chuỗi rỗng, số âm, ký tự đặc biệt không mong muốn vào Database hoặc Backend API. Điều này dẫn đến lỗi sập ứng dụng (NullPointerException, FormatException) hoặc sai lệch tính toán tài chính, thông tin tài khoản.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">2. Tối ưu trải nghiệm người dùng (UX)</div>
+          <p>Validation giúp người dùng biết ngay lập tức vị trí họ nhập sai (với viền đỏ và dòng chữ báo lỗi trực quan ngay dưới ô nhập) mà không cần phải chờ đợi ứng dụng gửi request lên Server rồi nhận về thông báo lỗi trễ. Điều này tiết kiệm thời gian và tạo cảm giác ứng dụng mượt mà, chuyên nghiệp.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">3. Giảm tải cho Server và tiết kiệm băng thông mạng</div>
+          <p>Việc lọc và chặn các dữ liệu sai ngay tại thiết bị của người dùng ngăn chặn hàng ngàn lượt gọi API vô nghĩa lên máy chủ, tiết kiệm chi phí băng thông và giảm tải xử lý cho Backend.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">4. Quản lý trạng thái đồng bộ, tập trung</div>
+          <p>Thay vì phải viết hàng chục biến cờ (flag) <code>bool isEmailError</code>, <code>bool isPassError</code> và gọi <code>setState()</code> thủ công cho từng ô, Flutter cung cấp cơ chế <code>Form</code> kết hợp <code>GlobalKey&lt;FormState&gt;</code> cho phép kích hoạt kiểm tra lỗi hoặc xóa trắng toàn bộ Form chỉ với 1 dòng lệnh duy nhất.</p>
+        </div>
+      </div>
+
+      <!-- SƠ ĐỒ SVG KIẾN TRÚC FORM TRONG FLUTTER -->
+      <div class="card" style="margin-top: 20px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Sơ Đồ Minh Họa: Mối Quan Hệ Giữa Form, GlobalKey, TextFormField và Controller</div>
+        <svg viewBox="0 0 850 280" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="260" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- FORM CONTAINER -->
+          <rect x="30" y="30" width="790" height="220" rx="8" fill="#1f242c" stroke="#58a6ff" stroke-width="2" stroke-dasharray="6,4" />
+          <text x="50" y="55" fill="#58a6ff" font-size="14" font-weight="bold">Widget Form (key: _formKey)</text>
+
+          <!-- GLOBALKEY FORMSTATE -->
+          <rect x="580" y="45" width="220" height="50" rx="6" fill="#238636" stroke="#2ea043" stroke-width="1" />
+          <text x="690" y="68" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">GlobalKey&lt;FormState&gt;</text>
+          <text x="690" y="85" fill="#e6edf3" font-size="11" text-anchor="middle">.validate(), .save(), .reset()</text>
+
+          <!-- FIELD 1 -->
+          <rect x="60" y="90" width="340" height="135" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="1.5" />
+          <text x="80" y="115" fill="#7ee787" font-size="13" font-weight="bold">TextFormField 1 (Username)</text>
+          
+          <rect x="80" y="130" width="300" height="35" rx="4" fill="#161b22" stroke="#484f58" stroke-width="1" />
+          <text x="95" y="152" fill="#8b949e" font-size="11">TextEditingController (_userCtrl)</text>
+
+          <rect x="80" y="175" width="300" height="35" rx="4" fill="#161b22" stroke="#fa7a18" stroke-width="1" />
+          <text x="95" y="197" fill="#fa7a18" font-size="11">validator: (value) => ... return error/null</text>
+
+          <!-- FIELD 2 -->
+          <rect x="430" y="115" width="370" height="110" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="1.5" />
+          <text x="450" y="140" fill="#7ee787" font-size="13" font-weight="bold">TextFormField 2 (Password)</text>
+
+          <rect x="450" y="155" width="330" height="30" rx="4" fill="#161b22" stroke="#484f58" stroke-width="1" />
+          <text x="465" y="175" fill="#8b949e" font-size="11">TextEditingController (_passCtrl)</text>
+
+          <rect x="450" y="190" width="330" height="25" rx="4" fill="#161b22" stroke="#fa7a18" stroke-width="1" />
+          <text x="465" y="207" fill="#fa7a18" font-size="11">validator: (value) => ...</text>
+        </svg>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3>2. Phân Biệt Các Khái Niệm Cốt Lõi: TextField vs TextFormField, Controller vs GlobalKey</h3>
+
+      <h4>2.1. So sánh TextField và TextFormField</h4>
+      <p>Nhiều người mới bắt đầu học Flutter thường phân vân giữa hai widget này. Bảng dưới đây giúp làm rõ ranh giới sử dụng:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Đặc điểm</th>
+              <th>TextField</th>
+              <th>TextFormField</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bản chất</strong></td>
+              <td>Một widget giao diện cơ bản thuần túy cho phép người dùng nhập một dòng hoặc nhiều dòng chữ.</td>
+              <td>Là một widget bao bọc bên ngoài <code>TextField</code> và tích hợp chặt chẽ với cơ chế <code>Form</code> của Flutter.</td>
+            </tr>
+            <tr>
+              <td><strong>Khả năng Validate</strong></td>
+              <td>Không có thuộc tính <code>validator</code> tích hợp sẵn. Nếu muốn báo lỗi đỏ, lập trình viên phải tự quản lý biến và truyền chuỗi vào <code>decoration: InputDecoration(errorText: ...)</code>.</td>
+              <td>Có sẵn thuộc tính <code>validator: (String? value) { ... }</code>. Khi <code>FormState.validate()</code> được gọi, nó sẽ tự động chạy hàm này và hiển thị lỗi màu đỏ phía dưới.</td>
+            </tr>
+            <tr>
+              <td><strong>Lưu giá trị (onSaved)</strong></td>
+              <td>Không có hàm <code>onSaved</code>.</td>
+              <td>Có thuộc tính <code>onSaved: (String? value) { ... }</code>, tự động được gọi khi kích hoạt <code>_formKey.currentState!.save()</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Trường hợp sử dụng</strong></td>
+              <td>Dùng cho các ô tìm kiếm độc lập (Search bar), ô chat tức thời không cần gộp thành Form lớn.</td>
+              <td>Bắt buộc sử dụng cho các biểu mẫu Đăng ký, Đăng nhập, Tạo/Sửa thông tin (CRUD Form) có kiểm tra hợp lệ.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>2.2. Phân biệt vai trò của TextEditingController và GlobalKey&lt;FormState&gt;</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Thành phần</th>
+              <th>Số lượng cần khai báo</th>
+              <th>Nhiệm vụ chính</th>
+              <th>Các phương thức và thuộc tính quan trọng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>TextEditingController</strong><br>(Quản lý dữ liệu chữ của 1 ô)</td>
+              <td>Mỗi ô <code>TextFormField</code> cần 1 controller riêng (trừ trường hợp form đơn giản chỉ dùng <code>onSaved</code>).</td>
+              <td>
+                <ul>
+                  <li>Đọc chuỗi văn bản người dùng đang nhập theo thời gian thực.</li>
+                  <li>Gán giá trị khởi tạo sẵn (khi làm màn hình Edit).</li>
+                  <li>Lắng nghe sự kiện người dùng gõ phím thông qua listener.</li>
+                  <li>Xóa trắng ô nhập (clear text).</li>
+                  <li>Điều khiển vị trí con trỏ chuột trong văn bản.</li>
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  <li><code>controller.text</code>: Lấy hoặc đặt chuỗi ký tự hiển thị.</li>
+                  <li><code>controller.text.trim()</code>: Cắt khoảng trắng đầu và cuối (rất quan trọng khi validate).</li>
+                  <li><code>controller.clear()</code>: Xóa toàn bộ nội dung trong ô.</li>
+                  <li><code>controller.addListener(...)</code>: Bắt sự kiện mỗi khi người dùng gõ thêm 1 ký tự.</li>
+                  <li><code>controller.dispose()</code>: Giải phóng bộ nhớ RAM và hủy listener (Bắt buộc).</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>GlobalKey&lt;FormState&gt;</strong><br>(Quản lý trạng thái toàn bộ Form)</td>
+              <td>Chỉ cần <strong>1 biến duy nhất</strong> cho toàn bộ một Form (dù Form đó có 2 ô hay 20 ô).</td>
+              <td>
+                <ul>
+                  <li>Truy cập trực tiếp vào đối tượng <code>FormState</code> bên trong cây Widget.</li>
+                  <li>Kích hoạt đồng loạt hàm <code>validator</code> của tất cả các trường con.</li>
+                  <li>Kích hoạt đồng loạt hàm <code>onSaved</code> của tất cả các trường con.</li>
+                  <li>Reset toàn bộ Form về trạng thái ban đầu, xóa bỏ các thông báo lỗi màu đỏ.</li>
+                </ul>
+              </td>
+              <td>
+                <ul>
+                  <li><code>_formKey.currentState!.validate()</code>: Trả về <code>true</code> nếu toàn bộ các trường đều hợp lệ (return null). Trả về <code>false</code> nếu có ít nhất 1 trường trả về chuỗi thông báo lỗi.</li>
+                  <li><code>_formKey.currentState!.save()</code>: Gọi callback <code>onSaved</code> của từng trường.</li>
+                  <li><code>_formKey.currentState!.reset()</code>: Xóa sạch toàn bộ dữ liệu hoặc đưa về giá trị khởi tạo ban đầu, xóa thông báo lỗi đỏ.</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3>3. Kỷ Luật Hủy Bộ Nhớ (Disposal Discipline)</h3>
+
+      <div class="callout danger">
+        <div class="callout-title">Quy tắc sống còn về quản lý tài nguyên trong Flutter (Disposal Discipline)</div>
+        <p><code>TextEditingController</code> và <code>FocusNode</code> là các đối tượng dài hạn kế thừa từ <code>ChangeNotifier</code>. Chúng đăng ký lắng nghe sự kiện từ cấp native engine của hệ điều hành.</p>
+        <p><strong>Disposal Discipline (Kỷ luật giải phóng)</strong> quy định: Bất kỳ đối tượng nào bạn khởi tạo có hỗ trợ phương thức <code>dispose()</code>, bạn <strong>bắt buộc phải gọi nó</strong> bên trong hàm <code>dispose()</code> của class <code>State</code> ngay trước dòng <code>super.dispose()</code>.</p>
+      </div>
+
+      <h4>3.1. Hậu quả của việc bỏ qua Disposal Discipline</h4>
+      <ul>
+        <li><strong>Rò rỉ bộ nhớ (Memory Leak):</strong> Khi người dùng rời khỏi màn hình, đối tượng Controller và FocusNode vẫn bị giữ lại trên Heap RAM do các subscription lắng nghe chưa được ngắt kết nối. Mở và đóng màn hình 100 lần sẽ tạo ra hàng trăm đối tượng rác chiếm dụng RAM.</li>
+        <li><strong>Lỗi "used after being disposed":</strong> Nếu một hàm bất đồng bộ (API, Timer) chạy ngầm và gọi <code>controller.text</code> khi widget đã bị unmount, ứng dụng sẽ quăng ngoại lệ làm crash app.</li>
+        <li><strong>Mất dữ liệu và giật khung hình:</strong> Nếu khai báo Controller trong <code>build()</code> của <code>StatelessWidget</code>, mỗi lần widget cha rebuild, một Controller mới toanh ra đời đè lên cái cũ, làm biến mất toàn bộ ký tự người dùng vừa gõ và tạo ra một loạt Controller mồ côi không thể dọn dẹp.</li>
+      </ul>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Mẫu chuẩn tuân thủ nghiêm ngặt Disposal Discipline</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>class CreateProductScreen extends StatefulWidget {
+  const CreateProductScreen({super.key});
+
+  @override
+  State&lt;CreateProductScreen&gt; createState() => _CreateProductScreenState();
+}
+
+class _CreateProductScreenState extends State&lt;CreateProductScreen&gt; {
+  final _formKey = GlobalKey&lt;FormState&gt;();
+  
+  // Khởi tạo các tài nguyên cần giải phóng
+  late final TextEditingController _nameController;
+  late final TextEditingController _priceController;
+  late final FocusNode _nameFocusNode;
+  late final FocusNode _priceFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _priceController = TextEditingController();
+    _nameFocusNode = FocusNode();
+    _priceFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // KỶ LUẬT GIẢI PHÓNG: Hủy tuần tự toàn bộ controller và focus node
+    _nameController.dispose();
+    _priceController.dispose();
+    _nameFocusNode.dispose();
+    _priceFocusNode.dispose();
+    
+    // Luôn gọi super.dispose() ở dòng cuối cùng!
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold();
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3>4. Chọn Đúng Bàn Phím Cho Từng Mục Đích (Right Keyboard For The Job)</h3>
+      <p>Một trong những yếu tố quan trọng nhất quyết định trải nghiệm người dùng trên thiết bị di động là <strong>bàn phím ảo bật lên đúng ngữ cảnh</strong>. Người dùng nhập số điện thoại không nên thấy bàn phím chữ cái, và người dùng nhập email phải có sẵn ký tự <code>@</code> và dấu chấm.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mục đích nhập liệu</th>
+              <th>Cấu hình keyboardType (TextInputType)</th>
+              <th>Cấu hình bổ trợ quan trọng</th>
+              <th>Hiệu quả hiển thị trên bàn phím</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Họ tên, văn bản thường</strong></td>
+              <td><code>TextInputType.name</code> hoặc <code>TextInputType.text</code></td>
+              <td><code>textCapitalization: TextCapitalization.words</code></td>
+              <td>Bàn phím chữ cái, tự động viết hoa chữ cái đầu tiên của mỗi từ (Ví dụ: Nguyễn Văn A).</td>
+            </tr>
+            <tr>
+              <td><strong>Địa chỉ Email</strong></td>
+              <td><code>TextInputType.emailAddress</code></td>
+              <td><code>autocorrect: false</code></td>
+              <td>Bàn phím xuất hiện phím tắt <code>@</code> và <code>.com</code> bên dưới cạnh phím cách; tắt tính năng tự sửa từ của điện thoại.</td>
+            </tr>
+            <tr>
+              <td><strong>Số điện thoại</strong></td>
+              <td><code>TextInputType.phone</code></td>
+              <td><code>inputFormatters: [FilteringTextInputFormatter.digitsOnly]</code></td>
+              <td>Bàn phím số điện thoại chuyên dụng (gồm các phím số lớn, phím cộng +, sao * và thăng #).</td>
+            </tr>
+            <tr>
+              <td><strong>Số nguyên / Mã OTP / Tuổi</strong></td>
+              <td><code>TextInputType.number</code></td>
+              <td><code>inputFormatters: [FilteringTextInputFormatter.digitsOnly]</code></td>
+              <td>Bàn phím bàn số gọn (Numpad) chỉ cho phép nhập số nguyên từ 0 đến 9, chặn nhập ký tự chữ.</td>
+            </tr>
+            <tr>
+              <td><strong>Giá tiền / Số thập phân</strong></td>
+              <td><code>const TextInputType.numberWithOptions(decimal: true)</code></td>
+              <td><code>inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))]</code></td>
+              <td>Bàn phím số bổ sung thêm dấu chấm thập phân <code>.</code> để nhập số thực (VD: 99.50).</td>
+            </tr>
+            <tr>
+              <td><strong>Mật khẩu / Mã PIN bảo mật</strong></td>
+              <td><code>TextInputType.visiblePassword</code></td>
+              <td><code>obscureText: true, enableSuggestions: false, autocorrect: false</code></td>
+              <td>Bàn phím bảo mật, tắt gợi ý từ trên thanh tiên đoán của bàn phím và che dấu chấm tròn.</td>
+            </tr>
+            <tr>
+              <td><strong>Đoạn văn dài / Ghi chú</strong></td>
+              <td><code>TextInputType.multiline</code></td>
+              <td><code>maxLines: 4, minLines: 2</code></td>
+              <td>Phím Enter chuyển thành phím xuống dòng (Line Break) thay vì phím Xong/Submit.</td>
+            </tr>
+            <tr>
+              <td><strong>Địa chỉ trang web (URL)</strong></td>
+              <td><code>TextInputType.url</code></td>
+              <td><code>autocorrect: false</code></td>
+              <td>Bàn phím hiển thị sẵn dấu gạch chéo <code>/</code>, dấu chấm <code>.</code> và tiền tố <code>.com</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3>5. Quản Lý Tiêu Điểm, Hành Động Bàn Phím & Ẩn Bàn Phím (Focus & Keyboard Actions)</h3>
+
+      <h4>5.1. FocusNode là gì? Vì sao cần nó?</h4>
+      <p><strong>FocusNode</strong> là một đối tượng điều khiển tiêu điểm của một widget nhập liệu. Một ô nhập có focus nghĩa là con trỏ soạn thảo đang nhấp nháy tại đó và bàn phím ảo đang sẵn sàng nhận diện phím bấm.</p>
+      <p>Sử dụng <code>FocusNode</code> giúp bạn:</p>
+      <ul>
+        <li>Tự động kích hoạt bàn phím vào một ô khi màn hình vừa mở (<code>autofocus: true</code> hoặc <code>focusNode.requestFocus()</code>).</li>
+        <li>Tự động chuyển con trỏ sang ô tiếp theo khi người dùng gõ xong ô hiện tại (Auto-tabbing).</li>
+        <li>Lắng nghe sự kiện người dùng chạm vào hoặc rời khỏi ô nhập để đổi màu viền tùy biến.</li>
+      </ul>
+
+      <h4>5.2. textInputAction & onFieldSubmitted (Keyboard Actions)</h4>
+      <p>Thuộc tính <code>textInputAction</code> quy định diện mạo và chức năng của nút bấm ở góc dưới bên phải bàn phím ảo. Kết hợp với callback <code>onFieldSubmitted: (value) { ... }</code>, bạn có thể tạo luồng nhập liệu liền mạch:</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Cấu hình textInputAction</div>
+          <ul>
+            <li><code>TextInputAction.next</code>: Nút mũi tên sang phải (Tiếp theo). Bấm vào sẽ chuyển focus sang ô kế tiếp.</li>
+            <li><code>TextInputAction.done</code>: Nút dấu tích V (Xong). Bấm vào sẽ đóng bàn phím hoặc gọi hàm submit.</li>
+            <li><code>TextInputAction.search</code>: Nút kính lúp tìm kiếm.</li>
+            <li><code>TextInputAction.go</code> / <code>TextInputAction.send</code>: Nút gửi đi.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Chuyển tiêu điểm với onFieldSubmitted</div>
+          <p>Khi người dùng bấm nút Next trên bàn phím, sự kiện <code>onFieldSubmitted</code> được kích hoạt. Ta dùng lệnh:</p>
+          <pre style="margin-top:8px;"><code>onFieldSubmitted: (_) {
+  FocusScope.of(context).requestFocus(_nextFocusNode);
+}</code></pre>
+          <p>Ô tiếp theo sẽ ngay lập tức được active mà người dùng không cần chạm tay lên màn hình.</p>
+        </div>
+      </div>
+
+      <h4>5.3. Hạ bàn phím ảo (Dismissing The Keyboard)</h4>
+      <p>Một trong những lỗi trải nghiệm người dùng khó chịu nhất trên Mobile là sau khi nhập xong hoặc chạm ra vùng trống bên ngoài, bàn phím ảo vẫn che kín nửa màn hình.</p>
+      <p>Có 2 kỹ thuật chuẩn để đóng bàn phím:</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Cách 1: Chạm ra khoảng trống bên ngoài để đóng bàn phím</div>
+          <p>Bọc toàn bộ widget <code>Scaffold</code> hoặc <code>Form</code> bằng một <code>GestureDetector</code> với cấu hình <code>behavior: HitTestBehavior.opaque</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Hạ phím khi chạm vùng trống</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>GestureDetector(
+  behavior: HitTestBehavior.opaque,
+  onTap: () {
+    // Bỏ focus của tất cả các ô, tự động hạ bàn phím ảo
+    FocusScope.of(context).unfocus();
+  },
+  child: Scaffold(
+    // Nội dung màn hình...
+  ),
+)</code></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Cách 2: Cuộn màn hình tự động hạ phím (Scroll Dismissal)</div>
+          <p>Trong <code>SingleChildScrollView</code> hoặc <code>ListView</code> chứa Form, đặt thuộc tính <code>keyboardDismissBehavior</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Tự hạ phím khi người dùng vuốt cuộn</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>SingleChildScrollView(
+  // Vuốt tay cuộn màn hình là bàn phím tự động tụt xuống
+  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+  padding: const EdgeInsets.all(16.0),
+  child: Form(...),
+)</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3>6. Bố Cục An Toàn Khi Cuộn (Scroll Safety Form Layout Patterns)</h3>
+
+      <div class="callout warning">
+        <div class="callout-title">Hiện tượng tràn màn hình: Bottom Overflowed by xxx Pixels</div>
+        <p>Khi bàn phím ảo bật lên, nó chiếm từ 30% đến 50% chiều cao màn hình vật lý. Nếu Form được đặt trong một <code>Column</code> không thể cuộn, không gian hiển thị bị co hẹp đột ngột sẽ lập tức gây ra lỗi sọc vàng đen <strong>RenderFlex overflowed</strong> kinh điển của Flutter.</p>
+      </div>
+
+      <h4>6.1. Mẫu bố cục chuẩn 1: SingleChildScrollView + SafeArea</h4>
+      <p>Đây là mẫu bố cục phổ biến nhất cho 90% các form nhập liệu thông thường:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Pattern 1: SingleChildScrollView cơ bản và an toàn</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>Scaffold(
+  appBar: AppBar(title: const Text('Thêm Sản Phẩm')),
+  body: SafeArea(
+    child: SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(...),
+            const SizedBox(height: 16),
+            TextFormField(...),
+            const SizedBox(height: 24),
+            ElevatedButton(...),
+          ],
+        ),
+      ),
+    ),
+  ),
+)</code></pre>
+      </div>
+
+      <h4>6.2. Mẫu bố cục chuẩn 2: LayoutBuilder + ConstrainedBox + IntrinsicHeight (Nút bấm ghim đáy)</h4>
+      <p>Một thiết kế rất hay gặp trong các ứng dụng hiện đại: Khi nội dung ngắn, nút bấm nằm ghim sát đáy màn hình. Nhưng khi bật bàn phím ảo hoặc trên màn hình nhỏ, nội dung tự động cho phép cuộn mà nút bấm không bị che khuất hay vỡ giao diện.</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Pattern 2: Ghim nút đáy màn hình khi rảnh, cuộn mượt mà khi bật phím</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>Scaffold(
+  body: SafeArea(
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight, // Ép chiều cao tối thiểu bằng màn hình
+            ),
+            child: IntrinsicHeight(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(controller: _userCtrl, decoration: const InputDecoration(labelText: 'Tên đăng nhập')),
+                      const SizedBox(height: 16),
+                      TextFormField(controller: _passCtrl, decoration: const InputDecoration(labelText: 'Mật khẩu')),
+                      
+                      const Spacer(), // Đẩy phần tử phía dưới xuống sát đáy màn hình!
+                      
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _handleSubmit,
+                        style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+                        child: const Text('Xác nhận'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  ),
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3>7. Chữ Ký Hàm Validator, Error Text & Thư Viện Helpers Tách Biệt</h3>
+
+      <h4>7.1. Chữ ký hàm Validator (Validator Signature)</h4>
+      <p>Trong Flutter, thuộc tính <code>validator</code> của <code>TextFormField</code> nhận vào một hàm tuân theo chữ ký quy chuẩn:</p>
+      <div class="code-wrapper">
+        <div class="code-header"><span>Chữ ký kiểu dữ liệu của Validator</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>typedef FormFieldValidator&lt;T&gt; = String? Function(T? value);</code></pre>
+      </div>
+      <p>Cụ thể với <code>TextFormField</code>, giá trị <code>value</code> là <code>String?</code>. Quy ước vàng của chữ ký này:</p>
+      <ul>
+        <li><strong>Khi hợp lệ:</strong> Hàm <strong>BẮT BUỘC trả về <code>null</code></strong>. Điều này báo cho Flutter biết ô này không có lỗi, khung viền hiển thị bình thường.</li>
+        <li><strong>Khi không hợp lệ:</strong> Hàm <strong>trả về một chuỗi <code>String</code></strong> chứa thông báo lỗi cụ thể (ví dụ: <code>return 'Email không hợp lệ';</code>). Chuỗi này được gọi là <strong>errorText</strong> và sẽ tự động được hiển thị bằng màu đỏ ngay bên dưới ô nhập, đồng thời viền ô nhập đổi sang màu đỏ lỗi.</li>
+      </ul>
+
+      <h4>7.2. Tại sao nên tách Validator Helpers ra khỏi cây Widget?</h4>
+      <p>Viết các đoạn <code>if-else</code> kiểm tra logic dài dòng trực tiếp bên trong phương thức <code>build()</code> khiến code giao diện bị phình to, khó đọc và không thể viết Unit Test kiểm thử logic. Thay vào đó, hãy tách các hàm kiểm tra ra một class tiện ích riêng (Validator Helpers):</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>lib/utils/validators.dart (Thư viện Helper Validator tái sử dụng)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>class Validators {
+  // 1. Kiểm tra bắt buộc nhập (Required)
+  static String? required(String? value, {String fieldName = 'Trường này'}) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName không được để trống';
+    }
+    return null;
+  }
+
+  // 2. Kiểm tra độ dài tối thiểu
+  static String? minLength(String? value, int min, {String fieldName = 'Dữ liệu'}) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName không được để trống';
+    }
+    if (value.trim().length < min) {
+      return '$fieldName phải có ít nhất $min ký tự';
+    }
+    return null;
+  }
+
+  // 3. Kiểm tra định dạng Email bằng Regex
+  static String? email(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Vui lòng nhập địa chỉ email';
+    }
+    // Biểu thức Regex kiểm tra email chuẩn quốc tế
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Email không đúng định dạng (VD: ten@domain.com)';
+    }
+    return null;
+  }
+
+  // 4. Kiểm tra số điện thoại di động Việt Nam bằng Regex
+  static String? vietnamesePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Vui lòng nhập số điện thoại';
+    }
+    // Định dạng 10 chữ số, bắt đầu bằng 03, 05, 07, 08, 09
+    final phoneRegex = RegExp(r'^(0[3|5|7|8|9])+([0-9]{8})$');
+    if (!phoneRegex.hasMatch(value.trim())) {
+      return 'Số điện thoại phải gồm 10 số, đầu 03, 05, 07, 08, 09';
+    }
+    return null;
+  }
+
+  // 5. Kiểm tra số tiền lớn hơn 0
+  static String? positiveNumber(String? value, {String fieldName = 'Số tiền'}) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Vui lòng nhập $fieldName';
+    }
+    final numVal = double.tryParse(value.trim());
+    if (numVal == null) {
+      return '$fieldName phải là số hợp lệ';
+    }
+    if (numVal <= 0) {
+      return '$fieldName phải lớn hơn 0';
+    }
+    return null;
+  }
+
+  // 6. Kiểm tra so khớp 2 trường (Confirm Password)
+  static String? match(String? value, String originalValue, {String message = 'Giá trị không trùng khớp'}) {
+    if (value == null || value.isEmpty) {
+      return 'Vui lòng nhập lại thông tin';
+    }
+    if (value != originalValue) {
+      return message;
+    }
+    return null;
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3>8. Quy Trình Submit Flow 4 Bước & Trải Nghiệm Bất Đồng Bộ (Async UX)</h3>
+      <p>Một nút Submit chuyên nghiệp không bao giờ chỉ đơn thuần đọc dữ liệu. Nó phải trải qua một quy trình khép kín 4 bước được gọi là <strong>Submit Flow</strong>:</p>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Validate:</strong> Kiểm tra tính hợp lệ toàn bộ Form qua <code>_formKey.currentState!.validate()</code>. Nếu trả về <code>false</code>, dừng quy trình ngay lập tức.
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Collect Data:</strong> Gom sạch sẽ dữ liệu từ các Controller (sử dụng <code>.trim()</code> để loại bỏ khoảng trắng rác) và đóng gói thành Map/Model.
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Call (API / Database):</strong> Bật trạng thái chờ (Loading State), vô hiệu hóa nút bấm để chống bấm liên tục (Spam Click) và gọi hàm bất đồng bộ <code>await</code>.
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Report:</strong> Tắt Loading, kiểm tra <code>mounted</code>, thông báo kết quả (SnackBar / Dialog) và điều hướng màn hình.
+        </div>
+      </div>
+
+      <h4>8.1. Thiết kế Trải nghiệm Bất đồng bộ (Async UX: Loading State & Disabled Button)</h4>
+      <div class="def">
+        <span class="def-term">Nguyên tắc vô hiệu hóa nút bấm trong Flutter:</span>
+        <p>Trong Flutter, tất cả các nút (<code>ElevatedButton</code>, <code>FilledButton</code>, <code>OutlinedButton</code>, <code>TextButton</code>) sẽ <strong>tự động chuyển sang trạng thái Disabled</strong> (màu xám và không nhận cảm ứng chạm) khi bạn gán thuộc tính <code>onPressed: null</code>!</p>
+        <p>Kết hợp điều này với một biến cờ <code>bool _isLoading = false;</code>: khi đang loading, ta gán <code>onPressed: _isLoading ? null : _submitForm</code> và hiển thị một vòng xoay <code>CircularProgressIndicator</code> bên trong nút bấm.</p>
+      </div>
+
+      <!-- SƠ ĐỒ SVG LUỒNG SUBMIT FLOW -->
+      <div class="card" style="margin-top: 20px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">Sơ Đồ Minh Họa: Vòng Đời Quy Trình Submit Flow Hoàn Chỉnh</div>
+        <svg viewBox="0 0 850 200" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="830" height="180" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- BƯỚC 1 -->
+          <rect x="30" y="55" width="160" height="70" rx="8" fill="#1f242c" stroke="#58a6ff" stroke-width="1.5" />
+          <text x="110" y="85" fill="#58a6ff" font-size="13" font-weight="bold" text-anchor="middle">1. VALIDATE</text>
+          <text x="110" y="105" fill="#8b949e" font-size="11" text-anchor="middle">_formKey.validate()</text>
+
+          <!-- BƯỚC 2 -->
+          <rect x="230" y="55" width="165" height="70" rx="8" fill="#1f242c" stroke="#7ee787" stroke-width="1.5" />
+          <text x="312" y="85" fill="#7ee787" font-size="13" font-weight="bold" text-anchor="middle">2. COLLECT DATA</text>
+          <text x="312" y="105" fill="#8b949e" font-size="11" text-anchor="middle">controller.text.trim()</text>
+
+          <!-- BƯỚC 3 -->
+          <rect x="435" y="55" width="175" height="70" rx="8" fill="#1f242c" stroke="#fa7a18" stroke-width="1.5" />
+          <text x="522" y="85" fill="#fa7a18" font-size="13" font-weight="bold" text-anchor="middle">3. CALL (ASYNC)</text>
+          <text x="522" y="105" fill="#8b949e" font-size="11" text-anchor="middle">Loading ON &amp; Disable btn</text>
+
+          <!-- BƯỚC 4 -->
+          <rect x="650" y="55" width="165" height="70" rx="8" fill="#1f242c" stroke="#a371f7" stroke-width="1.5" />
+          <text x="732" y="85" fill="#a371f7" font-size="13" font-weight="bold" text-anchor="middle">4. REPORT</text>
+          <text x="732" y="105" fill="#8b949e" font-size="11" text-anchor="middle">if (!mounted), SnackBar</text>
+        </svg>
+      </div>
+
+      <!-- ===================== PHẦN 9 ===================== -->
+      <h3>9. Tách Rời Từng Cụm Mã Nguồn Thực Hành (Từng Cụm Thẻ Code Độc Lập)</h3>
+      <p>Để dễ theo dõi và tra cứu khi làm bài, toàn bộ cấu trúc dự án Form chuẩn được tách thành từng cụm thẻ riêng biệt dưới đây:</p>
+
+      <!-- CỤM 1: KHAI BÁO BIẾN VÀ VÒNG ĐỜI -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Cụm 1: Khai Báo Biến, FocusNode & Kỷ Luật Giải Phóng (Disposal Discipline)</div>
+        <p>Khai báo tập trung các Controller, FocusNode và đảm bảo giải phóng sạch sẽ trong hàm <code>dispose()</code>:</p>
+        <div class="code-wrapper">
+          <div class="code-header"><span>1_state_and_lifecycle.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
+  // Khoá toàn cục quản lý Form
+  final _formKey = GlobalKey&lt;FormState&gt;();
+
+  // Khai báo các Controller lưu trữ văn bản
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
+  // Khai báo các FocusNode điều khiển tiêu điểm bàn phím
+  late final FocusNode _nameFocus;
+  late final FocusNode _emailFocus;
+  late final FocusNode _passwordFocus;
+
+  // Cờ theo dõi trạng thái bất đồng bộ & giao diện
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+
+    _nameFocus = FocusNode();
+    _emailFocus = FocusNode();
+    _passwordFocus = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // KỶ LUẬT HỦY BỘ NHỚ: Hủy toàn bộ Controller và FocusNode
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+
+    _nameFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+
+    super.dispose();
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- CỤM 2: SUBMIT HANDLER -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Cụm 2: Hàm Xử Lý Submit Chuẩn (Submit Flow + Async UX)</div>
+        <p>Hạ bàn phím, kích hoạt kiểm tra lỗi, gom dữ liệu sạch, khóa nút hiển thị vòng xoay và báo cáo kết quả:</p>
+        <div class="code-wrapper">
+          <div class="code-header"><span>2_submit_handler.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>Future&lt;void&gt; _handleSubmit() async {
+  // Hạ bàn phím ảo ngay khi người dùng bấm Submit
+  FocusScope.of(context).unfocus();
+
+  // 1. VALIDATE: Kiểm tra hợp lệ toàn bộ Form
+  if (!_formKey.currentState!.validate()) {
+    return;
+  }
+
+  // 2. COLLECT DATA: Gom dữ liệu sạch từ các controller
+  final userPayload = {
+    'name': _nameController.text.trim(),
+    'email': _emailController.text.trim(),
+    'password': _passwordController.text,
+  };
+
+  // 3. CALL: Bật cờ loading để vô hiệu hóa nút bấm chống click đúp
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    // Giả lập cuộc gọi mạng API hoặc ghi Database mất 2 giây
+    await Future.delayed(const Duration(seconds: 2));
+
+    // 4. REPORT: Luôn kiểm tra mounted trước khi dùng BuildContext sau lệnh await
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Đăng ký thành công cho ${userPayload['name']}'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // Reset Form về trắng ban đầu
+    _formKey.currentState!.reset();
+    _nameController.clear();
+    _emailController.clear();
+    _passwordController.clear();
+
+  } catch (error) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Lỗi gửi dữ liệu: $error'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+    // Đảm bảo tắt loading dù thành công hay thất bại
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- CỤM 3: CÁC Ô NHẬP LIỆU TEXTFORMWIDGET -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Cụm 3: Cấu Hình Trường Nhập Liệu (Right Keyboard, Actions & onFieldSubmitted)</div>
+        <p>Liên kết tiêu điểm giữa các ô bằng <code>textInputAction</code> và <code>onFieldSubmitted</code>:</p>
+        <div class="code-wrapper">
+          <div class="code-header"><span>3_input_fields_config.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>// Ô 1: Họ tên (Bàn phím viết hoa mỗi chữ cái đầu, phím Enter chuyển sang Email)
+TextFormField(
+  controller: _nameController,
+  focusNode: _nameFocus,
+  keyboardType: TextInputType.name,
+  textCapitalization: TextCapitalization.words,
+  textInputAction: TextInputAction.next,
+  onFieldSubmitted: (_) {
+    FocusScope.of(context).requestFocus(_emailFocus);
+  },
+  decoration: const InputDecoration(
+    labelText: 'Họ và tên *',
+    prefixIcon: Icon(Icons.person_outline),
+    border: OutlineInputBorder(),
+  ),
+  validator: (v) => Validators.required(v, fieldName: 'Họ và tên'),
+),
+
+const SizedBox(height: 16),
+
+// Ô 2: Email (Bàn phím email có sẵn ký tự @, tắt tự sửa từ, phím Enter chuyển sang Password)
+TextFormField(
+  controller: _emailController,
+  focusNode: _emailFocus,
+  keyboardType: TextInputType.emailAddress,
+  autocorrect: false,
+  textInputAction: TextInputAction.next,
+  onFieldSubmitted: (_) {
+    FocusScope.of(context).requestFocus(_passwordFocus);
+  },
+  decoration: const InputDecoration(
+    labelText: 'Địa chỉ Email *',
+    prefixIcon: Icon(Icons.email_outline),
+    border: OutlineInputBorder(),
+  ),
+  validator: Validators.email,
+),
+
+const SizedBox(height: 16),
+
+// Ô 3: Mật khẩu (Ẩn ký tự, phím Enter tự động kích hoạt gửi Form)
+TextFormField(
+  controller: _passwordController,
+  focusNode: _passwordFocus,
+  obscureText: _obscurePassword,
+  keyboardType: TextInputType.visiblePassword,
+  textInputAction: TextInputAction.done,
+  onFieldSubmitted: (_) => _handleSubmit(),
+  decoration: InputDecoration(
+    labelText: 'Mật khẩu *',
+    prefixIcon: const Icon(Icons.lock_outline),
+    suffixIcon: IconButton(
+      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+      onPressed: () {
+        setState(() => _obscurePassword = !_obscurePassword);
+      },
+    ),
+    border: const OutlineInputBorder(),
+  ),
+  validator: (v) => Validators.minLength(v, 6, fieldName: 'Mật khẩu'),
+),</code></pre>
+        </div>
+      </div>
+
+      <!-- CỤM 4: NÚT BẤM VÀ BỐ CỤC CHỐNG TRÀN -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Cụm 4: Bố Cục Scroll Safety & Nút Bấm Tự Khóa (Disabled Async Button)</div>
+        <p>Bọc <code>GestureDetector</code> chạm ra ngoài hạ phím, <code>SingleChildScrollView</code> cuộn hạ phím và nút bấm tự động disabled:</p>
+        <div class="code-wrapper">
+          <div class="code-header"><span>4_layout_and_button.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>GestureDetector(
+  behavior: HitTestBehavior.opaque,
+  onTap: () => FocusScope.of(context).unfocus(), // Chạm ra ngoài khoảng trống để hạ bàn phím
+  child: Scaffold(
+    appBar: AppBar(title: const Text('Đăng Ký Tài Khoản')),
+    body: SafeArea(
+      child: SingleChildScrollView(
+        // Vuốt cuộn ngón tay tự động hạ bàn phím ảo
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Các ô TextFormField ở Cụm 3 đặt tại đây...
+              const SizedBox(height: 24),
+
+              // Nút bấm có Async UX: Tự khóa và xoay vòng loading khi đang gửi
+              ElevatedButton(
+                // Khi _isLoading = true, gán null để nút bấm bị Disabled và không nhận thao tác bấm
+                onPressed: _isLoading ? null : _handleSubmit,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        'XÁC NHẬN ĐĂNG KÝ',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  ),
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 10 ===================== -->
+      <h3>10. Các Lỗi Phổ Biến Thường Gặp Và Cách Khắc Phục Khi Làm Form</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Hiện tượng / Thông báo lỗi</th>
+              <th>Nguyên nhân gốc rễ</th>
+              <th>Giải pháp khắc phục triệt để</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>A TextEditingController was used after being disposed</code></td>
+              <td>Một tiến trình bất đồng bộ (như Timer, Future.delayed hoặc phản hồi từ API) cố gắng đọc hoặc gán giá trị vào <code>controller.text</code> sau khi màn hình đã bị đóng (đã chạy hàm <code>dispose()</code>).</td>
+              <td>Thêm điều kiện kiểm tra <code>if (!mounted) return;</code> trước khi truy cập controller sau các lệnh <code>await</code> hoặc hủy timer trong <code>dispose()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>A RenderFlex overflowed by xxx pixels on the bottom</code></td>
+              <td>Khi người dùng chạm vào ô nhập văn bản, bàn phím ảo đẩy lên từ dưới đáy màn hình làm giảm chiều cao hiển thị của <code>Column</code>, gây tràn khung viền.</td>
+              <td>Bọc toàn bộ widget <code>Form</code> hoặc <code>Column</code> bên trong <code>SingleChildScrollView</code> để cho phép cuộn màn hình khi có bàn phím.</td>
+            </tr>
+            <tr>
+              <td><code>Bấm nút nhưng không thấy chữ lỗi màu đỏ hiện ra</code></td>
+              <td>1. Chưa gán <code>key: _formKey</code> vào widget <code>Form</code>.<br>2. Dùng nhầm widget <code>TextField</code> thay vì <code>TextFormField</code>.<br>3. Quên gọi hàm <code>_formKey.currentState!.validate()</code> trong sự kiện nhấn nút.</td>
+              <td>Kiểm tra đầy đủ bộ ba: Widget phải là <code>TextFormField</code>, có truyền <code>key: _formKey</code> vào <code>Form</code>, và gọi lệnh kiểm tra <code>_formKey.currentState!.validate()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Chữ người dùng vừa gõ bị biến mất mỗi khi giao diện cập nhật</code></td>
+              <td>Khởi tạo đối tượng <code>TextEditingController()</code> bên trong hàm <code>build()</code> hoặc bên trong một <code>StatelessWidget</code>.</td>
+              <td>Chuyển sang <code>StatefulWidget</code> và khai báo controller ở cấp độ thuộc tính của lớp <code>State</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Người dùng bấm nhiều lần gửi trùng lặp nhiều request lên server</code></td>
+              <td>Không có cơ chế Disabled button và Loading state trong lúc tác vụ async đang chạy.</td>
+              <td>Tạo biến cờ <code>_isLoading</code>, khi đang chạy gán <code>onPressed: _isLoading ? null : _submitHandler</code> để vô hiệu hoá nút và hiển thị <code>CircularProgressIndicator</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

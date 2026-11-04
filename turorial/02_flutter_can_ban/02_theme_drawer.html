@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 2. Quản Lý Theme, ThemeData & Drawer - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 2</span>
+        <span class="pill pill-green">Theme & Drawer</span>
+        <span class="pill pill-purple">Dự án: theme_data</span>
+      </div>
+      <div>
+        <a href="01_widgets_can_ban.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 1. Widgets</a>
+        <a href="03_navigation_route.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 3. Navigation &rarr;</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Trang chủ &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 2. Hướng Dẫn Chi Tiết Về Theme, ThemeData & Đổi Giao Diện Trong Drawer</h2>
+        <p>Tìm hiểu định nghĩa Theme, lý do cần dùng Theme trong ứng dụng, cơ chế hoạt động của Material 3 (ColorScheme.fromSeed, copyWith), và hướng dẫn từng bước lắp ghép Drawer chọn màu sắc, bật/tắt Dark Mode kèm ảnh Banner.</p>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3>1. Theme Là Gì? Vì Sao Cần Phải Dùng Theme?</h3>
+      
+      <h4>1.1. Khái niệm Theme trong Flutter</h4>
+      <p>Theme (chủ đề giao diện) là tập hợp toàn bộ các quy chuẩn về mặt thẩm mỹ của ứng dụng, bao gồm: bảng màu (Color Palette), kiểu chữ (Typography), kích thước lề, bán kính bo góc của nút bấm và phong cách của các thanh điều hướng (AppBar, Drawer, NavigationBar).</p>
+      <p>Trong Flutter, toàn bộ cấu hình này được đóng gói trong một đối tượng có tên là <code>ThemeData</code> và được khai báo ở mức cao nhất của ứng dụng thông qua widget <code>MaterialApp</code>.</p>
+
+      <h4>1.2. Vì sao cần dùng Theme thay vì tự gán màu thủ công?</h4>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Hạn chế khi tự gán màu cứng (Hardcode)</div>
+          <p>Ví dụ viết trực tiếp <code>color: Colors.pink</code> hay <code>fontSize: 20</code> vào từng Widget:</p>
+          <ul>
+            <li><strong>Mất thời gian sửa đổi</strong>: Khi muốn đổi tông màu cả app, bạn phải tìm và sửa lại hàng chục màn hình riêng lẻ.</li>
+            <li><strong>Lỗi giao diện Dark Mode</strong>: Khi người dùng đổi sang chế độ màn hình tối, chữ màu đen được gán cứng sẽ bị chìm hoàn toàn vào nền đen khiến người dùng không đọc được nội dung.</li>
+            <li><strong>Thiếu đồng bộ</strong>: Mỗi màn hình có thể có kích thước nút, độ bo góc hoặc màu sắc lệch nhau, làm mất đi sự chuyên nghiệp.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Lợi ích vượt trội khi dùng Theme</div>
+          <p>Khi sử dụng hệ thống <code>ThemeData</code> tập trung:</p>
+          <ul>
+            <li><strong>Quản lý tập trung một nơi</strong>: Chỉ cần thay đổi 1 dòng cấu hình ở <code>app_theme.dart</code>, toàn bộ các trang và widget con trong ứng dụng tự động cập nhật ngay lập tức.</li>
+            <li><strong>Hỗ trợ Dark Mode mượt mà</strong>: Tự động đảo màu chữ và màu nền theo bảng màu tiêu chuẩn mà không cần viết lệnh if/else ở từng widget.</li>
+            <li><strong>Chuẩn hóa thiết kế Material 3</strong>: Đảm bảo độ tương phản màu sắc đạt chuẩn tiếp cận người dùng (accessibility).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3>2. Các Thành Phần Cốt Lõi Trong Hệ Thống Theme</h3>
+
+      <h4>2.1. ColorScheme.fromSeed: Cơ chế sinh màu tự động từ hạt giống</h4>
+      <p>Trước phiên bản Flutter Material 3, lập trình viên phải tự khai báo từng màu như <code>primaryColor</code>, <code>accentColor</code>, <code>cardColor</code> rất phức tạp. Material 3 mang đến giải pháp <code>ColorScheme.fromSeed</code>:</p>
+      <ul>
+        <li><strong>Cơ chế hoạt động</strong>: Bạn chỉ cần cung cấp 1 màu gốc duy nhất (seedColor) và độ sáng (Brightness.light hoặc Brightness.dark). Thuật toán của Flutter sẽ tự động tính toán ra một bảng gồm hơn 30 màu sắc bổ trợ tương thích hoàn hảo: <code>primary</code>, <code>onPrimary</code>, <code>secondaryContainer</code>, <code>surface</code>, <code>onSurface</code>, <code>error</code>...</li>
+        <li><strong>Quy tắc chữ trên nền (on-colors)</strong>: Mỗi màu nền đều có một màu chữ tương ứng với tiền tố <code>on</code> (ví dụ: nền là <code>primary</code> thì chữ/icon trên đó phải dùng <code>onPrimary</code>) để đảm bảo luôn nhìn thấy rõ, không bị trùng màu.</li>
+      </ul>
+
+      <h4>2.2. useMaterial3: Bật giao diện thiết kế thế hệ mới</h4>
+      <p>Khi đặt <code>useMaterial3: true</code> trong <code>ThemeData</code>, Flutter kích hoạt bộ Widget mới theo ngôn ngữ Material 3: thanh AppBar phẳng hiện đại, các nút bấm mới như <code>FilledButton</code>, bo góc mềm mại hơn và màu sắc tương thích hoàn toàn với <code>ColorScheme</code>.</p>
+
+      <h4>2.3. Phương thức copyWith: Kế thừa và tùy chỉnh chọn lọc</h4>
+      <p>Tại sao không tạo mới bằng <code>ThemeData(...)</code> hay <code>TextTheme(...)</code>? Vì nếu tạo mới hoàn toàn, bạn sẽ làm mất hết tất cả các thông số cỡ chữ, khoảng cách chuẩn mà Flutter đã đo đạc sẵn. Phương thức <code>copyWith</code> tạo ra một bản sao nguyên vẹn của Theme gốc và cho phép bạn chỉ sửa đúng mục mình cần (ví dụ chỉ in đậm chữ tiêu đề, hoặc chỉ bo tròn thêm cho nút bấm).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Thuộc tính trong ThemeData</th>
+              <th>Kiểu dữ liệu</th>
+              <th>Giải thích mục đích</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>colorScheme</code></td>
+              <td><code>ColorScheme</code></td>
+              <td>Bảng màu trung tâm điều phối toàn bộ màu sắc nút, nền, thanh điều hướng và chữ.</td>
+            </tr>
+            <tr>
+              <td><code>textTheme</code></td>
+              <td><code>TextTheme</code></td>
+              <td>Tập hợp kiểu chữ toàn app: <code>titleLarge</code>, <code>bodyMedium</code>, <code>headlineSmall</code>...</td>
+            </tr>
+            <tr>
+              <td><code>filledButtonTheme</code></td>
+              <td><code>FilledButtonThemeData</code></td>
+              <td>Quy định kiểu dáng mặc định (bo góc, padding) cho toàn bộ các nút bấm chính <code>FilledButton</code>.</td>
+            </tr>
+            <tr>
+              <td><code>appBarTheme</code></td>
+              <td><code>AppBarTheme</code></td>
+              <td>Màu nền, màu icon, vị trí căn giữa tiêu đề của thanh điều hướng trên cùng <code>AppBar</code>.</td>
+            </tr>
+            <tr>
+              <td><code>scaffoldBackgroundColor</code></td>
+              <td><code>Color</code></td>
+              <td>Màu nền tổng của toàn màn hình Scaffold.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>2.4. Cách lấy giá trị Theme trong Widget con: Theme.of(context)</h4>
+      <p>Trong hàm <code>build</code> của bất kỳ widget con nào, bạn không nên gán cứng màu sắc mà nên gọi thông qua ngữ cảnh <code>context</code>:</p>
+      <ul>
+        <li><code>Theme.of(context).colorScheme.primary</code>: Lấy màu chủ đạo hiện tại.</li>
+        <li><code>Theme.of(context).colorScheme.secondaryContainer</code>: Lấy màu phụ phù hợp làm nền thẻ, thanh appbar.</li>
+        <li><code>Theme.of(context).textTheme.titleLarge</code>: Lấy kiểu chữ tiêu đề lớn đã được cấu hình chung.</li>
+        <li><code>Theme.of(context).textTheme.bodyMedium</code>: Lấy kiểu chữ cho đoạn văn nội dung thông thường.</li>
+      </ul>
+
+      <!-- ===================== PHẦN 3: DRAWER LÀ GÌ ===================== -->
+      <h3>3. Drawer Trong Flutter Là Gì? Vì Sao Cần Drawer?</h3>
+
+      <h4>3.1. Khái niệm Drawer</h4>
+      <p>Drawer (ngăn kéo điều hướng) là một bảng điều khiển dạng trượt, thường ẩn ở cạnh màn hình (thường là mép trái) và xuất hiện khi người dùng vuốt từ mép vào hoặc bấm vào nút menu trên thanh AppBar. Drawer thường được dùng để chứa danh mục chuyển trang (Navigation), thông tin tài khoản người dùng, hoặc các tùy chỉnh cài đặt của ứng dụng như đổi màu chủ đề (Theme) và bật/tắt chế độ tối (Dark Mode).</p>
+
+      <h4>3.2. Vì sao cần dùng Drawer?</h4>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Tối ưu hóa không gian hiển thị</div>
+          <p>Màn hình điện thoại có diện tích nhỏ hẹp. Nếu đặt tất cả nút cài đặt, cấu hình màu sắc hay danh mục điều hướng lên màn hình chính, giao diện sẽ trở nên chật chội và rối mắt. Drawer giúp cất giấu các tùy chọn phụ gọn gàng vào cạnh bên.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">Chuẩn tương tác quen thuộc</div>
+          <p>Người dùng di động đã quá quen thuộc với thao tác vuốt từ mép trái màn hình để mở menu. Scaffold trong Flutter tự động tích hợp sẵn icon nút menu (hamburger icon) trên AppBar khi bạn khai báo thuộc tính <code>drawer</code> mà không cần viết thêm code bắt sự kiện mở.</p>
+        </div>
+      </div>
+
+      <h4>3.3. Các biến và thuộc tính quan trọng của Widget Drawer</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Thuộc tính / Biến</th>
+              <th>Kiểu dữ liệu</th>
+              <th>Mô tả chi tiết và cách dùng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>child</code></td>
+              <td><code>Widget?</code></td>
+              <td>Nội dung bên trong của Drawer. Thông thường là một <code>ListView</code> hoặc <code>Column</code> chứa các thành phần như ảnh Banner, tiêu đề tài khoản, và các dòng lựa chọn <code>ListTile</code>.</td>
+            </tr>
+            <tr>
+              <td><code>backgroundColor</code></td>
+              <td><code>Color?</code></td>
+              <td>Màu nền của ngăn kéo Drawer (mặc định lấy theo màu nền của theme hiện hành).</td>
+            </tr>
+            <tr>
+              <td><code>elevation</code></td>
+              <td><code>double?</code></td>
+              <td>Độ cao đổ bóng của ngăn kéo so với màn hình nền phía sau khi trượt ra.</td>
+            </tr>
+            <tr>
+              <td><code>width</code></td>
+              <td><code>double?</code></td>
+              <td>Độ rộng cố định của ngăn kéo. Nếu không khai báo, Flutter sẽ tự động tính độ rộng chuẩn theo nền tảng (khoảng 304 logical pixels trên di động).</td>
+            </tr>
+            <tr>
+              <td><code>shape</code></td>
+              <td><code>ShapeBorder?</code></td>
+              <td>Định hình đường viền và độ bo góc của ngăn kéo (ví dụ bo tròn cạnh phải của Drawer).</td>
+            </tr>
+            <tr>
+              <td><code>scaffold.drawer</code></td>
+              <td><code>Widget?</code></td>
+              <td>Thuộc tính trong <code>Scaffold</code> nhận vào một <code>Drawer</code>, quy định ngăn kéo mở từ mép trái (Left-to-Right).</td>
+            </tr>
+            <tr>
+              <td><code>scaffold.endDrawer</code></td>
+              <td><code>Widget?</code></td>
+              <td>Thuộc tính trong <code>Scaffold</code> nhận vào một <code>Drawer</code>, quy định ngăn kéo mở từ mép phải (Right-to-Left).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>3.4. Các Widget thường được ghép bên trong Drawer</h4>
+      <ul>
+        <li><strong>DrawerHeader</strong> hoặc <strong>Image</strong>: Nằm ở trên cùng, hiển thị ảnh Banner quảng bá, logo thương hiệu hoặc ảnh đại diện kèm tên người dùng.</li>
+        <li><strong>ListTile</strong>: Tạo từng dòng mục điều hướng hoặc kết hợp với <code>trailing: DropdownButton(...)</code> để tạo danh sách chọn nhanh màu sắc.</li>
+        <li><strong>SwitchListTile</strong>: Tích hợp công tắc gạt on/off ngay trên một dòng, cực kỳ phù hợp cho cài đặt Dark Mode hoặc bật thông báo.</li>
+        <li><strong>Divider</strong>: Đường gạch ngang phân tách các nhóm tính năng trong ngăn kéo.</li>
+      </ul>
+
+      <h4>3.5. Hình ảnh minh họa cấu trúc Drawer trực quan</h4>
+      <p>Dưới đây là sơ đồ mô phỏng trực quan bố cục màn hình khi mở ngăn kéo Drawer từ mép trái:</p>
+
+      <div style="margin: 20px 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; display: flex; justify-content: center;">
+        <svg viewBox="0 0 760 480" width="100%" height="auto" style="max-width: 720px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+          <!-- Khung màn hình điện thoại -->
+          <rect x="40" y="20" width="680" height="440" rx="20" fill="#1e2430" stroke="#3b4252" stroke-width="3" />
+          
+          <!-- Thanh AppBar của màn hình chính -->
+          <rect x="40" y="20" width="680" height="56" rx="0" fill="#2e3440" />
+          <text x="60" y="55" fill="#d8dee9" font-size="18" font-weight="bold">AppBar (Scaffold)</text>
+          
+          <!-- Nội dung mờ phía sau (Scaffold Body) -->
+          <rect x="360" y="76" width="360" height="384" fill="#1e2430" opacity="0.6" />
+          <text x="440" y="220" fill="#6c7a96" font-size="20" font-weight="bold">Vùng màn hình chính (Scaffold Body)</text>
+          <text x="440" y="250" fill="#4c566a" font-size="14">Bị lớp mờ che phủ khi Drawer trượt ra</text>
+          <rect x="440" y="280" width="180" height="40" rx="8" fill="#3b4252" opacity="0.7" />
+          <text x="480" y="305" fill="#8892b0" font-size="14">Registration Form</text>
+
+          <!-- KHUNG DRAWER TRƯỢT RA TỪ TRÁI -->
+          <rect x="40" y="20" width="320" height="440" rx="16" fill="#2b303c" stroke="#4c566a" stroke-width="2" />
+          
+          <!-- 1. Banner đầu Drawer -->
+          <rect x="40" y="20" width="320" height="130" rx="16" fill="#3b4252" />
+          <rect x="40" y="110" width="320" height="40" fill="#3b4252" /> <!-- Che góc bo dưới -->
+          <!-- Giả lập hình ảnh banner -->
+          <rect x="56" y="36" width="288" height="98" rx="8" fill="#434c5e" stroke="#5e81ac" stroke-dasharray="4" />
+          <text x="110" y="80" fill="#88c0d0" font-size="14" font-weight="bold">Image / Banner</text>
+          <text x="75" y="105" fill="#d8dee9" font-size="11">assets/banner.png hoặc Network</text>
+
+          <!-- 2. Selectbox Theme -->
+          <rect x="52" y="170" width="296" height="52" rx="8" fill="#353b49" />
+          <text x="68" y="202" fill="#eceff4" font-size="14" font-weight="bold">Theme:</text>
+          <rect x="210" y="180" width="126" height="32" rx="6" fill="#434c5e" stroke="#4c566a" />
+          <text x="226" y="201" fill="#81a1c1" font-size="13" font-weight="bold">Pink / Teal / Orange</text>
+
+          <!-- Đường kẻ ngang Divider -->
+          <line x1="52" y1="240" x2="348" y2="240" stroke="#434c5e" stroke-width="1.5" />
+
+          <!-- 3. Switch Dark Mode -->
+          <rect x="52" y="258" width="296" height="52" rx="8" fill="#353b49" />
+          <text x="68" y="290" fill="#eceff4" font-size="14" font-weight="bold">Dark mode:</text>
+          <!-- Nút Switch giả lập -->
+          <rect x="280" y="272" width="48" height="24" rx="12" fill="#5e81ac" />
+          <circle cx="314" cy="284" r="9" fill="#eceff4" />
+
+          <!-- Đường kẻ ngang Divider thứ hai -->
+          <line x1="52" y1="328" x2="348" y2="328" stroke="#434c5e" stroke-width="1.5" />
+
+          <!-- Các menu mục điều hướng mẫu bên dưới -->
+          <rect x="52" y="344" width="296" height="42" rx="6" fill="transparent" />
+          <text x="68" y="370" fill="#d8dee9" font-size="14">Cài đặt tài khoản</text>
+
+          <rect x="52" y="394" width="296" height="42" rx="6" fill="transparent" />
+          <text x="68" y="420" fill="#d8dee9" font-size="14">Đăng xuất</text>
+
+          <!-- Chú thích mũi tên Drawer trượt ra -->
+          <path d="M 360 220 L 390 220" stroke="#88c0d0" stroke-width="3" marker-end="url(#arrow)" />
+          <text x="375" y="205" fill="#88c0d0" font-size="12" font-weight="bold">Trượt ra mép trái</text>
+        </svg>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3>4. Cách Khai Báo Và Sử Dụng Ảnh Banner Trong Drawer</h3>
+      <p>Khi hiển thị Banner đầu ngăn kéo Drawer, có hai cách làm tùy theo yêu cầu của bài tập:</p>
+
+      <h4>4.1. Dùng ảnh nội bộ dự án (Assets)</h4>
+      <p>Áp dụng khi đề thi hoặc dự án có cung cấp sẵn file ảnh trong thư mục:</p>
+      <ol>
+        <li>Tạo thư mục <code>assets/images/</code> nằm ở thư mục gốc của project (ngang hàng với thư mục <code>lib</code>).</li>
+        <li>Chép file ảnh của bạn vào thư mục trên (ví dụ: <code>banner.png</code>).</li>
+        <li>Mở file <code>pubspec.yaml</code>, tìm đến khối <code>flutter:</code> và bỏ chú thích:
+          <pre><code>flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/banner.png</code></pre>
+        </li>
+        <li>Chạy lệnh <code>flutter pub get</code> để cập nhật tài nguyên.</li>
+        <li>Trong code gọi: <code>Image.asset('assets/images/banner.png', fit: BoxFit.cover, height: 160)</code>.</li>
+      </ol>
+
+      <h4>4.2. Dùng ảnh trực tuyến (Network)</h4>
+      <p>Áp dụng khi cần làm nhanh, không muốn chỉnh sửa file <code>pubspec.yaml</code>:</p>
+      <pre><code>Image.network(
+  'https://picsum.photos/500/200',
+  height: 160,
+  width: double.infinity,
+  fit: BoxFit.cover,
+)</code></pre>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3>5. Hướng Dẫn Từng Bước Xây Dựng Bài Thực Hành (theme_data)</h3>
+      <p>Để code mạch lạc, dễ hiểu và dễ bảo trì, chúng ta phân chia dự án thành 3 tệp độc lập thay vì gom vào một file duy nhất:</p>
+      <ul>
+        <li><strong>Bước 1</strong>: Xây dựng lớp cấu hình <code>AppTheme</code> động tại <code>lib/app_theme.dart</code>.</li>
+        <li><strong>Bước 2</strong>: Xây dựng màn hình nội dung <code>RegistrationScreen</code> tại <code>lib/registration_screen.dart</code>.</li>
+        <li><strong>Bước 3</strong>: Xây dựng thanh <code>Drawer</code> và quản lý State đổi màu, đổi chế độ tối tại <code>lib/main.dart</code>.</li>
+      </ul>
+
+      <!-- BƯỚC 1 -->
+      <h4>Bước 1: Tạo file cấu hình Theme tập trung (lib/app_theme.dart)</h4>
+      <p>File này chịu trách nhiệm tạo ra một đối tượng <code>ThemeData</code> linh hoạt. Hàm nhận vào 2 tham số: độ sáng (sáng hoặc tối) và màu sắc gốc được chọn.</p>
+      
+      <div class="code-wrapper">
+        <div class="code-header"><span>lib/app_theme.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+
+class AppTheme {
+  // Hàm tạo ThemeData nhận vào brightness và màu hạt giống (seedColor)
+  static ThemeData create(Brightness brightness, Color seedColor) {
+    // 1. Khai báo bảng màu tự động từ hạt giống (seed) màu
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: brightness,
+    );
+
+    // 2. Khai báo ThemeData nền tảng dùng Material 3
+    final base = ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+    );
+
+    // 3. Sử dụng copyWith để tùy chỉnh lại một số thành phần riêng biệt
+    return base.copyWith(
+      // Chỉnh sửa phông chữ dựa trên textTheme mặc định
+      textTheme: base.textTheme.copyWith(
+        titleLarge: base.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+        bodyMedium: base.textTheme.bodyMedium?.copyWith(
+          height: 1.4,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      // Định dạng kiểu dáng nút bấm FilledButton
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      ),
+      // Tùy chỉnh màu nền AppBar lấy theo màu secondaryContainer của theme
+      appBarTheme: AppBarTheme(
+        backgroundColor: colorScheme.secondaryContainer,
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- BƯỚC 2 -->
+      <h4>Bước 2: Xây dựng màn hình nội dung (lib/registration_screen.dart)</h4>
+      <p>Màn hình này sử dụng các Widget nội dung như <code>Text</code> và <code>FilledButton</code>. Các widget này không cần gán cứng màu sắc mà sẽ tự động ăn theo theme đã cấu hình ở Bước 1.</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>lib/registration_screen.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+
+class RegistrationScreen extends StatelessWidget {
+  const RegistrationScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Tiêu đề tự động áp dụng kiểu chữ và màu sắc theo Theme
+          Text(
+            'Registration',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 16),
+          // Nút bấm tự động kế thừa filledButtonTheme (bo góc 12, padding chuẩn)
+          FilledButton(
+            onPressed: () {
+              // In kiểu chữ hiện tại ra console để kiểm tra
+              print(Theme.of(context).textTheme.bodyMedium);
+            },
+            child: const Text('Signup'),
+          ),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- BƯỚC 3 -->
+      <h4>Bước 3: Lắp ráp thanh Drawer và quản lý State chuyển đổi giao diện (lib/main.dart)</h4>
+      <p>Tệp chính chứa ứng dụng, khai báo trạng thái (State) gồm tên màu đang chọn và cờ bật/tắt chế độ tối. Bên trong Scaffold, cấu hình <code>drawer</code> gồm đầy đủ 3 thành phần: Banner ảnh, Dropdown chọn 3 màu (Pink, Teal, Orange) và Switch chuyển Dark mode.</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>lib/main.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+import 'app_theme.dart';
+import 'registration_screen.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // Danh mục 3 màu chủ đề theo yêu cầu bài thực hành
+  final Map<String, Color> _themeColors = {
+    'Pink': Colors.pink,
+    'Teal': Colors.teal,
+    'Orange': Colors.orange,
+  };
+
+  // Biến lưu trữ màu đang được lựa chọn (mặc định ban đầu là Pink)
+  String _selectedColorName = 'Pink';
+
+  // Biến lưu trạng thái bật/tắt Dark Mode
+  bool _isDarkMode = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // Lấy đối tượng Color thực tế từ tên màu được chọn
+    final currentSeedColor = _themeColors[_selectedColorName]!;
+
+    return MaterialApp(
+      title: 'Theme Data',
+      debugShowCheckedModeBanner: false,
+
+      // Tạo theme cho chế độ Sáng dựa trên màu hiện tại
+      theme: AppTheme.create(Brightness.light, currentSeedColor),
+
+      // Tạo theme cho chế độ Tối dựa trên màu hiện tại
+      darkTheme: AppTheme.create(Brightness.dark, currentSeedColor),
+
+      // Quyết định chế độ hiển thị dựa vào biến _isDarkMode
+      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Theme Data'),
+        ),
+        // Nội dung chính của màn hình
+        body: const RegistrationScreen(),
+
+        // Xây dựng ngăn kéo Drawer điều khiển
+        drawer: Drawer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Thành phần 1: Ảnh Banner đầu Drawer
+              Image.network(
+                'https://picsum.photos/500/200',
+                height: 160,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 160,
+                  color: Colors.grey[300],
+                  child: const Center(child: Text('Ảnh Banner')),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Thành phần 2: Hộp chọn Selectbox (DropdownButton) cung cấp 3 màu
+              ListTile(
+                title: const Text('Theme:'),
+                trailing: DropdownButton<String>(
+                  value: _selectedColorName,
+                  items: _themeColors.keys.map((String colorName) {
+                    return DropdownMenuItem<String>(
+                      value: colorName,
+                      child: Text(colorName),
+                    );
+                  }).toList(),
+                  onChanged: (String? newColor) {
+                    if (newColor != null) {
+                      setState(() {
+                        _selectedColorName = newColor;
+                      });
+                    }
+                  },
+                ),
+              ),
+
+              const Divider(),
+
+              // Thành phần 3: Nút gạt Switch cho phép bật tắt Dark Mode
+              SwitchListTile(
+                title: const Text('Dark mode:'),
+                value: _isDarkMode,
+                onChanged: (bool value) {
+                  setState(() {
+                    _isDarkMode = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3>6. Các Sai Lầm Cần Lưu Ý Khi Làm Bài Về Theme & Drawer</h3>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. Không dùng copyWith khi tùy biến TextTheme</div>
+          <p>Nếu bạn viết <code>textTheme: TextTheme(...)</code>, toàn bộ các kích thước chữ chuẩn từ hệ thống sẽ bị xóa trắng và ứng dụng có thể gặp lỗi hiển thị chữ. Phải luôn viết <code>base.textTheme.copyWith(...)</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">2. Gán cứng màu chữ đen/trắng trong Widget con</div>
+          <p>Nếu bạn viết <code>color: Colors.black</code> trong thẻ Text, khi người dùng bật Dark Mode, màu nền chuyển sang đen khiến chữ biến mất. Hãy lấy màu theo <code>Theme.of(context).colorScheme.onSurface</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">3. Quên gọi setState khi đổi màu hoặc bật Dark Mode</div>
+          <p>Khi người dùng tương tác với <code>DropdownButton</code> hoặc <code>SwitchListTile</code>, phải đặt lệnh gán trong khối <code>setState(() { ... })</code> để hàm <code>build()</code> của ứng dụng chạy lại và áp dụng màu mới.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">4. Quên thụt lề chuẩn trong file pubspec.yaml</div>
+          <p>Khi khai báo thư mục <code>assets:</code> trong <code>pubspec.yaml</code>, ngôn ngữ YAML đòi hỏi thụt lề chính xác bằng 2 dấu cách. Thụt lề sai sẽ khiến lệnh <code>flutter pub get</code> báo lỗi cú pháp.</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3>7. Tóm Tắt Quy Trình Làm Bài Nhanh</h3>
+      <div class="def">
+        <span class="def-term">Các bước thực hiện khi gặp yêu cầu về Theme & Drawer</span>
+        <ol style="margin-left: 20px; margin-top: 8px; line-height: 2;">
+          <li>Tạo file <code>app_theme.dart</code> chứa hàm <code>create(Brightness, Color)</code> sử dụng <code>ColorScheme.fromSeed</code> và <code>copyWith</code>.</li>
+          <li>Khai báo danh sách màu trong một <code>Map&lt;String, Color&gt;</code> ở State của <code>MyApp</code>.</li>
+          <li>Tại <code>MaterialApp</code>, truyền hàm tạo theme vào cả 2 thuộc tính <code>theme</code> và <code>darkTheme</code>, gắn <code>themeMode</code> vào biến boolean.</li>
+          <li>Thêm <code>Drawer</code> vào Scaffold: dùng <code>Image.network</code> làm banner, <code>DropdownButton</code> để đổi màu trong Map, và <code>SwitchListTile</code> để chuyển trạng thái Dark Mode bằng <code>setState</code>.</li>
+        </ol>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

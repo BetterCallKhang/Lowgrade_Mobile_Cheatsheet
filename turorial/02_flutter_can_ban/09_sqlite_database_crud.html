@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 9. SQLite Database, sqflite & Full CRUD Note App - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 9</span>
+        <span class="pill pill-green">Local Database: SQLite & sqflite</span>
+        <span class="pill pill-purple">Dự án: sqlite_intro</span>
+      </div>
+      <div>
+        <a href="08_local_storage_prefs.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 8. Local Storage</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Trang chủ &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 9. Cơ Sở Dữ Liệu SQLite & Toàn Diện Quy Trình CRUD Với <code>sqflite</code> + Riverpod</h2>
+        <p>Hướng dẫn chi tiết từ bản chất gốc rễ: <strong>SQLite là gì? Dùng như thế nào? Vì sao nên dùng SQLite thay vì SharedPreferences?</strong> Giới thiệu toàn bộ hệ sinh thái thư viện (<code>sqflite</code>, <code>path</code>, <code>sqflite_common_ffi_web</code>, <code>flutter_riverpod</code>), quy trình từng bước nhỏ kèm code cụ thể ở mỗi bước, phân tích kiến trúc, và hoàn thiện trọn vẹn <strong>bài toán thực hành 7 yêu cầu CRUD Note</strong> (Dialog Confirm, Validate Form, SnackBar, Dispose Controller).</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 7 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Bản chất: SQLite là gì? Dùng thế nào? Vì sao phải dùng SQLite?</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. So sánh chuyên sâu: SharedPreferences vs SQLite Local Database</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Tổng quan các thư viện (Packages) sẽ sử dụng & Vai trò cốt lõi</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Yêu cầu bài toán thực hành CRUD Note App (7 tiêu chí)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Quy trình thực hiện chi tiết (Từng bước nhỏ kèm Code thực tế)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Minh họa kiến trúc luồng dữ liệu (Data Flow Diagram)</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Bảng tổng hợp lỗi thường gặp khi dùng SQLite & Cách xử lý</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1: BẢN CHẤT SQLITE ===================== -->
+      <h3 id="sec-1">1. Bản Chất: SQLite Là Gì? Dùng Thế Nào? Vì Sao Phải Dùng SQLite?</h3>
+
+      <h4>1.1. SQLite là gì?</h4>
+      <p><strong>SQLite</strong> là một hệ quản trị cơ sở dữ liệu quan hệ (RDBMS - Relational Database Management System) <strong>nhúng (embedded)</strong>, siêu nhẹ, mã nguồn mở và hoạt động độc lập (serverless). Khác với MySQL, SQL Server hay PostgreSQL cần một server dịch vụ riêng biệt lắng nghe cổng mạng (port), SQLite được <strong>tích hợp trực tiếp</strong> vào nhân hệ điều hành của thiết bị di động (Android, iOS) và lưu trữ toàn bộ dữ liệu (bảng, bản ghi, chỉ mục) vào <strong>chỉ một file nhị phân duy nhất</strong> nằm trong thư mục nội bộ (Internal Storage) của ứng dụng.</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">🗄️ Serverless & Nhúng Trực Tiếp</div>
+          <p>Không cần cài đặt Database Server, không cần cấu hình IP/Port hay Username/Password. Engine SQLite chạy trực tiếp bên trong cùng tiến trình bộ nhớ của ứng dụng Flutter.</p>
+          <span class="pill pill-blue">Zero Configuration</span>
+        </div>
+        <div class="card">
+          <div class="card-title">⚡ Đầy Đủ Sức Mạnh SQL Chuẩn</div>
+          <p>Hỗ trợ đầy đủ ngôn ngữ truy vấn SQL: <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, mệnh đề <code>WHERE</code>, <code>ORDER BY</code>, <code>JOIN</code> nhiều bảng và quan hệ khóa ngoại (Foreign Key).</p>
+          <span class="pill pill-green">Chuẩn ACID & RDBMS</span>
+        </div>
+        <div class="card">
+          <div class="card-title">📱 Offline-First & Tốc Độ Cực Cao</div>
+          <p>Dữ liệu nằm sẵn trên ổ đĩa thiết bị (Flash/Disk). App hoạt động tức thì, mượt mà và toàn diện ngay cả khi thiết bị ngắt kết nối mạng hoàn toàn (Airplane Mode / No Internet).</p>
+          <span class="pill pill-purple">Offline-First Native</span>
+        </div>
+      </div>
+
+      <h4>1.2. SQLite được dùng như thế nào trong Flutter?</h4>
+      <p>Trong ứng dụng Flutter, SQLite hoạt động theo mô hình cầu nối (Platform Channels / FFI):</p>
+      <ol style="margin-left: 20px; line-height: 2;">
+        <li><strong>Định vị đường dẫn file DB:</strong> Ứng dụng hỏi hệ điều hành thư mục an toàn dành riêng cho app (thông qua hàm <code>getDatabasesPath()</code>) và nối với tên file (ví dụ: <code>note_management.db</code>).</li>
+        <li><strong>Khởi tạo & Tạo bảng (Schema):</strong> Khi mở DB lần đầu tiên (<code>openDatabase</code>), hàm callback <code>onCreate</code> sẽ kích hoạt để chạy câu lệnh DDL <code>CREATE TABLE ...</code> tạo cấu trúc các cột dữ liệu.</li>
+        <li><strong>Thực thi truy vấn (CRUD):</strong> Dart code gửi các yêu cầu CRUD dưới dạng câu lệnh SQL chuẩn hoặc thông qua các hàm tiện ích Object-Relational: <code>query()</code>, <code>insert()</code>, <code>update()</code>, <code>delete()</code>.</li>
+        <li><strong>Chuyển đổi dữ liệu (ORM Mapping):</strong> Kết quả trả về từ SQLite luôn là một mảng Map <code>List&lt;Map&lt;String, Object?&gt;&gt;</code>. Lớp Model trong Dart sẽ ánh xạ qua lại bằng <code>fromJson()</code> và <code>toJson()</code>.</li>
+      </ol>
+
+      <h4>1.3. Vì sao phải dùng SQLite? (Ưu điểm vượt trội)</h4>
+      <ul>
+        <li><strong>Truy vấn có chọn lọc & tốc độ cao:</strong> Khi danh sách có hàng chục nghìn dòng, bạn chỉ cần lấy 10 bản ghi mới nhất (<code>LIMIT 10</code>) hoặc lọc các ghi chú chứa từ khóa nhất định (<code>WHERE title LIKE '%họp%'</code>) mà không phải load toàn bộ dữ liệu vào RAM rồi lọc thủ công.</li>
+        <li><strong>Bảo toàn tính toàn vẹn dữ liệu (ACID Transactions):</strong> Đảm bảo thao tác ghi hoặc thành công 100% hoặc rollback hoàn toàn, không bao giờ xảy ra tình trạng crash app làm hỏng hoặc mất nửa chừng dữ liệu.</li>
+        <li><strong>Ràng buộc quan hệ dữ liệu:</strong> Dễ dàng thiết kế nhiều bảng liên kết với nhau (ví dụ: Bảng <code>Category</code> liên kết với Bảng <code>Notes</code> qua <code>category_id</code>, bảng <code>Orders</code> với <code>OrderItems</code>).</li>
+        <li><strong>Bảo mật & Cô lập:</strong> File database được lưu trong Sandbox nội bộ của ứng dụng, các ứng dụng khác trên điện thoại không thể tự ý đọc hay can thiệp.</li>
+      </ul>
+
+      <!-- ===================== PHẦN 2: SO SÁNH ===================== -->
+      <h3 id="sec-2">2. So Sánh Chuyên Sâu: SharedPreferences vs SQLite Local Database</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tiêu chí so sánh</th>
+              <th>SharedPreferences (Mục 8)</th>
+              <th>SQLite Database / sqflite (Mục 9)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bản chất lưu trữ</strong></td>
+              <td>File XML (Android) / Plist (iOS) dạng <code>Key - Value</code> đơn giản.</td>
+              <td>Một file database quan hệ nhị phân <code>.db</code> có bảng, cột và chỉ mục (Index).</td>
+            </tr>
+            <tr>
+              <td><strong>Cấu trúc dữ liệu</strong></td>
+              <td>Phi cấu trúc (Lưu Primitive Types: bool, int, double, String, List&lt;String&gt;).</td>
+              <td>Có cấu trúc chặt chẽ (Schema, Table, Column, Data Types: INTEGER, TEXT, REAL, BLOB).</td>
+            </tr>
+            <tr>
+              <td><strong>Truy vấn & Lọc tìm kiếm</strong></td>
+              <td>Không hỗ trợ lọc. Phải nạp toàn bộ String JSON vào RAM rồi chạy vòng lặp lọc.</td>
+              <td>Truy vấn cực mạnh bằng SQL: <code>WHERE</code>, <code>ORDER BY</code>, <code>LIMIT</code>, <code>OFFSET</code>, <code>JOIN</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Dung lượng phù hợp</strong></td>
+              <td>Rất nhỏ (vài KB đến dưới 1-2 MB). Dùng nhiều sẽ gây giật lag do nạp toàn bộ file vào RAM khi mở app.</td>
+              <td>Lớn (từ vài MB đến hàng trăm MB / hàng trăm nghìn bản ghi) mà vẫn mượt mà nhờ đọc phân trang.</td>
+            </tr>
+            <tr>
+              <td><strong>Quan hệ giữa các bảng</strong></td>
+              <td>Không hỗ trợ (Flat Data).</td>
+              <td>Hỗ trợ quan hệ 1-1, 1-N, N-N qua Khóa chính (Primary Key) & Khóa ngoại (Foreign Key).</td>
+            </tr>
+            <tr>
+              <td><strong>Trường hợp sử dụng thực tế</strong></td>
+              <td>Lưu DarkMode, User Token (JWT), Ngôn ngữ, Cờ kiểm tra lần đầu mở app (isFirstOpen).</td>
+              <td>Danh sách công việc (Todo/Notes), Giỏ hàng Offline, Lịch sử giao dịch, Cache tin nhắn, Danh mục sản phẩm.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 3: CÁC THƯ VIỆN SỬ DỤNG ===================== -->
+      <h3 id="sec-3">3. Tổng Quan Các Thư Viện (Packages) Sẽ Sử Dụng & Vai Trò Cốt Lõi</h3>
+      <p>Để xây dựng một ứng dụng SQLite hoàn chỉnh, mượt mà trên cả Mobile (Android, iOS) lẫn Web (Chrome Dev), chúng ta kết hợp các thư viện chuẩn sau:</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📦 1. <code>sqflite: ^2.4.2</code></div>
+          <p>Plugin SQLite chính thức và phổ biến nhất cho Flutter (Android, iOS, macOS). Cung cấp các API mở kết nối DB, thực thi lệnh DDL (tạo bảng) và các hàm tiện ích CRUD (<code>insert</code>, <code>query</code>, <code>update</code>, <code>delete</code>, <code>transaction</code>).</p>
+        </div>
+        <div class="card">
+          <div class="card-title">📦 2. <code>path: ^1.9.1</code></div>
+          <p>Thư viện xử lý đường dẫn tệp tin đa nền tảng. Cung cấp hàm <code>join(dir, 'app.db')</code> giúp tự động chuẩn hóa dấu gạch nối (<code>/</code> trên Linux/macOS/Android hoặc <code>\</code> trên Windows) một cách chính xác tuyệt đối.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">🌐 3. <code>sqflite_common_ffi_web: ^1.2.0</code></div>
+          <p>Giải pháp đưa SQLite lên môi trường trình duyệt Web (Chrome) dựa trên nền tảng WebAssembly (Wasm) và IndexedDB. Giúp bạn test app SQLite nhanh chóng trên trình duyệt mà không cần mở máy ảo Android nặng nề.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">⚡ 4. <code>flutter_riverpod</code> & <code>riverpod_annotation</code></div>
+          <p>Bộ đôi quản lý State hiện đại. Cầu nối giữa giao diện UI và Cơ sở dữ liệu SQLite: Tự động tải danh sách ghi chú khi mở màn hình, phản ứng tự động vẽ lại giao diện khi có thêm/sửa/xóa thông qua <code>ref.invalidateSelf()</code>.</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4: ĐỀ BÀI 7 YÊU CẦU ===================== -->
+      <h3 id="sec-4">4. Yêu Cầu Bài Toán Thực Hành CRUD Note App (7 Tiêu Chí)</h3>
+      <div class="callout warn">
+        <div class="callout-title">📋 Bộ 7 tiêu chí nghiệp vụ cần hoàn thiện:</div>
+        <ol style="margin-left: 20px; line-height: 2.1;">
+          <li><strong>Tiêu chí 1 (Create Screen):</strong> Nhấn <code>FloatingActionButton</code> ở màn hình chính sẽ chuyển sang màn hình thêm mới (<code>NoteCreateScreen</code>). Màn hình này gồm <code>Form</code> với 2 trường nhập liệu <code>title</code> và <code>content</code>; bắt buộc quản lý <code>TextEditingController</code> và phải hủy tài nguyên trong <code>dispose()</code>.</li>
+          <li><strong>Tiêu chí 2 (Validation):</strong> Trường <code>title</code> phải có độ dài ít nhất <strong>3 ký tự</strong>. Trường <code>content</code> phải có ít nhất <strong>10 ký tự</strong>.</li>
+          <li><strong>Tiêu chí 3 (Feedback Create):</strong> Sau khi thêm mới thành công vào DB: Hiển thị <strong>SnackBar</strong> thông báo thành công và tự động chuyển (<code>Navigator.pop</code>) về màn hình danh sách Note.</li>
+          <li><strong>Tiêu chí 4 (Delete Confirm Dialog):</strong> Ở mỗi thẻ Note có một <code>IconButton</code> Delete. Khi nhấn vào sẽ hiển thị <strong>AlertDialog</strong> xác nhận: <em>"Are you sure to delete Note `tên_note`?"</em> với 2 nút <strong>Cancel</strong> và <strong>Delete</strong>. Nhấn Delete mới thực thi xóa bản ghi khỏi SQLite.</li>
+          <li><strong>Tiêu chí 5 (Feedback Delete):</strong> Sau khi xóa thành công: Hiển thị <strong>SnackBar</strong> thông báo xóa thành công và cập nhật lại danh sách.</li>
+          <li><strong>Tiêu chí 6 (Edit Screen):</strong> Ở mỗi thẻ Note có thêm 1 <code>IconButton</code> Edit. Khi nhấn vào sẽ điều hướng mở <code>NoteEditScreen</code> và truyền object Note hiện tại sang.</li>
+          <li><strong>Tiêu chí 7 (Update Logic & Reuse):</strong> Màn hình <code>NoteEditScreen</code> kế thừa toàn bộ quy tắc Validate (Title &ge; 3, Content &ge; 10 ký tự), tự động điền sẵn dữ liệu cũ vào các ô nhập liệu, lưu bản ghi cập nhật qua DB và hiện <strong>SnackBar</strong> thông báo thành công.</li>
+        </ol>
+      </div>
+
+      <!-- ===================== PHẦN 5: BƯỚC LÀM KÈM CODE ===================== -->
+      <h3 id="sec-5">5. Quy Trình Thực Hiện Chi Tiết (Từng Bước Nhỏ Kèm Code Thực Tế)</h3>
+      <p>Dưới đây là quy trình 7 bước nhỏ từ số 0. Ở mỗi bước đều có giải thích mục đích và khối code hoàn chỉnh tương ứng.</p>
+
+      <!-- BƯỚC 1 -->
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-title">Bước 1: Cấu hình thư viện trong <code>pubspec.yaml</code> & Chạy lệnh Terminal</div>
+        <div class="step-body">
+          <p>Mở file <code>pubspec.yaml</code> ở thư mục gốc của project, khai báo các thư viện cần dùng vào <code>dependencies</code> và công cụ sinh mã vào <code>dev_dependencies</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>pubspec.yaml</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-yaml">dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.4.2                  # Thư viện SQLite chính cho Flutter
+  path: ^1.9.1                      # Nối đường dẫn file DB an toàn đa nền tảng
+  sqflite_common_ffi_web: ^1.2.0    # SQLite engine chạy trên Web (Wasm)
+  flutter_riverpod: ^3.2.0          # Quản lý State hiện đại
+  riverpod_annotation: ^4.0.1       # Annotation @riverpod
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner:                     # Công cụ chạy sinh mã Dart
+  riverpod_generator: ^4.0.2        # Sinh code Notifier tự động
+  flutter_lints: ^6.0.0
+
+dependency_overrides:
+  test_api: ^0.7.9</code></pre>
+          </div>
+          <p style="margin-top:12px;">Sau khi lưu file, mở Terminal trong dự án và chạy các lệnh:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Terminal Command</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-bash"># 1. Tải các gói thư viện về máy:
+flutter pub get
+
+# 2. Setup SQLite cho trình duyệt Web Chrome (nếu bạn cần chạy thử trên Web):
+dart run sqflite_common_ffi_web:setup</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 2 -->
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-title">Bước 2: Xây dựng Model Note với <code>fromJson</code> & <code>toJson</code></div>
+        <div class="step-body">
+          <p>Tạo file <code>lib/model/note.dart</code>. Model này đại diện cho 1 bản ghi trong bảng cơ sở dữ liệu. Lưu ý rằng trường <code>id</code> có kiểu <code>int?</code> (nullable) vì khi thêm mới, SQLite sẽ tự động tăng giá trị id (AUTOINCREMENT):</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/model/note.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">class Note {
+  int? id;         // id tự tăng trong SQLite, tạo mới thì để null
+  String title;    // Tiêu đề ghi chú
+  String content;  // Nội dung ghi chú
+
+  Note({
+    this.id,
+    required this.title,
+    required this.content,
+  });
+
+  // Chuyển dữ liệu Map đọc từ SQLite thành Object Note
+  factory Note.fromJson(Map<String, dynamic> json) {
+    return Note(
+      id: json['id'] as int?,
+      title: json['title'] as String,
+      content: json['content'] as String,
+    );
+  }
+
+  // Chuyển Object Note thành Map để truyền vào hàm insert/update của sqflite
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+    };
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 3 -->
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-title">Bước 3: Xây dựng lớp <code>DatabaseHelper</code> (Singleton Pattern & CRUD)</div>
+        <div class="step-body">
+          <p>Tạo file <code>lib/db/database_helper.dart</code>. Ta áp dụng <strong>Singleton Pattern</strong> (private constructor) để đảm bảo toàn bộ ứng dụng chỉ có duy nhất 1 kết nối Database mở đồng thời, tránh xung đột file lock. Đồng thời viết đủ 4 hàm CRUD (<code>getAll</code>, <code>create</code>, <code>update</code>, <code>delete</code>):</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/db/database_helper.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">import 'package:flutter/foundation.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:sqlite_intro/model/note.dart';
+
+class DatabaseHelper {
+  final _databaseName = 'note_management.db';
+  static const _noteTableName = 'notes';
+
+  // 1. Singleton pattern: Đảm bảo chỉ có 1 instance kết nối duy nhất
+  DatabaseHelper._privateConstructor();
+  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
+
+  static Database? _database;
+
+  // 2. Getter bất đồng bộ lấy database
+  Future<Database> get database async {
+    _database ??= await _initDatabase();
+    return _database!;
+  }
+
+  // 3. Khởi tạo kết nối SQLite
+  Future<Database> _initDatabase() async {
+    // Nếu chạy trên Web Chrome: dùng factory FFI Web
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      return openDatabase(_databaseName, version: 1, onCreate: _onCreate);
+    }
+
+    // Nếu chạy trên Mobile (Android/iOS): Lấy thư mục databases chuẩn
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, _databaseName); // Nối chuỗi đường dẫn chuẩn
+    return openDatabase(path, version: 1, onCreate: _onCreate);
+  }
+
+  // 4. Hàm tạo bảng chỉ chạy lần đầu tiên
+  Future<void> _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE $_noteTableName (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL
+      )
+    ''');
+  }
+
+  // 5. READ: Lấy toàn bộ danh sách notes (sắp xếp mới nhất lên đầu)
+  Future<List<Note>> getAll() async {
+    final db = await database;
+    final List<Map<String, Object?>> maps = await db.query(
+      _noteTableName,
+      orderBy: 'id DESC',
+    );
+    return [for (final m in maps) Note.fromJson(m)];
+  }
+
+  // 6. CREATE: Thêm một Note mới
+  Future<int> create(Note note) async {
+    final db = await database;
+    return db.insert(_noteTableName, note.toJson());
+  }
+
+  // 7. UPDATE: Cập nhật Note theo id (Dùng whereArgs để chống SQL Injection)
+  Future<int> update(Note note) async {
+    final db = await database;
+    return db.update(
+      _noteTableName,
+      note.toJson(),
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
+  }
+
+  // 8. DELETE: Xóa Note theo id
+  Future<int> delete(int id) async {
+    final db = await database;
+    return db.delete(
+      _noteTableName,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 4 -->
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-title">Bước 4: Tạo State Notifier với Riverpod & Lệnh sinh mã tự động</div>
+        <div class="step-body">
+          <p>Tạo file <code>lib/providers/note_notifier.dart</code>. Notifier chịu trách nhiệm gọi hàm DB và thông báo cho giao diện vẽ lại bằng <code>ref.invalidateSelf()</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/providers/note_notifier.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sqlite_intro/db/database_helper.dart';
+import '../model/note.dart';
+
+part 'note_notifier.g.dart';
+
+@riverpod
+class NoteNotifier extends _$NoteNotifier {
+  // Khi giao diện lắng nghe, hàm build() sẽ tự đọc danh sách Note từ SQLite
+  @override
+  Future<List<Note>> build() {
+    return DatabaseHelper.instance.getAll();
+  }
+
+  // Thêm mới Note
+  Future<void> addNote(Note note) async {
+    await DatabaseHelper.instance.create(note);
+    ref.invalidateSelf(); // Kích hoạt build() chạy lại để nạp danh sách mới
+    await future;         // Chờ đến khi build() mới nạp xong dữ liệu
+  }
+
+  // Cập nhật Note
+  Future<void> updateNote(Note note) async {
+    await DatabaseHelper.instance.update(note);
+    ref.invalidateSelf();
+    await future;
+  }
+
+  // Xóa Note
+  Future<void> deleteNote(int id) async {
+    await DatabaseHelper.instance.delete(id);
+    ref.invalidateSelf();
+    await future;
+  }
+}</code></pre>
+          </div>
+          <p style="margin-top:12px;">Sau khi viết xong file trên, mở Terminal và chạy lệnh sau để sinh file <code>note_notifier.g.dart</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Terminal Command (Sinh mã Riverpod)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-bash">dart run build_runner build --delete-conflicting-outputs</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 5 -->
+      <div class="step-box">
+        <div class="step-num">5</div>
+        <div class="step-title">Bước 5: Xây dựng màn hình Form thêm mới (<code>NoteCreateScreen</code>)</div>
+        <div class="step-body">
+          <p>Tạo file <code>lib/ui/note_create_screen.dart</code>. Màn hình này thỏa mãn <strong>Tiêu chí 1, 2 và 3</strong>: Form có <code>GlobalKey</code>, kiểm tra độ dài <code>title &ge; 3</code>, <code>content &ge; 10</code>, bắt buộc gọi <code>dispose()</code> để hủy controller, hiển thị SnackBar và <code>Navigator.pop()</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/ui/note_create_screen.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite_intro/model/note.dart';
+import 'package:sqlite_intro/providers/note_notifier.dart';
+
+class NoteCreateScreen extends ConsumerStatefulWidget {
+  const NoteCreateScreen({super.key});
+
+  @override
+  ConsumerState<NoteCreateScreen> createState() => _NoteCreateScreenState();
+}
+
+class _NoteCreateScreenState extends ConsumerState<NoteCreateScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+
+  // Bắt buộc: Hủy controller trong dispose() chống rò rỉ bộ nhớ
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveForm() async {
+    // 1. Kiểm tra Validate
+    if (_formKey.currentState!.validate()) {
+      final newNote = Note(
+        title: _titleController.text.trim(),
+        content: _contentController.text.trim(),
+      );
+
+      // 2. Lưu vào SQLite thông qua Notifier
+      await ref.read(noteProvider.notifier).addNote(newNote);
+
+      // 3. Hiển thị SnackBar thông báo và quay về trang danh sách
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thêm mới Note thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Create Note')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+                // Tiêu chí 2: Title ít nhất 3 ký tự
+                validator: (value) {
+                  if (value == null || value.trim().length < 3) {
+                    return 'Title phải có ít nhất 3 ký tự';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _contentController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Content',
+                  border: OutlineInputBorder(),
+                ),
+                // Tiêu chí 2: Content ít nhất 10 ký tự
+                validator: (value) {
+                  if (value == null || value.trim().length < 10) {
+                    return 'Content phải có ít nhất 10 ký tự';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _saveForm,
+                icon: const Icon(Icons.save),
+                label: const Text('Save Note'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 6 -->
+      <div class="step-box">
+        <div class="step-num">6</div>
+        <div class="step-title">Bước 6: Xây dựng màn hình chỉnh sửa (<code>NoteEditScreen</code>)</div>
+        <div class="step-body">
+          <p>Tạo file <code>lib/ui/note_edit_screen.dart</code>. Màn hình này thỏa mãn <strong>Tiêu chí 6 và 7</strong>: Nhận vào object <code>note</code> cũ, gán giá trị vào controller tại <code>initState()</code>, validate đúng chuẩn, gọi <code>updateNote</code> và hiện SnackBar thông báo:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/ui/note_edit_screen.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite_intro/model/note.dart';
+import 'package:sqlite_intro/providers/note_notifier.dart';
+
+class NoteEditScreen extends ConsumerStatefulWidget {
+  final Note note; // Nhận đối tượng Note cần sửa
+  const NoteEditScreen({super.key, required this.note});
+
+  @override
+  ConsumerState<NoteEditScreen> createState() => _NoteEditScreenState();
+}
+
+class _NoteEditScreenState extends ConsumerState<NoteEditScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final TextEditingController _titleController;
+  late final TextEditingController _contentController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Gán dữ liệu hiện tại của Note vào Form
+    _titleController = TextEditingController(text: widget.note.title);
+    _contentController = TextEditingController(text: widget.note.content);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveEditForm() async {
+    if (_formKey.currentState!.validate()) {
+      // Giữ nguyên id cũ để cập nhật đúng bản ghi
+      final updatedNote = Note(
+        id: widget.note.id,
+        title: _titleController.text.trim(),
+        content: _contentController.text.trim(),
+      );
+
+      await ref.read(noteProvider.notifier).updateNote(updatedNote);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cập nhật Note thành công!'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit Note')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().length < 3) {
+                    return 'Title phải có ít nhất 3 ký tự';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _contentController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Content',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().length < 10) {
+                    return 'Content phải có ít nhất 10 ký tự';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _saveEditForm,
+                icon: const Icon(Icons.check),
+                label: const Text('Update Note'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 7 -->
+      <div class="step-box">
+        <div class="step-num">7</div>
+        <div class="step-title">Bước 7: Màn hình danh sách (<code>NoteListScreen</code>) & Khởi động <code>main.dart</code></div>
+        <div class="step-body">
+          <p>Tạo file <code>lib/ui/note_list_screen.dart</code>. Thỏa mãn <strong>Tiêu chí 4 và 5</strong>: GridView hiển thị danh sách, nút Sửa mở <code>NoteEditScreen</code>, nút Xóa hiển thị <code>AlertDialog</code> xác nhận có hỏi tên ghi chú, nút FloatingActionButton mở <code>NoteCreateScreen</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/ui/note_list_screen.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite_intro/model/note.dart';
+import 'package:sqlite_intro/providers/note_notifier.dart';
+import 'package:sqlite_intro/ui/note_create_screen.dart';
+import 'package:sqlite_intro/ui/note_edit_screen.dart';
+
+class NoteListScreen extends ConsumerStatefulWidget {
+  const NoteListScreen({super.key});
+
+  @override
+  ConsumerState<NoteListScreen> createState() => _NoteListScreenState();
+}
+
+class _NoteListScreenState extends ConsumerState<NoteListScreen> {
+  // Tiêu chí 4 & 5: Hộp thoại xác nhận trước khi xóa
+  void _showDeleteConfirmDialog(BuildContext context, Note note) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: Text('Are you sure to delete Note "${note.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                // Xóa khỏi SQLite
+                await ref.read(noteProvider.notifier).deleteNote(note.id!);
+
+                if (dialogCtx.mounted) {
+                  Navigator.pop(dialogCtx); // Đóng dialog
+                }
+
+                // Tiêu chí 5: Hiển thị SnackBar
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Xóa Note thành công!'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notesAsyncVal = ref.watch(noteProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SQLite Notes CRUD'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: notesAsyncVal.when(
+        data: (notes) => notes.isEmpty
+            ? const Center(
+                child: Text(
+                  'No notes. Please create one.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              )
+            : GridView.builder(
+                padding: const EdgeInsets.all(10),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.95,
+                ),
+                itemCount: notes.length,
+                itemBuilder: (context, index) {
+                  final note = notes[index];
+                  return Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            note.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Expanded(
+                            child: Text(
+                              note.content,
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: Colors.grey.shade700),
+                            ),
+                          ),
+                          const Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              // Tiêu chí 6: Nút Edit mở NoteEditScreen
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => NoteEditScreen(note: note),
+                                    ),
+                                  );
+                                },
+                              ),
+                              // Tiêu chí 4: Nút Delete mở Dialog xác nhận
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _showDeleteConfirmDialog(context, note),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(
+          child: Text('Lỗi tải dữ liệu: $err', style: const TextStyle(color: Colors.red)),
+        ),
+      ),
+      // Tiêu chí 1: FloatingActionButton mở NoteCreateScreen
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NoteCreateScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+          </div>
+
+          <p style="margin-top:16px;">Cuối cùng, khởi động ứng dụng tại file <code>lib/main.dart</code> với <code>WidgetsFlutterBinding.ensureInitialized()</code> và bọc <code>ProviderScope</code>:</p>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>lib/main.dart</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            </div>
+            <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite_intro/ui/note_list_screen.dart';
+
+void main() {
+  // Đảm bảo kết nối Native Engine sẵn sàng trước khi truy cập SQLite
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'SQLite Note Management',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const NoteListScreen(),
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 6: MINH HỌA KIẾN TRÚC ===================== -->
+      <h3 id="sec-6">6. Minh Họa Kiến Trúc Luồng Dữ Liệu (Data Flow Diagram)</h3>
+      <p>Sơ đồ dưới đây minh họa trực quan luồng đi của dữ liệu từ khi người dùng thao tác trên màn hình, đi qua State Notifier của Riverpod, tới Singleton DatabaseHelper và ghi bền vững vào file SQLite <code>.db</code>:</p>
+
+      <div class="card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="font-family: monospace; font-size: 13px; line-height: 1.8; color: var(--accent-cyan); background-color: var(--code-bg); padding: 18px; border-radius: 8px; border: 1px solid var(--border-color); overflow-x: auto;">
+┌─────────────────────────────────────────────────────────────────────────────────┐<br>
+│                         1. GIAO DIỆN NGƯỜI DÙNG (UI LAYER)                      │<br>
+│                                                                                 │<br>
+│  [NoteListScreen] ────(ref.watch)────► Lắng nghe danh sách notes (AsyncValue)  │<br>
+│         │                                                                       │<br>
+│         ├─── Nhấn Thêm ────► [NoteCreateScreen] (Validate Form: Title ≥ 3, Len ≥ 10) │<br>
+│         ├─── Nhấn Sửa  ────► [NoteEditScreen]   (Populate dữ liệu cũ + Save)     │<br>
+│         └─── Nhấn Xóa  ────► [AlertDialog]      (Xác nhận tên Note trước khi xóa)│<br>
+└──────────────────────────────────────┬──────────────────────────────────────────┘<br>
+                                       │ ref.read(noteProvider.notifier)<br>
+                                       ▼<br>
+┌─────────────────────────────────────────────────────────────────────────────────┐<br>
+│                    2. QUẢN LÝ TRẠNG THÁI (STATE LAYER - RIVERPOD)               │<br>
+│                                                                                 │<br>
+│  [NoteNotifier] (build() ──► Future&lt;List&lt;Note&gt;&gt;)                                  │<br>
+│         ├── addNote(note)                                                       │<br>
+│         ├── updateNote(note)                                                    │<br>
+│         └── deleteNote(id)                                                      │<br>
+│                  │                                                              │<br>
+│                  └────► Sau khi DB xong: ref.invalidateSelf(); await future;    │<br>
+│                         (Tự động reload danh sách mới, UI vẽ lại mượt mà)       │<br>
+└──────────────────────────────────────┬──────────────────────────────────────────┘<br>
+                                       │ DatabaseHelper.instance<br>
+                                       ▼<br>
+┌─────────────────────────────────────────────────────────────────────────────────┐<br>
+│                  3. TẦNG TRUY XUẤT DỮ LIỆU (DATABASE HELPER SINGLETON)           │<br>
+│                                                                                 │<br>
+│  - DatabaseHelper._privateConstructor() (Chỉ 1 kết nối duy nhất chống khóa file)│<br>
+│  - getDatabasesPath() + join(...) ──► /data/user/0/.../note_management.db       │<br>
+│  - ORM Mapping: Note.fromJson(map) ◄──► note.toJson()                            │<br>
+│  - CRUD Helpers: db.query(), db.insert(), db.update(), db.delete()             │<br>
+│  - Bảo mật: Dùng whereArgs: [id] chống SQL Injection                            │<br>
+└──────────────────────────────────────┬──────────────────────────────────────────┘<br>
+                                       │ Native SQLite Engine / Wasm FFI<br>
+                                       ▼<br>
+┌─────────────────────────────────────────────────────────────────────────────────┐<br>
+│                     4. BỘ NHỚ VẬT LÝ DISK (SQLITE ENGINE NATIVE)                │<br>
+│                                                                                 │<br>
+│  File: "note_management.db"                                                     │<br>
+│  Bảng: notes [ id (INTEGER PK AI) | title (TEXT) | content (TEXT) ]             │<br>
+│  Đặc tính: Bền vững vĩnh viễn (Persistence), chuẩn ACID, Offline 100%           │<br>
+└─────────────────────────────────────────────────────────────────────────────────┘
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 7: LỖI THƯỜNG GẶP ===================== -->
+      <h3 id="sec-7">7. Bảng Tổng Hợp Lỗi Thường Gặp Khi Dùng SQLite & Cách Xử Lý</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Hiện tượng / Thông báo lỗi</th>
+              <th>Nguyên nhân gốc rễ</th>
+              <th>Cách giải quyết dứt điểm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>MissingPluginException (No implementation found for method getDatabasesPath)</code></td>
+              <td>Chạy lệnh <code>getDatabasesPath()</code> khi app chưa kết nối Native Channels hoặc vừa thêm plugin <code>sqflite</code> vào <code>pubspec.yaml</code> nhưng chỉ Hot Reload.</td>
+              <td>Tắt hẳn app (Dừng Debug / Stop Run) và thực hiện <strong>Rebuild lại từ đầu (Full Restart)</strong> để Gradle tích hợp thư viện native C/C++ vào Android APK. Thêm <code>WidgetsFlutterBinding.ensureInitialized();</code> ở hàm <code>main()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>databaseFactory not initialized</code> hoặc màn hình xám xịt khi chạy trên trình duyệt Web (Chrome)</td>
+              <td>Mặc định thư viện <code>sqflite</code> chỉ hỗ trợ Mobile (Android/iOS). Khi chạy trên Web cần dùng factory FFI Web.</td>
+              <td>Trong <code>_initDatabase()</code>, kiểm tra <code>if (kIsWeb) { databaseFactory = databaseFactoryFfiWeb; }</code> và chạy terminal: <code>dart run sqflite_common_ffi_web:setup</code>.</td>
+            </tr>
+            <tr>
+              <td><code>table notes already exists</code> hoặc không thấy cột mới thêm</td>
+              <td>Phương thức <code>_onCreate</code> chỉ chạy đúng 1 lần khi DB vừa được tạo. Khi bạn sửa code DDL tạo cột mới, SQLite thấy file <code>.db</code> đã tồn tại nên không chạy lại <code>_onCreate</code>.</td>
+              <td>Gỡ cài đặt (Uninstall) app khỏi máy ảo/điện thoại rồi cài lại, hoặc tăng biến <code>version: 2</code> trong <code>openDatabase</code> và viết hàm <code>onUpgrade</code>.</td>
+            </tr>
+            <tr>
+              <td>Nguy cơ dính lỗ hổng bảo mật <strong>SQL Injection</strong></td>
+              <td>Ghép chuỗi thô trực tiếp vào câu lệnh SQL, ví dụ: <code>rawDelete("DELETE FROM notes WHERE id = $id")</code>. Nếu tham số chứa mã độc SQL, kẻ xấu có thể can thiệp dữ liệu.</td>
+              <td>Luôn dùng dấu chấm hỏi (Placeholder <code>?</code>) và truyền giá trị qua mảng <code>whereArgs</code>: <code>db.delete('notes', where: 'id = ?', whereArgs: [id]);</code>.</td>
+            </tr>
+            <tr>
+              <td>UI không tự động cập nhật khi vừa Insert/Delete thành công</td>
+              <td>Quên báo hiệu cho State Management biết dữ liệu dưới DB đã thay đổi.</td>
+              <td>Trong Notifier, sau mỗi hàm <code>create/update/delete</code>, luôn gọi <code>ref.invalidateSelf(); await future;</code> để Riverpod tự động kéo dữ liệu mới nhất lên màn hình.</td>
+            </tr>
+            <tr>
+              <td><code>A TextEditingController was used after being disposed</code></td>
+              <td>Màn hình đã bị đóng nhưng một hàm bất đồng bộ (hoặc Animation) vẫn cố tình truy cập vào <code>_titleController.text</code> sau khi đã gọi <code>dispose()</code>.</td>
+              <td>Kiểm tra <code>if (!mounted) return;</code> trước khi thao tác trên UI hoặc chuyển dòng <code>dispose()</code> xuống cuối cùng sau khi mọi tiến trình kết thúc.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

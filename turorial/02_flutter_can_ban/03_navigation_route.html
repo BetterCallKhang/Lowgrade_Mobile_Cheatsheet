@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 3. Navigator & Route (Điều Hướng & Chuyển Trang) - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 3</span>
+        <span class="pill pill-green">Navigation & Route</span>
+        <span class="pill pill-purple">Dự án: widget_intro</span>
+      </div>
+      <div>
+        <a href="02_theme_drawer.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 2. Theme & Drawer</a>
+        <a href="04_layout_responsive.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Mục 4. Layout & Responsive &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 3. Toàn Diện Về Navigator & Route Trong Flutter</h2>
+        <p>Bản chất Navigator là gì? Tại sao phải dùng cơ chế ngăn xếp (Stack)? Bản chất Widget Navigator và các thuộc tính/constructor của nó. Hướng dẫn toàn diện từ Anonymous Route (MaterialPageRoute), Named Routes, truyền & nhận dữ liệu 2 chiều (await Navigator.push), và Deep Linking — Giải phẫu cấu trúc đường link (Anatomy of a Link) xử lý qua onGenerateRoute.</p>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3>1. Navigator Là Gì? Tại Sao Phải Dùng Navigator?</h3>
+      
+      <h4>1.1. Khái niệm cơ bản</h4>
+      <p>Trong ứng dụng di động, người dùng không ở mãi một màn hình. Họ nhấn vào danh sách sản phẩm để xem chi tiết, nhấn nút "Mua hàng" để sang giỏ hàng, hoặc nhấn mũi tên quay lại để về trang trước. Quá trình di chuyển giữa các màn hình đó được gọi là <strong>Navigation (Điều hướng)</strong>, và mỗi màn hình hiển thị được gọi là một <strong>Route</strong>.</p>
+      <p>Trong Flutter, <code>Navigator</code> chính là một Widget quản lý tập hợp các <code>Route</code> theo nguyên lý cấu trúc dữ liệu <strong>Ngăn xếp (LIFO Stack - Last In, First Out)</strong>: màn hình nào được đưa vào sau cùng sẽ hiển thị trên cùng và được người dùng nhìn thấy trước tiên.</p>
+
+      <!-- HÌNH MINH HỌA SVG STACK -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">📊 Minh Họa Trực Quan: Cơ Chế Ngăn Xếp (Route Stack) Trong Navigator</div>
+        <svg viewBox="0 0 850 280" style="width: 100%; max-width: 820px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <!-- Nền xám nhẹ -->
+          <rect x="10" y="10" width="830" height="260" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HỘP 1: BAN ĐẦU -->
+          <g>
+            <text x="130" y="40" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle">1. Khởi tạo App</text>
+            <rect x="50" y="60" width="160" height="180" rx="8" fill="#21262d" stroke="#30363d" stroke-dasharray="4" />
+            <!-- Màn hình Home ở đáy stack -->
+            <rect x="60" y="180" width="140" height="50" rx="6" fill="#1f6feb" stroke="#58a6ff" stroke-width="1.5" />
+            <text x="130" y="210" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">HomeScreen (Đáy)</text>
+            <text x="130" y="255" fill="#8b949e" font-size="11" text-anchor="middle">Stack: [Home]</text>
+          </g>
+
+          <!-- MŨI TÊN PUSH -->
+          <g>
+            <path d="M 230 140 L 300 140" stroke="#3fb950" stroke-width="3" fill="none" marker-end="url(#arrow-green)" />
+            <text x="265" y="125" fill="#3fb950" font-size="12" font-weight="bold" text-anchor="middle">push()</text>
+            <text x="265" y="160" fill="#8b949e" font-size="11" text-anchor="middle">Đẩy thêm</text>
+          </g>
+
+          <!-- HỘP 2: SAU KHI PUSH DETAIL -->
+          <g>
+            <text x="410" y="40" fill="#3fb950" font-size="14" font-weight="bold" text-anchor="middle">2. Chuyển sang DetailScreen</text>
+            <rect x="330" y="60" width="160" height="180" rx="8" fill="#21262d" stroke="#30363d" stroke-dasharray="4" />
+            <!-- HomeScreen bên dưới -->
+            <rect x="340" y="180" width="140" height="50" rx="6" fill="#1f6feb" opacity="0.6" stroke="#58a6ff" stroke-width="1" />
+            <text x="410" y="210" fill="#c9d1d9" font-size="12" text-anchor="middle">HomeScreen (Ẩn dưới)</text>
+            <!-- DetailScreen đè lên trên -->
+            <rect x="340" y="120" width="140" height="50" rx="6" fill="#238636" stroke="#3fb950" stroke-width="1.5" />
+            <text x="410" y="150" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">DetailScreen (Top)</text>
+            <text x="410" y="255" fill="#8b949e" font-size="11" text-anchor="middle">Stack: [Home, Detail]</text>
+          </g>
+
+          <!-- MŨI TÊN POP -->
+          <g>
+            <path d="M 510 140 L 580 140" stroke="#f85149" stroke-width="3" fill="none" marker-end="url(#arrow-red)" />
+            <text x="545" y="125" fill="#f85149" font-size="12" font-weight="bold" text-anchor="middle">pop()</text>
+            <text x="545" y="160" fill="#8b949e" font-size="11" text-anchor="middle">Rút khỏi Stack</text>
+          </g>
+
+          <!-- HỘP 3: SAU KHI POP QUAY VỀ -->
+          <g>
+            <text x="690" y="40" fill="#ffa657" font-size="14" font-weight="bold" text-anchor="middle">3. Quay lại HomeScreen</text>
+            <rect x="610" y="60" width="160" height="180" rx="8" fill="#21262d" stroke="#30363d" stroke-dasharray="4" />
+            <!-- HomeScreen sáng lại -->
+            <rect x="620" y="180" width="140" height="50" rx="6" fill="#1f6feb" stroke="#58a6ff" stroke-width="1.5" />
+            <text x="690" y="210" fill="#ffffff" font-size="13" font-weight="bold" text-anchor="middle">HomeScreen (Top)</text>
+            <!-- Detail bay ra ngoài -->
+            <path d="M 690 120 L 690 90" stroke="#f85149" stroke-width="2" stroke-dasharray="3" />
+            <text x="690" y="80" fill="#f85149" font-size="11" text-anchor="middle">&times; Hủy DetailScreen</text>
+            <text x="690" y="255" fill="#8b949e" font-size="11" text-anchor="middle">Stack: [Home]</text>
+          </g>
+
+          <!-- Marker definitions -->
+          <defs>
+            <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#3fb950" />
+            </marker>
+            <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f85149" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <h4>1.2. Tại sao phải dùng Navigator thay vì chỉ if/else hiển thị Widget?</h4>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">⚠️ Nhược điểm nếu chỉ dùng biến state & if/else</div>
+          <ul>
+            <li><strong>Mất nút Back mặc định của điện thoại</strong>: Trên Android, nút Back vật lý hoặc cử chỉ vuốt mép sẽ tắt ứng dụng thay vì quay về màn hình trước.</li>
+            <li><strong>Không có hiệu ứng chuyển cảnh (Animation)</strong>: Khi đổi màn hình, giao diện bị giật cục, không có hiệu ứng trượt mượt mà (slide) của Android/iOS.</li>
+            <li><strong>Khó quản lý luồng ứng dụng phức tạp</strong>: Không thể xử lý các luồng như: Login &rarr; OTP &rarr; Home, sau đó xóa sạch lịch sử để khi bấm Back không bị quay lại trang Login.</li>
+            <li><strong>Bộ nhớ không giải phóng đúng cách</strong>: Các màn hình cũ vẫn gắn chặt trong một cây Widget khổng lồ, gây tốn RAM và rò rỉ dữ liệu.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">✨ Ưu điểm vượt trội của Navigator</div>
+          <ul>
+            <li><strong>Tự động tích hợp nút Back phần cứng</strong>: Hoạt động trơn tru với cử chỉ vuốt về (iOS swipe back) và phím Back vật lý trên thiết bị Android.</li>
+            <li><strong>Tự sinh nút Back trên AppBar</strong>: Khi bạn dùng <code>Scaffold</code> có <code>AppBar</code> ở màn hình thứ 2, Flutter tự nhận biết có màn hình trước đó và tự động vẽ nút mũi tên quay lại mà bạn không cần code thêm gì.</li>
+            <li><strong>Hỗ trợ truyền & nhận kết quả 2 chiều</strong>: Màn hình gọi có thể <code>await</code> để nhận dữ liệu trả về sau khi màn hình con hoàn thành công việc.</li>
+            <li><strong>Hiệu ứng chuẩn Material 3 & Cupertino</strong>: Đổi trang mượt mà theo đúng triết lý của từng hệ điều hành.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3>2. Bản Chất Navigator Là Một Widget: Constructor & Các Tham Số Quan Trọng</h3>
+      
+      <h4>2.1. Navigator dưới góc nhìn kiến trúc Flutter</h4>
+      <p>Nhiều người lầm tưởng <code>Navigator</code> chỉ là một class chứa các hàm tĩnh (static methods) như <code>Navigator.push()</code> hay <code>Navigator.pop()</code>. Nhưng thực tế: <strong><code>Navigator</code> là một <code>StatefulWidget</code>!</strong></p>
+      <p>Khi bạn viết <code>MaterialApp(home: HomeScreen())</code>, chính <code>MaterialApp</code> đã âm thầm tạo sẵn một Widget <code>Navigator</code> gốc ở cấp cao nhất để bọc lấy toàn bộ ứng dụng của bạn. Mỗi khi bạn gọi <code>Navigator.of(context)</code>, Flutter sẽ duyệt ngược lên cây Widget để tìm <code>State</code> của Widget <code>Navigator</code> gần nhất (chính là <code>NavigatorState</code>).</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Cấu trúc Constructor của Widget Navigator</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>Navigator({
+  Key? key,
+  List&lt;Page&lt;dynamic&gt;&gt; pages = const &lt;Page&lt;dynamic&gt;&gt;[],
+  bool Function(Route&lt;dynamic&gt;, dynamic)? onPopPage,
+  String? initialRoute,
+  Route&lt;dynamic&gt;? Function(RouteSettings)? onGenerateRoute,
+  Route&lt;dynamic&gt;? Function(RouteSettings)? onUnknownRoute,
+  List&lt;NavigatorObserver&gt; observers = const &lt;NavigatorObserver&gt;[],
+  bool requestFocus = true,
+  String? restorationScopeId,
+  Route&lt;dynamic&gt; Function(NavigatorState, String)? onGenerateInitialRoutes,
+})</code></pre>
+      </div>
+
+      <h4>2.2. Bảng phân tích chi tiết các tham số của Navigator</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 22%;">Tham số</th>
+              <th style="width: 26%;">Kiểu dữ liệu</th>
+              <th>Ý nghĩa & Cách hoạt động trong thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>initialRoute</code></td>
+              <td><code>String?</code></td>
+              <td>Tên route sẽ được nạp đầu tiên vào Stack khi Navigator khởi động (Ví dụ: <code>'/'</code> hoặc <code>'/splash'</code>).</td>
+            </tr>
+            <tr>
+              <td><code>onGenerateRoute</code></td>
+              <td><code>Route&lt;dynamic&gt;? Function(RouteSettings)?</code></td>
+              <td>Hàm bắt chặn mọi yêu cầu chuyển trang theo tên (Named Route). Nhận vào <code>RouteSettings</code> (chứa <code>name</code> và <code>arguments</code>). Rất quan trọng khi bạn muốn kiểm tra quyền truy cập (vd: chưa login thì chuyển về Login) hoặc truyền dữ liệu phức tạp.</td>
+            </tr>
+            <tr>
+              <td><code>onUnknownRoute</code></td>
+              <td><code>Route&lt;dynamic&gt;? Function(RouteSettings)?</code></td>
+              <td>Xử lý trang "404 Not Found". Được gọi khi ứng dụng cố chuyển tới một tên route không hề được định nghĩa ở <code>routes</code> hay <code>onGenerateRoute</code>.</td>
+            </tr>
+            <tr>
+              <td><code>observers</code></td>
+              <td><code>List&lt;NavigatorObserver&gt;</code></td>
+              <td>Danh sách các bộ quan sát (Observer) lắng nghe sự kiện push, pop, remove màn hình. Thường dùng để tích hợp <strong>Google Analytics</strong> (theo dõi xem người dùng đang ở màn hình nào) hoặc theo dõi vòng đời trang.</td>
+            </tr>
+            <tr>
+              <td><code>pages</code></td>
+              <td><code>List&lt;Page&lt;dynamic&gt;&gt;</code></td>
+              <td>Dùng trong kiến trúc <strong>Navigator 2.0 (Declarative Navigation)</strong>. Cho phép lập trình viên điều khiển Stack màn hình một cách tường minh dựa trên mảng danh sách state thay vì gọi các lệnh push/pop thủ công.</td>
+            </tr>
+            <tr>
+              <td><code>onPopPage</code></td>
+              <td><code>bool Function(Route, dynamic)?</code></td>
+              <td>Đi kèm với tham số <code>pages</code> trong Navigator 2.0. Callback này kích hoạt khi người dùng nhấn nút Back để bạn cập nhật lại mảng danh sách <code>pages</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">💡 Bạn có thể lồng nhiều Widget Navigator độc lập trong 1 App không?</div>
+        <p><strong>Hoàn toàn được!</strong> Đó gọi là <em>Nested Navigation</em>. Ví dụ: Bạn có thanh <code>BottomNavigationBar</code> ở dưới cùng, mỗi Tab có một Stack chuyển trang riêng biệt mà thanh Tab Bar vẫn giữ nguyên ở dưới đáy màn hình. Mỗi Tab lúc này sẽ bọc nội dung của mình trong một Widget <code>Navigator</code> riêng.</p>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3>3. Hai Cách Điều Hướng Căn Bản: Anonymous Routes vs Named Routes</h3>
+
+      <div class="grid-2">
+        <!-- Anonymous Routes -->
+        <div class="card">
+          <div class="card-title">Cách 1: Anonymous Routes (MaterialPageRoute)</div>
+          <p>Tạo màn hình mới trực tiếp ngay tại vị trí bấm nút mà không cần đăng ký tên trước.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Cú pháp Navigator.push() trực tiếp</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const DetailScreen(),
+  ),
+);</code></pre>
+          </div>
+          <p><strong>Ưu điểm:</strong> Nhanh, linh hoạt, truyền dữ liệu qua constructor của màn hình đích cực kỳ dễ dàng (ví dụ: <code>DetailScreen(user: u)</code>).</p>
+          <p><strong>Nhược điểm:</strong> Nếu app lớn hàng trăm màn hình, code sẽ rải rác khắp nơi, khó quản lý tổng thể luồng trang.</p>
+        </div>
+
+        <!-- Named Routes -->
+        <div class="card">
+          <div class="card-title">Cách 2: Named Routes (Định danh theo tên chuỗi)</div>
+          <p>Đăng ký tất cả đường dẫn (Path) tập trung một chỗ ở <code>MaterialApp</code> giống như URL trang web.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Khai báo routes ở main.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>MaterialApp(
+  initialRoute: '/',
+  routes: {
+    '/': (context) => const HomeScreen(),
+    '/users': (context) => const UsersScreen(),
+    '/settings': (context) => const SettingsScreen(),
+  },
+);
+
+// Khi cần chuyển trang:
+Navigator.pushNamed(context, '/users');</code></pre>
+          </div>
+          <p><strong>Ưu điểm:</strong> Quản lý tập trung một nơi tại <code>MaterialApp</code>, không phụ thuộc file import trực tiếp giữa các màn hình.</p>
+          <p><strong>Nhược điểm:</strong> Truyền tham số phức tạp qua <code>arguments</code> phải ép kiểu (Type Casting).</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3>4. Bộ Sưu Tập Các Hàm Thao Tác Stack (Navigator State Methods)</h3>
+      <p>Dưới đây là các phương thức phổ biến nhất bạn bắt buộc phải thành thạo khi làm ứng dụng hoặc đi thi:</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. Navigator.push() & Navigator.pushNamed()</div>
+          <p>Đẩy một màn hình mới vào <strong>đỉnh Stack</strong>. Màn hình mới sẽ hiển thị lên, màn hình cũ vẫn nằm bên dưới và giữ nguyên trạng thái.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Ví dụ Push</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>// Cách 1: MaterialPageRoute
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const DetailScreen()),
+);
+
+// Cách 2: Named Route
+Navigator.pushNamed(context, '/users_screen');</code></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">2. Navigator.pop() - Quay lại màn hình trước</div>
+          <p>Rút màn hình hiện tại ra khỏi đỉnh Stack và <strong>hủy vứt bỏ nó (dispose)</strong>, màn hình nằm ngay bên dưới sẽ xuất hiện trở lại.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Ví dụ Pop</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>// Quay lại đơn thuần
+Navigator.pop(context);
+
+// Quay lại kèm gửi kèm dữ liệu cho màn hình trước
+Navigator.pop(context, 'Dữ liệu trả về');</code></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">3. Navigator.pushReplacement() - Thay thế trang hiện tại</div>
+          <p>Loại bỏ ngay màn hình hiện tại và đặt màn hình mới vào vị trí đó (Không tăng chiều cao Stack). Người dùng nhấn Back sẽ không về màn hình vừa bị thay thế.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Trường hợp dùng: Màn hình Splash sang Login</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>// Khi chạy xong Splash Screen 2 giây:
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => const LoginScreen()),
+);</code></pre>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">4. Navigator.pushAndRemoveUntil() - Xóa sạch lịch sử</div>
+          <p>Đẩy màn hình mới vào đỉnh Stack và <strong>xóa bỏ toàn bộ các màn hình trước đó</strong> theo một điều kiện nhất định.</p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Trường hợp dùng: Đăng xuất (Logout) hoặc Login thành công</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>// Xóa hết mọi màn hình cũ, chỉ giữ lại HomeScreen
+Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(builder: (context) => const HomeScreen()),
+  (route) => false, // false: hủy sạch toàn bộ route cũ
+);</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3>5. Truyền & Nhận Dữ Liệu 2 Chiều Giữa Các Màn Hình</h3>
+      <p>Một trong những tác vụ thường gặp nhất trong thực tế và các đề thi là: <strong>Truyền dữ liệu sang màn hình chi tiết</strong> và <strong>Nhận kết quả (Result) trả về sau khi người dùng Thêm/Sửa/Xóa</strong>.</p>
+
+      <!-- MINH HỌA TRUYỀN DỮ LIỆU SVG -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">🔄 Minh Họa Luồng Dữ Liệu 2 Chiều (Async / Await Trong Navigator)</div>
+        <svg viewBox="0 0 800 200" style="width: 100%; max-width: 780px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;">
+          <rect x="10" y="10" width="780" height="180" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- Box Màn hình A -->
+          <rect x="50" y="45" width="220" height="110" rx="8" fill="#1f2937" stroke="#58a6ff" stroke-width="1.5" />
+          <text x="160" y="75" fill="#58a6ff" font-size="14" font-weight="bold" text-anchor="middle">Màn hình A (Danh sách)</text>
+          <text x="160" y="100" fill="#8b949e" font-size="12" text-anchor="middle">Gọi: final result =</text>
+          <text x="160" y="125" fill="#3fb950" font-size="12" font-weight="bold" text-anchor="middle">await Navigator.push(...)</text>
+
+          <!-- Mũi tên đi: Truyền tham số -->
+          <path d="M 285 70 L 495 70" stroke="#3fb950" stroke-width="2.5" marker-end="url(#arrow-green)" />
+          <text x="390" y="60" fill="#3fb950" font-size="11" font-weight="bold" text-anchor="middle">1. Truyền Data qua Constructor / Arguments &rarr;</text>
+
+          <!-- Mũi tên về: Trả kết quả -->
+          <path d="M 495 130 L 285 130" stroke="#ffa657" stroke-width="2.5" marker-end="url(#arrow-orange)" />
+          <text x="390" y="148" fill="#ffa657" font-size="11" font-weight="bold" text-anchor="middle">&larr; 2. Navigator.pop(context, "Thành công")</text>
+
+          <!-- Box Màn hình B -->
+          <rect x="510" y="45" width="220" height="110" rx="8" fill="#1f2937" stroke="#ffa657" stroke-width="1.5" />
+          <text x="620" y="75" fill="#ffa657" font-size="14" font-weight="bold" text-anchor="middle">Màn hình B (Chỉnh sửa)</text>
+          <text x="620" y="100" fill="#8b949e" font-size="12" text-anchor="middle">Nhận Data & Hiển thị Form</text>
+          <text x="620" y="125" fill="#f85149" font-size="12" text-anchor="middle">Nhấn Save &rarr; Pop kèm Data</text>
+
+          <defs>
+            <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#ffa657" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>Code mẫu thực tế: Mở màn hình chỉnh sửa và chờ kết quả trả về</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>// ===================== MÀN HÌNH A =====================
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+  @override
+  State&lt;HomeScreen&gt; createState() =&gt; _HomeScreenState();
+}
+
+class _HomeScreenState extends State&lt;HomeScreen&gt; {
+  String _message = 'Chưa có dữ liệu mới';
+
+  Future&lt;void&gt; _openEditScreen() async {
+    // 1. Dùng từ khóa await trước Navigator.push để tạm dừng chờ màn hình B đóng
+    final result = await Navigator.push&lt;String&gt;(
+      context,
+      MaterialPageRoute(
+        builder: (context) =&gt; const EditScreen(currentTitle: 'Bài viết Flutter 101'),
+      ),
+    );
+
+    // 2. Sau khi màn hình B gọi Navigator.pop(context, 'giá_trị'), result sẽ nhận được giá trị đó
+    if (result != null &amp;&amp; mounted) {
+      setState(() {
+        _message = 'Kết quả nhận được: $result';
+      });
+      // Hiện thông báo SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã cập nhật: $result')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Màn hình chính')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_message, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _openEditScreen,
+              child: const Text('Chuyển sang màn hình Edit &rarr;'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ===================== MÀN HÌNH B =====================
+class EditScreen extends StatelessWidget {
+  final String currentTitle;
+  const EditScreen({super.key, required this.currentTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final textController = TextEditingController(text: currentTitle);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Chỉnh sửa thông tin')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: textController,
+              decoration: const InputDecoration(labelText: 'Tiêu đề mới'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // 3. Trả dữ liệu về cho màn hình A thông qua tham số thứ 2 của Navigator.pop
+                Navigator.pop(context, textController.text.trim());
+              },
+              child: const Text('Lưu & Trở Về'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3>6. Deep Linking & Giải Phẫu Cấu Trúc Đường Link (Anatomy of a Link)</h3>
+      
+      <h4>6.1. Deep Linking là gì? Tại sao lại gắn liền với Navigator & Route?</h4>
+      <p>Bình thường khi người dùng nhấn vào một đường liên kết từ Zalo, Facebook, Email hoặc thông báo đẩy (Push Notification):</p>
+      <ul>
+        <li><strong>Link thông thường:</strong> Mở trình duyệt web (Chrome, Safari).</li>
+        <li><strong>Link mở app cơ bản:</strong> Chỉ kích hoạt app mở lên và dừng lại ở màn hình <code>HomeScreen</code>.</li>
+        <li><strong>Deep Linking (Liên kết sâu):</strong> Cho phép đường link <strong>bật thẳng ứng dụng di động và nhảy trực tiếp vào màn hình cụ thể</strong> (ví dụ: mở thẳng chi tiết sản phẩm <code>#123</code>, trang cá nhân của một User, hoặc màn hình thanh toán đơn hàng) mà không cần người dùng tự bấm tìm kiếm lại từ đầu.</li>
+      </ul>
+      <p>Bản chất của Deep Linking trong Flutter chính là <strong>lệnh kích hoạt Route từ bên ngoài hệ điều hành (Android/iOS)</strong>, đẩy màn hình tương ứng vào cây <code>Navigator Stack</code> của ứng dụng.</p>
+
+      <h4>6.2. Giải Phẫu Cấu Trúc Của Một Đường Link (Anatomy of a Link)</h4>
+      <p>Mọi đường liên kết (URL / URI) dùng trong Deep Linking đều tuân theo chuẩn định dạng thống nhất:</p>
+
+      <!-- MINH HỌA ANATOMY OF A LINK BẰNG SVG -->
+      <div class="card" style="margin-top: 16px; margin-bottom: 24px; text-align: center; background-color: var(--bg-secondary);">
+        <div class="card-title" style="text-align: left; margin-bottom: 12px;">🔍 Sơ Đồ Cấu Trúc Giải Phẫu Đường Link (Anatomy of a Link)</div>
+        <svg viewBox="0 0 880 230" style="width: 100%; max-width: 850px; height: auto; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, monospace;">
+          <rect x="10" y="10" width="860" height="210" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1.5" />
+          
+          <!-- HỘP HIỂN THỊ URL HOÀN CHỈNH -->
+          <rect x="30" y="35" width="820" height="48" rx="8" fill="#0d1117" stroke="#30363d" stroke-width="1.5" />
+          <text x="50" y="66" font-size="16" font-weight="bold">
+            <tspan fill="#58a6ff">https://</tspan>
+            <tspan fill="#3fb950">www.myapp.com</tspan>
+            <tspan fill="#8b949e">:443</tspan>
+            <tspan fill="#ffa657">/products/detail</tspan>
+            <tspan fill="#bc8cff">?id=123&amp;ref=fb</tspan>
+            <tspan fill="#f85149">#reviews</tspan>
+          </text>
+
+          <!-- KHỐI 1: SCHEME -->
+          <line x1="75" y1="85" x2="75" y2="115" stroke="#58a6ff" stroke-width="1.5" />
+          <rect x="35" y="115" width="80" height="75" rx="6" fill="#1f2937" stroke="#58a6ff" stroke-width="1" />
+          <text x="75" y="135" fill="#58a6ff" font-size="12" font-weight="bold" text-anchor="middle">Scheme</text>
+          <text x="75" y="155" fill="#c9d1d9" font-size="10" text-anchor="middle">https://</text>
+          <text x="75" y="172" fill="#8b949e" font-size="9" text-anchor="middle">myapp://</text>
+
+          <!-- KHỐI 2: HOST -->
+          <line x1="220" y1="85" x2="220" y2="115" stroke="#3fb950" stroke-width="1.5" />
+          <rect x="155" y="115" width="130" height="75" rx="6" fill="#1f2937" stroke="#3fb950" stroke-width="1" />
+          <text x="220" y="135" fill="#3fb950" font-size="12" font-weight="bold" text-anchor="middle">Host / Domain</text>
+          <text x="220" y="155" fill="#c9d1d9" font-size="10" text-anchor="middle">www.myapp.com</text>
+          <text x="220" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Xác thực quyền app</text>
+
+          <!-- KHỐI 3: PORT -->
+          <line x1="330" y1="85" x2="330" y2="115" stroke="#8b949e" stroke-width="1.5" />
+          <rect x="300" y="115" width="60" height="75" rx="6" fill="#1f2937" stroke="#8b949e" stroke-width="1" />
+          <text x="330" y="135" fill="#8b949e" font-size="12" font-weight="bold" text-anchor="middle">Port</text>
+          <text x="330" y="155" fill="#c9d1d9" font-size="10" text-anchor="middle">:443</text>
+          <text x="330" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Cổng mạng</text>
+
+          <!-- KHỐI 4: PATH (ROUTE NAME) -->
+          <line x1="450" y1="85" x2="450" y2="115" stroke="#ffa657" stroke-width="1.5" />
+          <rect x="380" y="115" width="140" height="75" rx="6" fill="#1f2937" stroke="#ffa657" stroke-width="1.5" />
+          <text x="450" y="135" fill="#ffa657" font-size="12" font-weight="bold" text-anchor="middle">Path = Route Name</text>
+          <text x="450" y="155" fill="#c9d1d9" font-size="10" text-anchor="middle">/products/detail</text>
+          <text x="450" y="172" fill="#3fb950" font-size="9" text-anchor="middle">Trỏ vào Widget Trang</text>
+
+          <!-- KHỐI 5: QUERY PARAMS -->
+          <line x1="610" y1="85" x2="610" y2="115" stroke="#bc8cff" stroke-width="1.5" />
+          <rect x="535" y="115" width="150" height="75" rx="6" fill="#1f2937" stroke="#bc8cff" stroke-width="1.5" />
+          <text x="610" y="135" fill="#bc8cff" font-size="12" font-weight="bold" text-anchor="middle">Query Parameters</text>
+          <text x="610" y="155" fill="#c9d1d9" font-size="10" text-anchor="middle">?id=123&amp;ref=fb</text>
+          <text x="610" y="172" fill="#58a6ff" font-size="9" text-anchor="middle">Dữ liệu truyền vào Form</text>
+
+          <!-- KHỐI 6: FRAGMENT -->
+          <line x1="755" y1="85" x2="755" y2="115" stroke="#f85149" stroke-width="1.5" />
+          <rect x="705" y="115" width="100" height="75" rx="6" fill="#1f2937" stroke="#f85149" stroke-width="1" />
+          <text x="755" y="135" fill="#f85149" font-size="12" font-weight="bold" text-anchor="middle">Fragment</text>
+          <text x="755" y="155" fill="#c9d1d9" font-size="10" text-anchor="middle">#reviews</text>
+          <text x="755" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Vị trí neo cuộn</text>
+        </svg>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20%;">Thành phần</th>
+              <th style="width: 25%;">Ví dụ minh họa</th>
+              <th>Ý nghĩa & Vai trò kết nối với Navigator Flutter</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Scheme</strong></td>
+              <td><code>https://</code> hoặc <code>myapp://</code></td>
+              <td>Xác định phương thức mở. Nếu dùng Custom Scheme (<code>myapp://</code>), chỉ thiết bị đã cài app mới mở được. Nếu dùng Universal Link (<code>https://</code>), mở app nếu có, hoặc mở web nếu chưa cài app.</td>
+            </tr>
+            <tr>
+              <td><strong>2. Host / Domain</strong></td>
+              <td><code>www.myapp.com</code>, <code>shopee.vn</code></td>
+              <td>Định danh chủ sở hữu link. Android và iOS sẽ dùng Host này để xác thực tính chính chủ qua file cấu hình (<code>assetlinks.json</code> / <code>apple-app-site-association</code>).</td>
+            </tr>
+            <tr>
+              <td><strong>3. Path (Đường dẫn)</strong></td>
+              <td><code>/products/detail</code>, <code>/users</code></td>
+              <td><strong>Tương ứng trực tiếp với Route Name</strong> trong Flutter. Navigator dùng Path này để xác định người dùng muốn xem Widget màn hình nào.</td>
+            </tr>
+            <tr>
+              <td><strong>4. Query Parameters</strong></td>
+              <td><code>?id=123&amp;category=shoes</code></td>
+              <td><strong>Tương ứng với Route Arguments</strong> (tham số dữ liệu). Flutter sẽ trích xuất <code>id=123</code> từ chuỗi URL này để nạp dữ liệu chi tiết hiển thị lên Widget.</td>
+            </tr>
+            <tr>
+              <td><strong>5. Fragment</strong></td>
+              <td><code>#reviews</code>, <code>#specs</code></td>
+              <td>Xác định vị trí neo cuộn (Scroll offset) đến một mục cụ thể trong Widget.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>6.3. Cách Bắt & Xử Lý Deep Link Trong Flutter Bằng <code>onGenerateRoute</code></h4>
+      <p>Khi có Deep Link kích hoạt từ ngoài hệ điều hành, Flutter sẽ truyền toàn bộ đường link vào thuộc tính <code>onGenerateRoute</code> của <code>MaterialApp</code>. Bạn dùng class <code>Uri</code> có sẵn của Dart để bóc tách (Parse) các thành phần:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>main.dart - Xử lý Deep Link bằng onGenerateRoute</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Deep Linking Demo',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+      initialRoute: '/',
+      // Hàm onGenerateRoute sẽ tiếp nhận toàn bộ URL do Deep Link bắn vào
+      onGenerateRoute: (RouteSettings settings) {
+        // 1. Dùng Uri.parse để giải phẫu cấu trúc đường link (Anatomy)
+        final uri = Uri.parse(settings.name ?? '/');
+
+        // 2. Kiểm tra Path để điều hướng đúng Route màn hình
+        if (uri.path == '/product_detail') {
+          // 3. Trích xuất Query Parameters (ví dụ: ?id=99)
+          final productId = uri.queryParameters['id'] ?? 'Unknown';
+
+          return MaterialPageRoute(
+            builder: (context) =&gt; ProductDetailScreen(productId: productId),
+            settings: settings,
+          );
+        }
+
+        if (uri.path == '/user') {
+          final userId = uri.queryParameters['id'] ?? '0';
+          return MaterialPageRoute(
+            builder: (context) =&gt; UserProfileScreen(userId: userId),
+            settings: settings,
+          );
+        }
+
+        // Mặc định về trang chủ HomeScreen nếu không khớp đường dẫn
+        return MaterialPageRoute(builder: (context) =&gt; const HomeScreen());
+      },
+    );
+  }
+}
+
+// ===================== MÀN HÌNH CHI TIẾT SẢN PHẨM =====================
+class ProductDetailScreen extends StatelessWidget {
+  final String productId;
+  const ProductDetailScreen({super.key, required this.productId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Sản phẩm #$productId')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.shopping_bag, size: 70, color: Colors.indigo),
+            const SizedBox(height: 12),
+            Text(
+              'Đang hiển thị thông tin sản phẩm ID: $productId',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text('Được mở tự động thông qua Deep Link!'),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () =&gt; Navigator.pop(context),
+              child: const Text('&larr; Quay lại màn trước'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class UserProfileScreen extends StatelessWidget {
+  final String userId;
+  const UserProfileScreen({super.key, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('User Profile #$userId')),
+      body: Center(child: Text('Trang cá nhân của User: $userId')),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home Screen')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            // Thử nghiệm mở đường dẫn nội bộ giả lập Deep Link
+            Navigator.pushNamed(context, '/product_detail?id=888');
+          },
+          child: const Text('Thử nghiệm mở link: /product_detail?id=888'),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3>7. Các Sai Lầm Cốt Tử Thường Gặp Về Navigator & Cách Khắc Phục</h3>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. Khai báo cả "home:" và "initialRoute: '/'" cùng lúc</div>
+          <p><strong>Lỗi:</strong> <code>Failed assertion: ... !home || !initialRoute</code>.</p>
+          <p><strong>Khắc phục:</strong> Khi đã khai báo <code>routes: {'/': ...}</code> và <code>initialRoute: '/'</code> thì <strong>tuyệt đối không</strong> được viết thêm dòng <code>home: HomeScreen()</code> trong <code>MaterialApp</code>.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">2. Lỗi "Navigator operation requested with a context that does not include a Navigator"</div>
+          <p><strong>Nguyên nhân:</strong> Gọi <code>Navigator.of(context)</code> ngay tại hàm <code>build()</code> của chính <code>MyApp</code> (nơi mà <code>MaterialApp</code> vừa mới được tạo ra nên <code>context</code> này nằm phía trên <code>Navigator</code>).</p>
+          <p><strong>Khắc phục:</strong> Chỉ gọi lệnh <code>Navigator</code> ở các Widget con bên trong <code>MaterialApp</code>, hoặc dùng widget <code>Builder(builder: (innerContext) =&gt; ...)</code>.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">3. Quên kiểm tra "if (mounted)" sau từ khóa await</div>
+          <p><strong>Nguy cơ:</strong> Sau khi <code>await Navigator.push()</code> hoàn tất, có thể người dùng đã thoát khỏi màn hình hiện tại khiến Widget bị unmount. Nếu gọi ngay <code>setState()</code> hoặc <code>ScaffoldMessenger</code> sẽ văng crash log.</p>
+          <p><strong>Khắc phục:</strong> Luôn kiểm tra <code>if (!mounted) return;</code> trước khi cập nhật State hoặc hiển thị SnackBar.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">4. Quên bọc Expanded cho GridView / ListView trong Column</div>
+          <p><strong>Lỗi:</strong> Màn hình vàng đen sọc chéo báo lỗi <code>Vertical viewport was given unbounded height</code>.</p>
+          <p><strong>Khắc phục:</strong> Mọi Widget cuộn (ListView, GridView) khi nằm trực tiếp trong một <code>Column</code> bắt buộc phải được bọc trong <code>Expanded</code> hoặc có chiều cao cố định bằng <code>SizedBox</code>.</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3>8. Tóm Tắt Cheat Sheet: Bảng Tra Cứu Lệnh Nhanh</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 30%;">Nhu cầu nghiệp vụ</th>
+              <th style="width: 45%;">Đoạn mã tương ứng</th>
+              <th>Đặc điểm hoạt động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Mở màn hình mới</td>
+              <td><code>Navigator.push(context, MaterialPageRoute(builder: (ctx) =&gt; Page()));</code></td>
+              <td>Đẩy vào Stack, có nút Back tự động.</td>
+            </tr>
+            <tr>
+              <td>Mở bằng tên đường dẫn</td>
+              <td><code>Navigator.pushNamed(context, '/route_name');</code></td>
+              <td>Dễ quản lý tập trung ở main.dart.</td>
+            </tr>
+            <tr>
+              <td>Đóng trang hiện tại</td>
+              <td><code>Navigator.pop(context);</code></td>
+              <td>Gỡ khỏi Stack, giải phóng tài nguyên.</td>
+            </tr>
+            <tr>
+              <td>Đóng trang & trả dữ liệu về</td>
+              <td><code>Navigator.pop(context, 'Dữ liệu');</code></td>
+              <td>Trang trước nhận được qua <code>await push</code>.</td>
+            </tr>
+            <tr>
+              <td>Thay thế trang (Splash &rarr; Home)</td>
+              <td><code>Navigator.pushReplacement(context, MaterialPageRoute(...));</code></td>
+              <td>Không thể bấm Back về trang cũ.</td>
+            </tr>
+            <tr>
+              <td>Đăng xuất (Xóa sạch mọi trang)</td>
+              <td><code>Navigator.pushAndRemoveUntil(context, route, (r) =&gt; false);</code></td>
+              <td>Xóa sạch Stack, trang mới làm trang duy nhất.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>
+

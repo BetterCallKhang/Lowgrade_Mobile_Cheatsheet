@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phần 4. Tập hợp dữ liệu (List, Set, Map & Generics) - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Phần 4</span>
+        <span class="pill pill-green">Collections & Generics &lt;T&gt;</span>
+      </div>
+      <div>
+        <a href="03_dart_co_ban.html" class="copy-btn" style="text-decoration:none;">&larr; Phần 3. Dart cơ bản</a>
+        <a href="05_oop_model.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Phần 5. OOP & Model &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Phần 4. Các tập hợp dữ liệu thường dùng trong Dart & Generics</h2>
+        <p>Hướng dẫn chuyên sâu về <strong>Generics (&lt;T&gt;)</strong>, 3 cấu trúc dữ liệu cốt lõi <strong>List</strong>, <strong>Set</strong>, <strong>Map</strong> cùng danh sách đầy đủ các thuộc tính (properties) và phương thức (methods) kèm code mẫu thực tế ứng dụng trong lập trình Flutter.</p>
+      </div>
+
+      <!-- ===================== 1. GENERICS TRONG DART ===================== -->
+      <h3>1. Generics trong Dart (&lt;T&gt;, &lt;E&gt;, &lt;K, V&gt;)</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p><strong>Generics (Kiểu tham số hoá)</strong> cho phép bạn chỉ định kiểu dữ liệu mà một tập hợp hoặc một lớp có thể chứa bằng cặp ngoặc nhọn <code>&lt;...&gt;</code>. Lợi ích vượt trội của Generics:</p>
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li><strong>Bảo đảm an toàn kiểu lúc dịch (Type Safety):</strong> Báo lỗi ngay lập tức khi bạn vô tình chèn sai kiểu vào mảng.</li>
+          <li><strong>Giảm thiểu ép kiểu thủ công (No typecasting):</strong> Trình biên dịch tự biết chính xác kiểu trả về của từng phần tử.</li>
+          <li><strong>Tái sử dụng code linh hoạt:</strong> Viết một hàm hoặc class có thể hoạt động với bất kỳ kiểu dữ liệu nào.</li>
+        </ul>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Ký hiệu quy ước</th><th>Ý nghĩa</th><th>Ví dụ thực tế trong Flutter</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>&lt;E&gt;</code> (Element)</td>
+              <td>Phần tử trong danh sách hoặc tập hợp.</td>
+              <td><code>List&lt;String&gt;</code>, <code>Set&lt;int&gt;</code>, <code>List&lt;Widget&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>&lt;K, V&gt;</code> (Key, Value)</td>
+              <td>Khoá và Giá trị trong bảng ánh xạ Map.</td>
+              <td><code>Map&lt;String, dynamic&gt;</code> (JSON), <code>Map&lt;int, User&gt;</code></td>
+            </tr>
+            <tr>
+              <td><code>&lt;T&gt;</code> (Type)</td>
+              <td>Kiểu dữ liệu tổng quát bất kỳ cho class hoặc hàm.</td>
+              <td><code>ApiResponse&lt;T&gt;</code>, <code>Future&lt;T&gt;</code>, <code>Stream&lt;T&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Ví dụ Generics với Class và Hàm</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="c">// 1. Nếu không có Generics: phải dùng Object? và ép kiểu thủ công rất rủi ro</span>
+List rawList = ['Khang', 20];
+<span class="c">// String name = rawList[1]; // Sập runtime lúc chạy vì rawList[1] là số int!</span>
+
+<span class="c">// 2. Khi có Generics: An toàn tuyệt đối lúc biên dịch</span>
+List<String> names = ['An', 'Bình'];
+<span class="c">// names.add(100); // Lỗi gạch đỏ ngay lập tức: The argument type 'int' can't be assigned to 'String'</span>
+
+<span class="c">// 3. Tự viết Generic Class (Ví dụ chuẩn bọc kết quả trả về từ API)</span>
+class ApiResponse<T> {
+  final bool success;
+  final String? message;
+  final T? data; <span class="c">// Kiểu dữ liệu T linh hoạt (có thể là User, List<Post>, ...)</span>
+
+  ApiResponse({required this.success, this.message, this.data});
+}
+
+void main() {
+  <span class="c">// T biến thành String</span>
+  var res1 = ApiResponse<String>(success: true, data: 'Token_123');
+  print(res1.data?.length);
+
+  <span class="c">// T biến thành int</span>
+  var res2 = ApiResponse<int>(success: true, data: 200);
+  print(res2.data);
+}</code></pre>
+      </div>
+
+      <!-- ===================== 2. TỔNG QUAN SO SÁNH 3 TẬP DỮ LIỆU ===================== -->
+      <h3>2. Bảng so sánh 3 cấu trúc dữ liệu cốt lõi</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tập dữ liệu</th><th>Cú pháp khai báo</th><th>Đặc điểm chính</th><th>Ứng dụng điển hình trong Flutter</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>List&lt;E&gt;</strong> (Mảng/Danh sách)</td>
+              <td><code>List&lt;String&gt; items = ['A', 'B', 'A'];</code></td>
+              <td>- Có thứ tự (ordered), truy xuất qua chỉ mục index <code>[0]</code>.<br>- Cho phép phần tử trùng lặp.<br>- Có thể thêm/xoá linh hoạt.</td>
+              <td>Dùng trực tiếp trong <code>ListView.builder</code>, <code>GridView.builder</code>, danh sách sản phẩm, feed tin tức.</td>
+            </tr>
+            <tr>
+              <td><strong>Set&lt;E&gt;</strong> (Tập hợp duy nhất)</td>
+              <td><code>Set&lt;int&gt; ids = {1, 2, 3, 2}; // {1, 2, 3}</code></td>
+              <td>- Các phần tử <strong>hoàn toàn duy nhất</strong> (không trùng).<br>- Tốc độ kiểm tra <code>contains()</code> là O(1) cực nhanh.<br>- Dễ dàng lọc trùng: <code>list.toSet().toList()</code>.</td>
+              <td>Lưu ID các phần tử đã chọn (Multi-select), danh sách tags sản phẩm, tập hợp quyền hạn người dùng.</td>
+            </tr>
+            <tr>
+              <td><strong>Map&lt;K, V&gt;</strong> (Key-Value)</td>
+              <td><code>Map&lt;String, dynamic&gt; user = {'id': 1};</code></td>
+              <td>- Lưu trữ theo cặp Khoá & Giá trị: <code>map['key']</code>.<br>- Khoá (Key) là duy nhất.<br>- Trả về <code>null</code> nếu key không tồn tại.</td>
+              <td>Làm việc với <strong>JSON REST API</strong> (<code>jsonDecode</code>), dữ liệu lưu trữ cấu hình SharedPreferences, dòng SQLite.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 3. LIST VÀ CÁC HÀM / BIẾN HAY DÙNG ===================== -->
+      <h3>3. List&lt;E&gt;: Các biến và hàm thông dụng</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tên thuộc tính / Hàm</th><th>Mục đích</th><th>Ví dụ & Kết quả</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.length</code></td>
+              <td>Độ dài (số lượng phần tử) của danh sách.</td>
+              <td><code>[1, 2, 3].length == 3</code></td>
+            </tr>
+            <tr>
+              <td><code>.isEmpty</code> / <code>.isNotEmpty</code></td>
+              <td>Kiểm tra danh sách rỗng hay không.</td>
+              <td><code>if (posts.isEmpty) return Text('Không có dữ liệu');</code></td>
+            </tr>
+            <tr>
+              <td><code>.first</code> / <code>.last</code></td>
+              <td>Lấy phần tử đầu tiên hoặc cuối cùng.</td>
+              <td><code>[10, 20, 30].first == 10; [10, 20, 30].last == 30</code></td>
+            </tr>
+            <tr>
+              <td><code>.reversed</code></td>
+              <td>Đảo ngược thứ tự phần tử.</td>
+              <td><code>[1, 2, 3].reversed.toList() // [3, 2, 1]</code></td>
+            </tr>
+            <tr>
+              <td><code>.add(e)</code> / <code>.addAll([...])</code></td>
+              <td>Thêm một hoặc nhiều phần tử vào cuối.</td>
+              <td><code>list.add(4); list.addAll([5, 6]);</code></td>
+            </tr>
+            <tr>
+              <td><code>.insert(idx, e)</code></td>
+              <td>Chèn phần tử vào vị trí index cụ thể.</td>
+              <td><code>['B', 'C'].insert(0, 'A') // ['A', 'B', 'C']</code></td>
+            </tr>
+            <tr>
+              <td><code>.remove(e)</code> / <code>.removeAt(idx)</code></td>
+              <td>Xoá phần tử theo giá trị hoặc theo chỉ số index.</td>
+              <td><code>list.remove('An'); list.removeAt(0);</code></td>
+            </tr>
+            <tr>
+              <td><code>.removeWhere(test)</code></td>
+              <td>Xoá tất cả phần tử thoả điều kiện.</td>
+              <td><code>numbers.removeWhere((n) => n < 0); // Xoá số âm</code></td>
+            </tr>
+            <tr>
+              <td><code>.contains(e)</code></td>
+              <td>Kiểm tra phần tử có nằm trong list không.</td>
+              <td><code>[1, 2, 3].contains(2) == true</code></td>
+            </tr>
+            <tr>
+              <td><code>.indexOf(e)</code></td>
+              <td>Tìm chỉ mục index đầu tiên của phần tử (-1 nếu không thấy).</td>
+              <td><code>['a', 'b'].indexOf('b') == 1</code></td>
+            </tr>
+            <tr>
+              <td><code>.sublist(start, [end])</code></td>
+              <td>Cắt một đoạn danh sách con.</td>
+              <td><code>[1, 2, 3, 4, 5].sublist(1, 3) // [2, 3]</code></td>
+            </tr>
+            <tr>
+              <td><code>.sort([compare])</code></td>
+              <td>Sắp xếp tại chỗ (in-place) theo thứ tự tăng/giảm dần.</td>
+              <td><code>numbers.sort((a, b) => b.compareTo(a)); // Giảm dần</code></td>
+            </tr>
+            <tr>
+              <td><code>.where((e) => bool)</code></td>
+              <td>Lọc các phần tử thoả mãn điều kiện (tương đương filter).</td>
+              <td><code>scores.where((s) => s >= 5).toList()</code></td>
+            </tr>
+            <tr>
+              <td><code>.map((e) => newT)</code></td>
+              <td>Biến đổi từng phần tử sang kiểu dữ liệu mới.</td>
+              <td><code>items.map((item) => Text(item.name)).toList()</code></td>
+            </tr>
+            <tr>
+              <td><code>.any(test)</code> / <code>.every(test)</code></td>
+              <td>Kiểm tra có ít nhất 1 (any) hoặc toàn bộ (every) thoả điều kiện.</td>
+              <td><code>scores.any((s) => s >= 9); scores.every((s) => s >= 5);</code></td>
+            </tr>
+            <tr>
+              <td><code>.fold(initial, combine)</code></td>
+              <td>Gộp và tính toán tích luỹ (ví dụ tính tổng tiền giỏ hàng).</td>
+              <td><code>items.fold(0.0, (sum, i) => sum + i.price);</code></td>
+            </tr>
+            <tr>
+              <td><code>.firstWhere(test, orElse)</code></td>
+              <td>Tìm phần tử đầu tiên thoả điều kiện (có fallback).</td>
+              <td><code>users.firstWhere((u) => u.id == 1, orElse: () => null);</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 4. SET VÀ CÁC HÀM / BIẾN HAY DÙNG ===================== -->
+      <h3>4. Set&lt;E&gt;: Các biến và hàm thông dụng</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tên thuộc tính / Hàm</th><th>Mục đích</th><th>Ví dụ & Kết quả</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.length</code>, <code>.isEmpty</code></td>
+              <td>Số lượng phần tử duy nhất, kiểm tra rỗng.</td>
+              <td><code>{1, 2, 2}.length == 2</code></td>
+            </tr>
+            <tr>
+              <td><code>.add(e)</code> / <code>.addAll(iterable)</code></td>
+              <td>Thêm phần tử (nếu đã tồn tại sẽ tự động bỏ qua).</td>
+              <td><code>tags.add('Flutter');</code></td>
+            </tr>
+            <tr>
+              <td><code>.remove(e)</code></td>
+              <td>Xoá phần tử khỏi Set.</td>
+              <td><code>selectedIds.remove(10);</code></td>
+            </tr>
+            <tr>
+              <td><code>.contains(e)</code></td>
+              <td>Kiểm tra tồn tại với độ phức tạp thời gian cực nhanh O(1).</td>
+              <td><code>selectedIds.contains(productId)</code></td>
+            </tr>
+            <tr>
+              <td><code>.union(otherSet)</code></td>
+              <td>Hợp hai tập hợp (lấy tất cả không trùng lặp).</td>
+              <td><code>{1, 2}.union({2, 3}) // {1, 2, 3}</code></td>
+            </tr>
+            <tr>
+              <td><code>.intersection(otherSet)</code></td>
+              <td>Giao hai tập hợp (lấy các phần tử chung).</td>
+              <td><code>{1, 2}.intersection({2, 3}) // {2}</code></td>
+            </tr>
+            <tr>
+              <td><code>.difference(otherSet)</code></td>
+              <td>Hiệu hai tập hợp (phần tử có ở Set hiện tại nhưng không có ở other).</td>
+              <td><code>{1, 2}.difference({2, 3}) // {1}</code></td>
+            </tr>
+            <tr>
+              <td><code>.toList()</code></td>
+              <td>Chuyển đổi Set trở lại thành List để render lên giao diện.</td>
+              <td><code>uniqueCategories.toList()</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 5. MAP VÀ CÁC HÀM / BIẾN HAY DÙNG ===================== -->
+      <h3>5. Map&lt;K, V&gt;: Các biến và hàm thông dụng</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tên thuộc tính / Hàm</th><th>Mục đích</th><th>Ví dụ & Kết quả</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.keys</code> / <code>.values</code></td>
+              <td>Lấy toàn bộ danh sách khoá (Keys) hoặc giá trị (Values).</td>
+              <td><code>user.keys.toList(); user.values.toList();</code></td>
+            </tr>
+            <tr>
+              <td><code>.entries</code></td>
+              <td>Lấy danh sách các cặp <code>MapEntry(key, value)</code>.</td>
+              <td><code>user.entries.map((e) => Text('${e.key}: ${e.value}'))</code></td>
+            </tr>
+            <tr>
+              <td><code>.containsKey(k)</code></td>
+              <td>Kiểm tra khoá key có tồn tại trong Map không (an toàn tránh null).</td>
+              <td><code>if (json.containsKey('avatar')) { ... }</code></td>
+            </tr>
+            <tr>
+              <td><code>.containsValue(v)</code></td>
+              <td>Kiểm tra xem giá trị value có trong Map không.</td>
+              <td><code>user.containsValue('admin')</code></td>
+            </tr>
+            <tr>
+              <td><code>.putIfAbsent(k, () => v)</code></td>
+              <td>Chỉ thêm key-value vào nếu key đó chưa tồn tại trong Map.</td>
+              <td><code>config.putIfAbsent('theme', () => 'dark');</code></td>
+            </tr>
+            <tr>
+              <td><code>.update(k, (v) => newV)</code></td>
+              <td>Cập nhật giá trị của một key cụ thể dựa trên giá trị hiện tại.</td>
+              <td><code>cart.update('apple', (qty) => qty + 1, ifAbsent: () => 1);</code></td>
+            </tr>
+            <tr>
+              <td><code>.remove(k)</code></td>
+              <td>Xoá cặp key-value khỏi Map và trả về giá trị vừa xoá.</td>
+              <td><code>user.remove('password');</code></td>
+            </tr>
+            <tr>
+              <td><code>.forEach((k, v) => ...)</code></td>
+              <td>Duyệt lặp qua từng cặp key-value.</td>
+              <td><code>map.forEach((k, v) => print('$k = $v'));</code></td>
+            </tr>
+            <tr>
+              <td><code>.map((k, v) => MapEntry(...))</code></td>
+              <td>Biến đổi toàn bộ Map sang một Map mới.</td>
+              <td><code>prices.map((k, v) => MapEntry(k, v * 1.1));</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 6. SPREAD VÀ COLLECTION IF / FOR ===================== -->
+      <h3>6. Kỹ thuật cao cấp: Spread (<code>...</code>), Collection If & Collection For</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm</span>
+        <p>Đây là 3 tính năng cực kỳ mạnh mẽ của Dart giúp bạn viết UI linh động ngay trong mảng Widget <code>children: [...]</code> của <code>Column</code> hoặc <code>Row</code> mà không cần viết các hàm nối mảng phức tạp.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>dart - Spread, Collection If & For thực chiến trong Flutter</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>bool isLoggedIn = true;
+bool isVip = false;
+List<String> baseMenu = ['Trang chủ', 'Sản phẩm'];
+List<String> adminMenu = ['Quản trị', 'Doanh thu'];
+
+<span class="c">// Kết hợp tất cả vào 1 List duy nhất</span>
+List<String> finalMenu = [
+  ...baseMenu,                                    <span class="c">// 1. Spread: Trải toàn bộ phần tử baseMenu</span>
+  if (isLoggedIn) 'Hồ sơ cá nhân',                <span class="c">// 2. Collection If: Chỉ chèn nếu đăng nhập</span>
+  if (isVip) 'Đặc quyền VIP' else 'Nâng cấp VIP', <span class="c">// Collection If-Else</span>
+  if (isLoggedIn) ...adminMenu,                   <span class="c">// Trải danh sách admin có điều kiện</span>
+  for (int i = 1; i <= 3; i++) 'Mục bổ sung $i',  <span class="c">// 3. Collection For: Sinh phần tử lặp</span>
+];
+
+<span class="c">// Tương tự với Map:</span>
+Map<String, dynamic> userProfile = {
+  'username': 'bettercallkhang',
+  'role': 'editor',
+  if (isVip) 'badge': 'Kim cương',
+};</code></pre>
+      </div>
+
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

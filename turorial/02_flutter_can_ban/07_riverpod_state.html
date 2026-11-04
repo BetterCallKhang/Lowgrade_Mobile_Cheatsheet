@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 7. Quản lý State với Riverpod & Code Generation - Flutter Cheatsheet</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Mục 7</span>
+        <span class="pill pill-green">State Management: Riverpod 2.0+</span>
+        <span class="pill pill-purple">Dự án: state_management</span>
+      </div>
+      <div>
+        <a href="06_call_api_http.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 6. Call API</a>
+        <a href="08_local_storage_prefs.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Tiếp theo: Mục 8. Local Storage &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 7. Quản Lý State Toàn Diện Với Riverpod & Code Generation</h2>
+        <p>Bản chất <strong>State</strong> và <strong>State Management</strong>, giải mã câu hỏi "Riverpod là gì? Dùng thế nào? Vì sao nên dùng Riverpod?", phân tích hệ sinh thái các gói thư viện (<code>flutter_riverpod</code>, <code>riverpod_annotation</code>, <code>build_runner</code>, <code>riverpod_generator</code>), quy tắc sinh code tự động <code>.g.dart</code>, các bước thiết lập từ số 0, sự khác biệt sống còn giữa <code>ref.watch</code> vs <code>ref.read</code>, và hoàn thiện dự án quản lý danh sách Users qua REST API chuẩn mực.</p>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3>1. Tổng Quan: State Là Gì? State Management Là Gì? Vì Sao Cần Riverpod?</h3>
+
+      <h4>1.1. State trong ứng dụng Flutter là gì?</h4>
+      <p>Trong Flutter, mọi thứ bạn nhìn thấy trên màn hình đều là <strong>Widget</strong>. Tuy nhiên, giao diện không đứng yên mà liên tục biến đổi theo hành động của người dùng hoặc dữ liệu từ máy chủ (Server). Tất cả dữ liệu có khả năng thay đổi và làm giao diện vẽ lại (re-render) được gọi là <strong>State (Trạng thái)</strong>.</p>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">1. Ephemeral State (Local State)</div>
+          <p>Là trạng thái cục bộ chỉ nằm trong phạm vi của <strong>duy nhất 1 Widget</strong>. Khi widget đó bị hủy (dispose), state cũng mất đi. Ví dụ: vị trí con trỏ trong ô nhập liệu <code>TextField</code>, trạng thái bật/tắt của một nút <code>Switch</code>, trang hiện tại của <code>PageView</code>.</p>
+          <p>&rarr; Cách quản lý: Sử dụng <code>StatefulWidget</code> và gọi hàm <code>setState()</code> là hoàn toàn đủ.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">2. App State (Global / Shared State)</div>
+          <p>Là dữ liệu cần được <strong>chia sẻ và dùng chung giữa nhiều màn hình</strong> khác nhau trong cây Widget (Widget Tree). Ví dụ: Thông tin người dùng đã đăng nhập (User Profile), Danh sách giỏ hàng (Cart), Cài đặt giao diện Dark/Light Mode, Dữ liệu đồng bộ từ API.</p>
+          <p>&rarr; Cách quản lý: Cần một giải pháp quản lý tập trung chuyên biệt (State Management) như <strong>Riverpod</strong>.</p>
+        </div>
+      </div>
+
+      <h4>1.2. Nỗi đau khi chỉ dùng <code>setState()</code> thuần của Flutter</h4>
+      <p>Nếu cố gắng dùng <code>setState()</code> để quản lý dữ liệu dùng chung cho toàn bộ app, lập trình viên sẽ đối mặt với các vấn đề nhức nhối sau:</p>
+      <ul>
+        <li><strong>Truyền tham số bắc cầu (Prop Drilling):</strong> Nếu Màn hình A muốn truyền giỏ hàng xuống Màn hình D (nằm sâu qua B và C), bạn buộc phải khai báo biến giỏ hàng và truyền constructor qua từng tầng B &rarr; C &rarr; D dù B và C hoàn toàn không cần dùng đến biến này. Code trở nên rối rắm, khó bảo trì.</li>
+        <li><strong>Lãng phí hiệu năng (Unnecessary Re-renders):</strong> Khi gọi <code>setState()</code> ở widget cha trên đỉnh, toàn bộ cây widget con phía dưới đều bị ép vẽ lại (rebuild), gây giật lag khung hình khi app phình to.</li>
+        <li><strong>Trộn lẫn logic nghiệp vụ và giao diện (Spaghetti Code):</strong> Logic gọi API, lọc dữ liệu, validate bị nhồi nhét trực tiếp vào hàm <code>build()</code> của UI, vi phạm nguyên lý phân tách trách nhiệm (Separation of Concerns).</li>
+      </ul>
+
+      <h4>1.3. Riverpod là gì?</h4>
+      <div class="def">
+        <span class="def-term">Định nghĩa Riverpod</span>
+        <p><strong>Riverpod</strong> (được tạo bởi <em>Remi Rousselet</em> — cũng chính là tác giả của thư viện <code>provider</code> nổi tiếng) là một bộ giải pháp <strong>quản lý State (Reactive State Management) & tiêm phụ thuộc (Dependency Injection)</strong> hiện đại, an toàn kiểu dữ liệu (Compile-safe) và độc lập hoàn toàn với cây Widget của Flutter.</p>
+        <p><em>*Fun fact:</em> Cái tên <code>Riverpod</code> chính là một từ đảo chữ cái (Anagram) của từ <code>Provider</code>.</p>
+      </div>
+
+      <h4>1.4. Vì sao nên dùng Riverpod thay vì Provider, Bloc hay GetX?</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tiêu chí so sánh</th>
+              <th>Provider truyền thống</th>
+              <th>Riverpod (Phiên bản mới 2.x - 3.x)</th>
+              <th>Lợi ích thực tế cho người mới</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Phụ thuộc <code>BuildContext</code></strong></td>
+              <td>Phụ thuộc chặt chẽ (<code>Provider.of(context)</code>). Không có context thì không đọc được state.</td>
+              <td><strong>Hoàn toàn không cần <code>BuildContext</code></strong>. Có thể đọc Provider ở bất cứ đâu (trong Model, Service, hàm tiện ích bên ngoài UI).</td>
+              <td>Tránh triệt để lỗi kinh điển <code>ProviderNotFoundException</code> khi context chưa sẵn sàng hoặc nằm ngoài cây Provider.</td>
+            </tr>
+            <tr>
+              <td><strong>An toàn lúc biên dịch (Compile Safety)</strong></td>
+              <td>Dễ crash lúc chạy (Runtime Error) nếu chưa khai báo Provider ở trên đầu cây widget.</td>
+              <td><strong>Compile-safe 100%</strong>. Nếu khai báo sai cú pháp hoặc kiểu dữ liệu, trình biên dịch Dart sẽ báo đỏ ngay trong IDE lúc gõ code.</td>
+              <td>Bắt lỗi ngay từ lúc code, không lo app bị văng đột ngột khi đi thi PE hay demo đồ án.</td>
+            </tr>
+            <tr>
+              <td><strong>Tự động giải phóng bộ nhớ (Auto-dispose)</strong></td>
+              <td>Phải tự viết thủ công logic dispose, dễ gây memory leak nếu quên.</td>
+              <td><strong>Tự động hủy state</strong> khi không còn widget nào trên màn hình lắng nghe (<code>autoDispose</code>).</td>
+              <td>Tiết kiệm RAM thiết bị và tránh lỗi dữ liệu cũ bị kẹt lại khi quay lại màn hình.</td>
+            </tr>
+            <tr>
+              <td><strong>Kết hợp State (Combining State)</strong></td>
+              <td>Cần dùng <code>ProxyProvider</code> cực kỳ rườm rà và khó viết.</td>
+              <td>Chỉ cần gọi <code>ref.watch(providerKhac)</code> ngay bên trong Provider là tự động phản ứng và đồng bộ.</td>
+              <td>Tính toán dữ liệu dẫn xuất (vd: đếm tổng số users, tính tổng tiền hóa đơn) chỉ bằng 2 dòng code.</td>
+            </tr>
+            <tr>
+              <td><strong>Code Generation hiện đại</strong></td>
+              <td>Không hỗ trợ, phải viết nhiều boilerplate lặp lại.</td>
+              <td>Hỗ trợ <code>@riverpod</code> sinh code tự động, giúp code ngắn gọn, trực quan, loại bỏ cú pháp phức tạp.</td>
+              <td>Giảm 60% lượng code phải gõ tay so với cú pháp Riverpod cũ.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== 3 THÀNH PHẦN CỐT LÕI ===================== -->
+      <h4>1.5. Tam Giác Vàng: 3 Thành Phần Cốt Lõi Trong Riverpod (Nhà Cung Cấp, Nhà Thông Báo & Người Tiêu Thụ)</h4>
+      <p>Để làm chủ và không bị rối khi học Riverpod, bạn chỉ cần nhớ mô hình <strong>"Nhà máy - Đại lý - Người tiêu dùng"</strong> gồm đúng 3 nhân vật chủ chốt sau:</p>
+
+      <div class="grid-3" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin: 16px 0;">
+        <!-- THÀNH PHẦN 1 -->
+        <div class="card" style="border-top: 4px solid var(--accent-green);">
+          <div class="card-title" style="color:var(--accent-green); font-size:16px;">
+            📢 1. Nhà Thông Báo (Notifier / StateNotifier)
+          </div>
+          <p><strong>Bản chất:</strong> Là "Bộ não xử lý logic" và là "Người quản kho dữ liệu".</p>
+          <ul style="margin-left: 18px; margin-top: 8px; font-size: 13.5px; line-height: 1.8;">
+            <li><strong>Nhiệm vụ:</strong> Nắm giữ giá trị dữ liệu (<code>state</code>) và chứa toàn bộ hàm nghiệp vụ (như <code>fetchUsers()</code>, <code>addUser()</code>, <code>clear()</code>).</li>
+            <li><strong>Cơ chế phát thanh:</strong> Mỗi khi dữ liệu trong kho thay đổi (thông qua lệnh gán <code>state = dữ_liệu_mới</code>), Nhà thông báo sẽ lập tức <em>phát loa phát thanh</em> cho hệ thống biết: <em>"Dữ liệu vừa đổi rồi, ai đang cần thì cập nhật đi!"</em></li>
+            <li><strong>Trong code mẫu:</strong> Chính là class <code>UserNotifier</code> kế thừa từ <code>_$UserNotifier</code>.</li>
+          </ul>
+        </div>
+
+        <!-- THÀNH PHẦN 2 -->
+        <div class="card" style="border-top: 4px solid var(--accent-blue);">
+          <div class="card-title" style="color:var(--accent-blue); font-size:16px;">
+            🏪 2. Nhà Cung Cấp (Provider)
+          </div>
+          <p><strong>Bản chất:</strong> Là "Cầu nối trung gian" hoặc "Đại lý phân phối" gắn nhãn công khai cho State.</p>
+          <ul style="margin-left: 18px; margin-top: 8px; font-size: 13.5px; line-height: 1.8;">
+            <li><strong>Nhiệm vụ:</strong> Đóng gói "Nhà thông báo" thành một điểm truy cập toàn cục để giao diện có thể tìm thấy ở bất cứ nơi đâu mà không sợ mất dấu.</li>
+            <li><strong>Điểm đặc biệt:</strong> Provider là một biến toàn cục nhưng <em>không chứa dữ liệu độc quyền</em>; nó chỉ là "ống ngắm" trỏ đến trạng thái lưu trong <code>ProviderScope</code>.</li>
+            <li><strong>Trong code mẫu:</strong> Chính là biến <code>userProvider</code> (được generator tự sinh từ <code>UserNotifier</code>) hoặc <code>totalUsersProvider</code>.</li>
+          </ul>
+        </div>
+
+        <!-- THÀNH PHẦN 3 -->
+        <div class="card" style="border-top: 4px solid var(--accent-purple);">
+          <div class="card-title" style="color:var(--accent-purple); font-size:16px;">
+            🛒 3. Người Tiêu Thụ (Consumer / UI Widget)
+          </div>
+          <p><strong>Bản chất:</strong> Là "Khách hàng" - Giao diện người dùng (Widget) cần dữ liệu để hiển thị.</p>
+          <ul style="margin-left: 18px; margin-top: 8px; font-size: 13.5px; line-height: 1.8;">
+            <li><strong>Nhiệm vụ:</strong> Lắng nghe "Nhà thông báo" thông qua "Nhà cung cấp" để vẽ giao diện (Text, ListView, GridView...).</li>
+            <li><strong>Công cụ giao tiếp:</strong> Sử dụng chiếc thẻ thành viên <code>WidgetRef ref</code>:
+              <br/>- Dùng <code>ref.watch(userProvider)</code> để "ngồi hóng" dữ liệu mới về.
+              <br/>- Dùng <code>ref.read(userProvider.notifier)</code> để "đặt hàng / yêu cầu làm việc" (bấm nút gọi hàm).
+            </li>
+            <li><strong>Trong code mẫu:</strong> Các widget như <code>ConsumerWidget</code>, <code>ConsumerStatefulWidget</code> (màn hình <code>HomeScreen</code>).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="def" style="margin-top:10px;">
+        <span class="def-term">Ví dụ đời sống thực tế để ghi nhớ ngay lập tức:</span>
+        <p>Tưởng tượng bạn đặt món ăn tại một nhà hàng:</p>
+        <ul style="margin-left:20px; line-height:1.9;">
+          <li><strong>Nhà thông báo (Notifier):</strong> Là <em>Đầu bếp chính</em> trong bếp. Đầu bếp nấu món (xử lý logic), khi món xong thì hô to <em>"Món số 5 đã xong!"</em> (cập nhật <code>state</code>).</li>
+          <li><strong>Nhà cung cấp (Provider):</strong> Là <em>Quầy phục vụ / Menu món</em>. Bạn không được chạy xộc thẳng vào bếp ôm chảo của đầu bếp, mà bạn phải thông qua Quầy phục vụ (Provider) để biết món nào đang có sẵn.</li>
+          <li><strong>Người tiêu thụ (Consumer):</strong> Là <em>Thực khách (Bạn)</em> ngồi tại bàn ăn (Giao diện UI). Bạn nhìn menu (<code>ref.watch</code>) chờ bê món ra ăn, và gọi bồi bàn khi muốn gọi thêm món mới (<code>ref.read</code>).</li>
+        </ul>
+      </div>
+
+      <!-- ===================== HÌNH MINH HỌA KIẾN TRÚC ===================== -->
+      <h4>1.6. Mô hình luồng dữ liệu một chiều (Unidirectional Data Flow) của Riverpod</h4>
+      <p>Dưới đây là sơ đồ minh họa cách dữ liệu di chuyển nhịp nhàng giữa 3 thành phần này:</p>
+
+      <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px; padding:20px; margin:16px 0; font-family:monospace; line-height:1.8;">
+        <div style="display:flex; flex-direction:column; gap:12px; max-width:680px; margin:0 auto;">
+          <div style="background:var(--bg-tertiary); border:2px solid var(--accent-blue); padding:12px 16px; border-radius:6px; text-align:center;">
+            <strong style="color:var(--accent-blue); font-size:15px;">ProviderScope (main.dart) - Vùng Chứa State Toàn Cục</strong><br />
+            <span style="color:var(--text-secondary); font-size:13px;">Nơi đăng ký và lưu trữ thực tế của tất cả các Nhà cung cấp (Providers)</span>
+          </div>
+          <div style="text-align:center; color:var(--text-muted); font-size:18px;">&darr; &uarr;</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="background:var(--bg-tertiary); border:1px solid var(--accent-green); padding:12px; border-radius:6px;">
+              <strong style="color:var(--accent-green);">📢 1. Nhà Thông Báo (Notifier)</strong><br />
+              <span style="color:var(--text-secondary); font-size:12.5px;">- Nắm giữ <code>state</code><br />- Chứa các hàm nghiệp vụ (fetch, clear)<br />- Gán <code>state = mới</code> &rarr; Bắn thông báo</span>
+            </div>
+            <div style="background:var(--bg-tertiary); border:1px solid var(--accent-purple); padding:12px; border-radius:6px;">
+              <strong style="color:var(--accent-purple);">🛒 3. Người Tiêu Thụ (Consumer UI)</strong><br />
+              <span style="color:var(--text-secondary); font-size:12.5px;">- <code>ref.watch(userProvider)</code>: Lắng nghe vẽ lại UI<br />- <code>ref.read(userProvider.notifier)</code>: Gọi hàm xử lý</span>
+            </div>
+          </div>
+          <div style="background:var(--bg-tertiary); border:1px dashed var(--accent-blue); padding:10px; border-radius:6px; text-align:center;">
+            <strong style="color:var(--accent-blue);">🏪 2. Nhà Cung Cấp (Provider - vd: <code>userProvider</code>)</strong><br />
+            <span style="color:var(--text-secondary); font-size:12.5px;">Làm chiếc cầu nối trung gian kết nối Người Tiêu Thụ với Nhà Thông Báo tương ứng.</span>
+          </div>
+          <div style="text-align:center; color:var(--accent-orange); font-size:12.5px; background:rgba(255,166,87,0.1); padding:8px; border-radius:4px; border:1px dashed var(--accent-orange);">
+            &rarr; <strong>Vòng tuần hoàn khép kín:</strong> Người Tiêu Thụ bấm nút &rarr; Gửi lệnh bằng <code>ref.read</code> &rarr; Nhà Thông Báo chạy hàm logic & đổi <code>state</code> &rarr; Bắn tín hiệu qua Nhà Cung Cấp &rarr; Người Tiêu Thụ tự động vẽ lại giao diện mới tức thì!
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3>2. Bảng Tra Cứu Các Thư Viện Sẽ Dùng (Dependencies Phân Loại Chi Tiết)</h3>
+      <p>Khi sử dụng Riverpod kết hợp với Code Generator (chuẩn mới nhất của dự án <code>state_management</code>), dự án sẽ cần 2 nhóm thư viện: nhóm chạy trong app (dependencies) và nhóm công cụ tự động sinh code ở máy lập trình (dev_dependencies).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên Thư Viện</th>
+              <th>Phân Loại</th>
+              <th>Vai Trò & Nhiệm Vụ Trong Dự Án</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>flutter_riverpod</code></td>
+              <td><span class="pill pill-green">dependencies</span></td>
+              <td>Cung cấp các Widget chuyên dụng của Riverpod cho Flutter như <code>ProviderScope</code>, <code>ConsumerWidget</code>, <code>ConsumerStatefulWidget</code>, và đối tượng <code>WidgetRef</code>.</td>
+            </tr>
+            <tr>
+              <td><code>riverpod_annotation</code></td>
+              <td><span class="pill pill-green">dependencies</span></td>
+              <td>Cung cấp các Annotation như <code>@riverpod</code> để bạn gắn lên đầu class hoặc function, đánh dấu cho máy biết cần phải sinh Provider tương ứng.</td>
+            </tr>
+            <tr>
+              <td><code>http</code></td>
+              <td><span class="pill pill-green">dependencies</span></td>
+              <td>Thư viện gửi HTTP Request (GET/POST) lấy dữ liệu JSON từ REST API giả lập (jsonplaceholder).</td>
+            </tr>
+            <tr>
+              <td><code>build_runner</code></td>
+              <td><span class="pill pill-yellow">dev_dependencies</span></td>
+              <td>Công cụ dòng lệnh chuẩn của hệ sinh thái Dart, dùng để quét toàn bộ mã nguồn dự án và kích hoạt các bộ sinh code tự động.</td>
+            </tr>
+            <tr>
+              <td><code>riverpod_generator</code></td>
+              <td><span class="pill pill-yellow">dev_dependencies</span></td>
+              <td>Bộ tạo mã (Code Generator) đọc các thẻ <code>@riverpod</code> và tự động viết ra các file <code>.g.dart</code> chứa toàn bộ mã boilerplate ngầm.</td>
+            </tr>
+            <tr>
+              <td><code>test_api</code> (override)</td>
+              <td><span class="pill pill-purple">dependency_overrides</span></td>
+              <td>Giải quyết xung đột phiên bản phụ thuộc giữa bộ kiểm thử của Flutter SDK và bộ sinh mã bên thứ ba (đặc biệt khi dùng Flutter mới).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== CẤU HÌNH PUBSPEC ===================== -->
+      <h4>File cấu hình chuẩn <code>pubspec.yaml</code> của dự án:</h4>
+      <div class="code-wrapper">
+        <div class="code-header"><span>pubspec.yaml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>name: state_management
+description: "Dự án mẫu quản lý State bằng Riverpod chuẩn"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  <span class="c"># 1. Bộ đôi thư viện Riverpod bắt buộc</span>
+  flutter_riverpod: ^3.2.0
+  riverpod_annotation: ^4.0.1
+  <span class="c"># 2. Thư viện gọi API</span>
+  http: ^1.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  <span class="c"># 3. Bộ đôi công cụ tự động sinh file .g.dart</span>
+  build_runner:
+  riverpod_generator: ^4.0.2
+
+<span class="c"># Khắc phục xung đột thư viện kiểm thử lúc build generator</span>
+dependency_overrides:
+  test_api: ^0.7.9
+
+flutter:
+  uses-material-design: true</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3: BƯỚC LÀM NHỎ ===================== -->
+      <h3>3. Quy Trình 5 Bước Nhỏ Triển Khai Riverpod Từ Con Số 0</h3>
+      <p>Để người mới bắt đầu không bị bỡ ngỡ, toàn bộ quy trình từ cài đặt đến khi hiển thị dữ liệu lên màn hình được chia thành <strong>5 bước nhỏ tuần tự</strong> sau:</p>
+
+      <!-- BƯỚC 1 -->
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Bước 1: Bọc <code>ProviderScope</code> tại điểm khởi động <code>main.dart</code></strong>
+          <p>Mọi ứng dụng sử dụng Riverpod đều <strong>bắt buộc</strong> phải bọc Widget gốc bên trong <code>ProviderScope</code>. Đây là nơi lưu giữ vùng nhớ của toàn bộ các Provider trong suốt vòng đời của app.</p>
+          <div class="code-wrapper" style="margin-top:10px;">
+            <div class="code-header"><span>lib/main.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:state_management/ui/home_screen.dart';
+
+void main() {
+  <span class="c">// BẮT BUỘC: Bọc ProviderScope quanh MyApp</span>
+  runApp(const ProviderScope(child: MyApp()));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Riverpod Demo',
+      home: HomeScreen(),
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 2 -->
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Bước 2: Chuẩn bị Model Class (Dữ liệu người dùng <code>User</code>)</strong>
+          <p>Tạo file <code>lib/model/user.dart</code> đại diện cho cấu trúc 1 người dùng lấy từ API <code>https://jsonplaceholder.typicode.com/users</code>:</p>
+          <div class="code-wrapper" style="margin-top:10px;">
+            <div class="code-header"><span>lib/model/user.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>class User {
+  final int id;
+  final String name;
+  final String username;
+  final String email;
+
+  const User({
+    required this.id,
+    required this.name,
+    required this.username,
+    required this.email,
+  });
+
+  <span class="c">// Constructor chuyển đổi dữ liệu từ Map JSON sang Object User</span>
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      username: json['username'] as String,
+      email: json['email'] as String,
+    );
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 3 -->
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Bước 3: Hiểu hai phong cách khai báo Provider (Thủ công vs Sinh code tự động)</strong>
+          <p>Trước khi viết Notifier, bạn hãy quan sát sự khác biệt giữa hai cách viết để hiểu rõ vì sao cú pháp <code>@riverpod</code> lại được ưa chuộng hiện nay:</p>
+
+          <div class="grid-2" style="margin-top:10px;">
+            <div class="card">
+              <div class="card-title">Cách 1: Khai báo thủ công (Manual - Kiểu cũ)</div>
+              <p>Phải tự tay chỉ định kiểu Generic phức tạp <code>NotifierProvider&lt;UserNotifier, List&lt;User&gt;&gt;</code>:</p>
+              <div class="code-wrapper" style="margin-top:8px;">
+                <div class="code-header"><span>Cú pháp thủ công</span></div>
+                <pre><code>class UserNotifier extends Notifier<List<User>> {
+  @override
+  List<User> build() => [];
+}
+
+<span class="c">// Rất dài dòng và dễ sai kiểu generic</span>
+final userNotifierProvider =
+    NotifierProvider<UserNotifier, List<User>>(() {
+  return UserNotifier();
+});</code></pre>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Cách 2: Dùng Annotation <code>@riverpod</code> (Khuyên dùng)</div>
+              <p>Chỉ cần kế thừa <code>_$TênClass</code> và thêm <code>@riverpod</code> trên đầu, bộ generator sẽ tự động lo phần còn lại:</p>
+              <div class="code-wrapper" style="margin-top:8px;">
+                <div class="code-header"><span>Cú pháp Code Generation</span></div>
+                <pre><code>part 'user_notifier.g.dart';
+
+@riverpod
+class UserNotifier extends _$UserNotifier {
+  @override
+  List<User> build() => [];
+}
+<span class="c">// Máy sẽ tự sinh biến: userProvider</span></code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="def" style="margin-top:12px;">
+            <span class="def-term">Quy tắc vàng đặt tên tự động của <code>riverpod_generator</code></span>
+            <ul style="margin-left:20px; line-height:1.9;">
+              <li><strong>Với Class Notifier:</strong> Tên Class (ví dụ <code>UserNotifier</code>) &rarr; Bỏ hậu tố <code>Notifier</code> còn <code>User</code> &rarr; Thêm hậu tố <code>Provider</code> và viết thường chữ đầu &rarr; Tên biến tự sinh ra sẽ là <strong><code>userProvider</code></strong>.</li>
+              <li><strong>Ví dụ khác:</strong> <code>ProductNotifier</code> &rarr; sinh ra <strong><code>productProvider</code></strong>; <code>CartNotifier</code> &rarr; sinh ra <strong><code>cartProvider</code></strong>.</li>
+              <li><strong>Với Function Provider:</strong> Tên hàm (ví dụ <code>int totalUsers(Ref ref)</code>) &rarr; Thêm đuôi <code>Provider</code> &rarr; Tên biến tự sinh ra sẽ là <strong><code>totalUsersProvider</code></strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BƯỚC 4 -->
+      <div class="step-box">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Bước 4: Viết File Provider & Chạy Lệnh Generate Code</strong>
+          <p>Tạo file <code>lib/providers/user_notifier.dart</code>. Chú ý dòng khai báo <code>part 'user_notifier.g.dart';</code> ở đầu file (file này sẽ được máy tự tạo ra sau khi gõ lệnh):</p>
+          
+          <div class="code-wrapper" style="margin-top:10px;">
+            <div class="code-header"><span>lib/providers/user_notifier.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:state_management/model/user.dart';
+
+<span class="c">// BẮT BUỘC: Khai báo part liên kết với file tự sinh</span>
+part 'user_notifier.g.dart';
+
+@riverpod
+class UserNotifier extends _$UserNotifier {
+  <span class="c">// 1. Hàm build(): Khởi tạo giá trị ban đầu cho State (Mảng rỗng)</span>
+  @override
+  List<User> build() {
+    return [];
+  }
+
+  <span class="c">// 2. Hàm gọi API lấy danh sách người dùng và cập nhật State</span>
+  Future<void> fetchUsers() async {
+    final url = Uri.parse('https://jsonplaceholder.typicode.com/users');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      final List<User> users = jsonList.map((j) => User.fromJson(j)).toList();
+
+      <span class="c">// QUAN TRỌNG: Gán thẳng giá trị mảng mới vào biến 'state'</span>
+      state = users;
+    } else {
+      throw Exception('Lỗi nạp dữ liệu: ${response.statusCode}');
+    }
+  }
+
+  <span class="c">// 3. Hàm xóa sạch danh sách</span>
+  void clearUsers() {
+    state = [];
+  }
+}
+
+<span class="c">// 4. Dependent Provider (Provider phụ thuộc): Đếm số lượng User</span>
+<span class="c">// Hàm này theo dõi userProvider, khi danh sách thay đổi thì tổng số lượng tự động cập nhật!</span>
+@riverpod
+int totalUsers(Ref ref) {
+  final users = ref.watch(userProvider);
+  return users.length;
+}</code></pre>
+          </div>
+
+          <div class="alert alert-warning" style="margin-top:14px;">
+            <strong>Cảnh báo tư duy lập trình: Vì sao KHÔNG ĐƯỢC dùng <code>state.add(u)</code> hay <code>state.clear()</code>?</strong><br />
+            Trong Riverpod, <code>state</code> là <strong>bất biến (Immutable)</strong>. Riverpod so sánh sự thay đổi trạng thái dựa trên <em>Địa chỉ tham chiếu bộ nhớ (Object Identity)</em>. Nếu bạn gọi <code>state.add(u)</code>, bạn chỉ sửa đổi bên trong cùng một ô nhớ của mảng cũ, địa chỉ mảng không đổi nên Riverpod sẽ hiểu lầm là dữ liệu chưa thay đổi và <strong>không kích hoạt giao diện vẽ lại</strong>. Luôn luôn gán <code>state = mảng_mới</code>!
+          </div>
+
+          <p style="margin-top:14px;"><strong>Lệnh chạy sinh file <code>.g.dart</code> trong Terminal:</strong></p>
+          <div class="code-wrapper">
+            <div class="code-header"><span>Terminal (Dự án gốc)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <pre><code><span class="c"># Lệnh 1: Chạy sinh 1 lần và tự động ghi đè nếu có xung đột file cũ</span>
+dart run build_runner build --delete-conflicting-outputs
+
+<span class="c"># Lệnh 2: Chế độ theo dõi liên tục (Tự động sinh lại mỗi khi bấm Ctrl + S lưu code)</span>
+dart run build_runner watch --delete-conflicting-outputs</code></pre>
+          </div>
+          <p>Sau khi lệnh chạy hoàn tất và thông báo <em>[INFO] Succeeded</em>, file <code>user_notifier.g.dart</code> sẽ xuất hiện cùng thư mục, tất cả các gạch chân đỏ trong code sẽ hoàn toàn biến mất!</p>
+        </div>
+      </div>
+
+      <!-- BƯỚC 5 -->
+      <div class="step-box">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Bước 5: Tiêu thụ State trên giao diện UI (<code>ConsumerWidget</code> vs <code>ConsumerStatefulWidget</code>)</strong>
+          <p>Để màn hình đọc được dữ liệu từ Riverpod, Flutter cung cấp 2 widget thay thế tương ứng:</p>
+          <ul style="margin-left:20px; line-height:1.9;">
+            <li>Thay <code>StatelessWidget</code> bằng <strong><code>ConsumerWidget</code></strong>: Nhận thêm tham số <code>WidgetRef ref</code> trong hàm <code>build(BuildContext context, WidgetRef ref)</code>.</li>
+            <li>Thay <code>StatefulWidget</code> bằng <strong><code>ConsumerStatefulWidget</code></strong> & <strong><code>ConsumerState&lt;T&gt;</code></strong>: Cho phép truy cập thuộc tính <code>ref</code> toàn cục trực tiếp ở bất kỳ đâu trong State.</li>
+          </ul>
+
+          <h4 style="margin-top:12px;">Bảng so sánh cốt lõi: Khi nào dùng <code>ref.watch</code>, <code>ref.read</code>, và <code>ref.listen</code>?</h4>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cú pháp lệnh</th>
+                  <th>Vị trí được phép sử dụng</th>
+                  <th>Cơ chế hoạt động</th>
+                  <th>Trường hợp thực tế</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>ref.watch(provider)</code></td>
+                  <td>Bên trong hàm <code>build()</code> của Widget</td>
+                  <td><strong>Lắng nghe liên tục</strong>. Mỗi khi state đổi giá trị, widget hiện tại sẽ tự động chạy lại hàm build để cập nhật giao diện mới nhất.</td>
+                  <td>Lấy danh sách người dùng để render ListView, lấy trạng thái DarkMode, hiển thị số dư giỏ hàng.</td>
+                </tr>
+                <tr>
+                  <td><code>ref.read(provider.notifier)</code></td>
+                  <td>Bên trong các hàm xử lý sự kiện (<code>onPressed</code>, <code>onTap</code>...)</td>
+                  <td><strong>Lấy đối tượng xử lý một lần duy nhất</strong> mà không đăng ký lắng nghe vẽ lại.</td>
+                  <td>Bấm nút Fetch dữ liệu (<code>.fetchUsers()</code>), bấm nút Xóa danh sách (<code>.clearUsers()</code>), bấm nút Đăng xuất.</td>
+                </tr>
+                <tr>
+                  <td><code>ref.read(provider)</code></td>
+                  <td>Bên trong hàm sự kiện hoặc phương thức Notifier</td>
+                  <td>Chỉ đọc trích xuất giá trị state tại đúng thời điểm đó mà không quan tâm các thay đổi tương lai.</td>
+                  <td>Kiểm tra điều kiện nhanh trước khi chuyển trang (ví dụ: <code>if (ref.read(authProvider) == null)</code>).</td>
+                </tr>
+                <tr>
+                  <td><code>ref.listen(provider, (prev, next) {})</code></td>
+                  <td>Bên trong hàm <code>build()</code></td>
+                  <td>Lắng nghe sự kiện để <strong>thực thi một hành động phụ (Side-effect)</strong> thay vì vẽ lại giao diện.</td>
+                  <td>Bắn thông báo <code>SnackBar</code>, bật <code>AlertDialog</code> báo lỗi mạng, hoặc điều hướng chuyển trang.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4: CODE HOÀN CHỈNH ===================== -->
+      <h3>4. Toàn Bộ Mã Nguồn Màn Hình Giao Diện Hoàn Chỉnh (<code>home_screen.dart</code>)</h3>
+      <p>File giao diện thực chiến hoàn chỉnh sử dụng <code>ConsumerStatefulWidget</code>, bao gồm các nút bấm hành động (Fetch, Clear), hiển thị số lượng người dùng từ Dependent Provider, và kết hợp bố cục <code>GridView</code> 4 cột trực quan:</p>
+
+      <div class="code-wrapper">
+        <div class="code-header"><span>lib/ui/home_screen.dart</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:state_management/model/user.dart';
+import 'package:state_management/providers/user_notifier.dart';
+
+<span class="c">// ===============================================================</span>
+<span class="c">// CÁCH 1: DÙNG ConsumerStatefulWidget (Tiện khi cần initState, dispose)</span>
+<span class="c">// ===============================================================</span>
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    <span class="c">// 1. Dùng ref.watch() để lắng nghe danh sách users từ Riverpod</span>
+    final List<User> users = ref.watch(userProvider);
+
+    <span class="c">// 2. Dùng ref.watch() để theo dõi tổng số lượng từ dependent provider</span>
+    final int totalCount = ref.watch(totalUsersProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Danh sách người dùng (Riverpod)'),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            <span class="c">// Hàng nút bấm kích hoạt hành động</span>
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      <span class="c">// Dùng ref.read(provider.notifier) để gọi phương thức nghiệp vụ</span>
+                      ref.read(userProvider.notifier).fetchUsers();
+                    },
+                    icon: const Icon(Icons.cloud_download),
+                    label: const Text('Fetch Users'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      <span class="c">// Xóa dữ liệu</span>
+                      ref.read(userProvider.notifier).clearUsers();
+                    },
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Clear All'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            <span class="c">// Hiển thị tổng số lượng người dùng</span>
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.teal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.teal.withOpacity(0.3)),
+              ),
+              child: Text(
+                'Tổng số người dùng hiện có: $totalCount',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            <span class="c">// Hiển thị danh sách thẻ người dùng dạng GridView</span>
+            Expanded(
+              child: users.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Chưa có dữ liệu. Bấm "Fetch Users" để tải!',
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      ),
+                    )
+                  : GridView.count(
+                      crossAxisCount: 2, <span class="c">// 2 cột trên điện thoại</span>
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 1.4,
+                      children: users.map((u) {
+                        return Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: Colors.teal.shade100,
+                                      child: Text(
+                                        u.id.toString(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.teal,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        u.username,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(height: 16),
+                                Text(
+                                  u.name,
+                                  style: const TextStyle(fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  u.email,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: Colors.grey,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+<span class="c">// ===============================================================</span>
+<span class="c">// CÁCH 2: DÙNG ConsumerWidget (Gọn gàng nhất khi không cần lifecycle)</span>
+<span class="c">// ===============================================================</span>
+class SimpleUserScreen extends ConsumerWidget {
+  const SimpleUserScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final users = ref.watch(userProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Simple ConsumerWidget')),
+      body: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          final u = users[index];
+          return ListTile(
+            leading: const Icon(Icons.person, color: Colors.teal),
+            title: Text('${u.name} (@${u.username})'),
+            subtitle: Text(u.email),
+            trailing: Text('#${u.id}'),
+          );
+        },
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5: TỔNG KẾT & LỖI ===================== -->
+      <h3>5. Bảng Tổng Hợp Các Lỗi Thường Gặp & Cách Khắc Phục Tức Thì</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Hiện tượng lỗi</th>
+              <th>Nguyên nhân gốc rễ</th>
+              <th>Cách xử lý chuẩn xác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>No ProviderScope found</code> khi vừa chạy app</td>
+              <td>Quên bọc <code>ProviderScope</code> quanh <code>MyApp()</code> trong hàm <code>main()</code>.</td>
+              <td>Vào <code>main.dart</code>, sửa thành <code>runApp(const ProviderScope(child: MyApp()));</code>.</td>
+            </tr>
+            <tr>
+              <td>Gạch đỏ ở <code>_$UserNotifier</code> hoặc file <code>.g.dart</code> báo không tìm thấy</td>
+              <td>Chưa chạy bộ công cụ <code>build_runner</code> để sinh code tự động.</td>
+              <td>Mở Terminal chạy lệnh: <code>dart run build_runner build --delete-conflicting-outputs</code>.</td>
+            </tr>
+            <tr>
+              <td>Giao diện không cập nhật sau khi thêm phần tử vào danh sách</td>
+              <td>Dùng <code>state.add(item)</code> thay vì tạo mảng mới.</td>
+              <td>Sửa thành: <code>state = [...state, item];</code> để tạo bản sao tham chiếu mới kích hoạt render.</td>
+            </tr>
+            <tr>
+              <td>Gặp lỗi lặp vô hạn (Infinite Re-render loop)</td>
+              <td>Gọi <code>ref.read()</code> hoặc các hàm làm đổi state trực tiếp ngay giữa lòng hàm <code>build()</code>.</td>
+              <td>Chỉ đặt các lệnh thay đổi state bên trong các callback sự kiện như <code>onPressed</code> hoặc dùng <code>ref.listen</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>
+
