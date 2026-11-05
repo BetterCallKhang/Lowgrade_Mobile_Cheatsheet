@@ -33,6 +33,16 @@ function toggleNavGroup(header) {
   const group = header.closest('.nav-group');
   if (group) {
     group.classList.toggle('collapsed');
+    
+    // Lưu trạng thái đóng/mở vào localStorage theo tên nhóm
+    try {
+      const groupName = header.getAttribute('data-group') || header.innerText.trim();
+      const savedState = JSON.parse(localStorage.getItem('sidebar_group_state') || '{}');
+      savedState[groupName] = group.classList.contains('collapsed');
+      localStorage.setItem('sidebar_group_state', JSON.stringify(savedState));
+    } catch (e) {
+      console.warn('Cannot save sidebar state:', e);
+    }
   }
 }
 
