@@ -60,6 +60,39 @@
             <li><a href="02_flutter_can_ban/09_sqlite_database_crud.html" style="color:var(--accent-blue); font-weight:600;">Mục 9. Cơ sở dữ liệu SQLite & Full CRUD</a>: Bản chất SQLite, Singleton DatabaseHelper, bộ 4 thao tác CRUD, Riverpod AsyncNotifier, giải quyết trọn vẹn 7 yêu cầu thi thực hành (Validation, Confirm Dialog, SnackBar, Dispose Controller).</li>
           </ul>
         </div>
+
+        <!-- NHÓM CHEAT SHEET PHÒNG THI -->
+        <div class="card" style="border-left: 4px solid var(--accent-purple, #bc8cff);">
+          <div class="card-title">Mục 3: Cheat Sheet Phòng Thi (Copy & Paste Thực Chiến)</div>
+          <p>Tài liệu siêu tốc phục vụ kỳ thi thực hành PE: Giải thích ngắn gọn thư viện là gì, dùng khi nào và toàn bộ code mẫu chuẩn chỉ việc copy và paste:</p>
+          <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
+            <li><a href="03_cheat_sheet/01_setup_libraries_project_structure.html" style="color:var(--accent-blue); font-weight:600;">Mục 1. Thư viện & Cấu trúc dự án sẵn (Copy & Paste)</a>: Lệnh terminal cài 1 dòng, bảng tra cứu vai trò các thư viện (sqflite, web ffi, shared_preferences, riverpod, http), file pubspec.yaml chuẩn, cây thư mục lib/ sẵn sàng cho mọi đề thi và khung sườn main.dart an toàn.</li>
+            <li><a href="03_cheat_sheet/02_database_validator_helper.html" style="color:var(--accent-blue); font-weight:600;">Mục 2. Database & Static Validators Helper</a>: DatabaseHelper Singleton đa nền tảng (Mobile + Web), nạp dữ liệu mẫu ban đầu, và bộ hàm static AppValidator (login, register, email, pass, confirm pass, số nguyên, số thực) gọi là dùng.</li>
+            <li><a href="03_cheat_sheet/03_register_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 3. Mẫu Màn Hình Register (Đăng ký)</a>: Tối giản đúng 4 trường (Username, Email, Password, Confirm Password), gọi static validators, kiểm tra trùng CSDL và điều hướng sang Login.</li>
+            <li><a href="03_cheat_sheet/04_login_logout_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 4. Mẫu Màn Hình Login & Xử Lý Logout</a>: Tối giản, không màu mè, ăn trọn điểm validation, ẩn hiện mật khẩu, kiểm tra tài khoản, SessionService và Dialog xác nhận logout.</li>
+            <li><a href="03_cheat_sheet/05_item_list_screens.html" style="color:var(--accent-blue); font-weight:600;">Mục 5. Mẫu Danh Sách ListView (Riverpod Code Gen)</a>: Chuẩn cú pháp `@riverpod` annotation, lệnh `build_runner`, tách riêng `ItemCardWidget`, tự động cập nhật khi Thêm/Xóa và xử lý `.when()` mượt mà.</li>
+            <li><a href="03_cheat_sheet/06_add_edit_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)</a>: Kỹ thuật "2 trong 1" dùng chung 1 màn hình cho cả Thêm và Chỉnh sửa, Form dropdown, validation và lưu qua Riverpod.</li>
+            <li><a href="03_cheat_sheet/07_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 7. Mẫu Màn Hình Chi Tiết (Detail Screen)</a>: Nhận Model qua Constructor, trình bày thẻ thông tin thanh lịch, nút Edit trên AppBar và nút quay lại.</li>
+          </ul>
+        </div>
+
+        <!-- NHÓM PHÒNG THI THỰC CHIẾN -->
+        <div class="card" style="border-left: 4px solid var(--accent-green, #238636);">
+          <div class="card-title">Mục 4: Hướng Dẫn Giải Đề Mẫu 1 (Art Gallery Manager)</div>
+          <p>Hướng dẫn "cầm tay chỉ việc" giải quyết trọn vẹn đề thi thực hành từ A đến Z, dùng chung cho mọi dạng đề:</p>
+          <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
+            <li><a href="04_giai_de_mau_1/01_setup_project_libraries.html" style="color:var(--accent-blue); font-weight:600;">Bước 1. Khởi tạo dự án & Cấu hình thư viện chung</a>: Quy tắc phòng thi, khởi tạo project linh hoạt theo mọi đề, khai báo trọn bộ package cốt lõi (sqflite, shared_preferences, flutter_riverpod, http), cấu hình assets/banner và phân chia thư mục chuẩn.</li>
+            <li><a href="04_giai_de_mau_1/02_data_models.html" style="color:var(--accent-blue); font-weight:600;">Bước 2. Phân tích & Tạo Data Models</a>: Phương pháp suy luận đối chiếu đề bài và dataSample.txt, công thức vàng của Model (Fields, Constructor, toMap, fromMap, copyWith), hoàn thiện UserModel và ArtworkModel.</li>
+            <li><a href="04_giai_de_mau_1/03_database_helper.html" style="color:var(--accent-blue); font-weight:600;">Bước 3. Tầng CSDL DatabaseHelper</a>: Thiết kế SQLite Singleton, cấu hình mở CSDL trên cả Mobile và Web Browser, nạp dữ liệu mẫu (Seeding) và toàn bộ các hàm truy vấn cho toàn app.</li>
+            <li><a href="04_giai_de_mau_1/04_register_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 4. Màn hình Đăng ký (Task 1: User Registration)</a>: Phân tích UI Register, kỹ thuật quản lý Form & dispose Controllers chống rò rỉ bộ nhớ, bộ validation bắt buộc / khớp mật khẩu / email regex, kiểm tra username unique và code RegisterScreen hoàn chỉnh.</li>
+            <li><a href="04_giai_de_mau_1/05_session_service.html" style="color:var(--accent-blue); font-weight:600;">Bước 5. Quản lý Session (Task 3: Session Management)</a>: Xây dựng SessionService với SharedPreferences, lưu trữ `isLoggedIn`, `userId`, `username`, kiểm tra trạng thái khi mở app và hàm Logout xóa session.</li>
+            <li><a href="04_giai_de_mau_1/06_login_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 6. Màn hình Đăng nhập (Task 2: User Login)</a>: Phân tích UI Login & Logo bảo tàng, xác thực tài khoản từ SQLite, xử lý cờ Session, thông báo lỗi `Invalid username or password`, và điều hướng an toàn sang Home Screen.</li>
+            <li><a href="04_giai_de_mau_1/07_home_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 7. Màn hình Danh sách & Xóa (Task 4: Home List & Task 7: Delete Artwork)</a>: Hiển thị Banner kèm Session Username, ListView.builder danh sách tranh, xử lý trạng thái rỗng "No artworks found", hộp thoại xác nhận xóa (Confirmation Dialog) và SnackBar thông báo.</li>
+            <li><a href="04_giai_de_mau_1/08_add_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 8. Màn hình Thêm tác phẩm (Task 5: Add Artwork Screen)</a>: Dựng Form nhập Title, Artist, Year (number), DropdownButtonFormField cho Category, Description, lấy User ID Session làm khóa ngoại createdBy và cập nhật lại Home.</li>
+            <li><a href="04_giai_de_mau_1/09_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 9. Màn hình Chi tiết (Task 6: Artwork Detail Screen)</a>: Kỹ thuật truyền đối tượng Model qua Constructor, trình bày thẻ thông tin thanh lịch và nút Back trên AppBar trở về Home.</li>
+            <li><a href="04_giai_de_mau_1/10_main_entry.html" style="color:var(--accent-blue); font-weight:600;">Bước 10. Hoàn thiện main.dart & Quy trình nộp bài</a>: Khởi tạo engine bắt buộc `WidgetsFlutterBinding.ensureInitialized()`, cổng phân luồng Session Gatekeeper (Home vs Login), kịch bản test 7 Tasks và lệnh `flutter clean` trước khi nộp.</li>
+          </ul>
+        </div>
       </div>
 
       <!-- ===================== HƯỚNG DẪN TÌM KIẾM NHANH ===================== -->

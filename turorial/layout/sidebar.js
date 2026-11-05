@@ -31,16 +31,43 @@
         { title: "8. Local Storage & Prefs", href: "02_flutter_can_ban/08_local_storage_prefs.html" },
         { title: "9. SQLite Local & CRUD", href: "02_flutter_can_ban/09_sqlite_database_crud.html" }
       ]
+    },
+    {
+      group: "Mục 3: Cheat Sheet Phòng Thi (Copy & Paste)",
+      items: [
+        { title: "1. Thư viện & Cấu trúc dự án sẵn", href: "03_cheat_sheet/01_setup_libraries_project_structure.html" },
+        { title: "2. Database & Static Validators Helper", href: "03_cheat_sheet/02_database_validator_helper.html" },
+        { title: "3. Mẫu Register Screen (Đăng ký)", href: "03_cheat_sheet/03_register_screen.html" },
+        { title: "4. Mẫu Login & Logout Screens", href: "03_cheat_sheet/04_login_logout_screen.html" },
+        { title: "5. Mẫu Danh Sách ListView (Riverpod Code Gen)", href: "03_cheat_sheet/05_item_list_screens.html" },
+        { title: "6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)", href: "03_cheat_sheet/06_add_edit_screen.html" },
+        { title: "7. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/07_detail_screen.html" }
+      ]
+    },
+    {
+      group: "Mục 4: Giải Đề Mẫu 1 (Art Gallery Manager)",
+      items: [
+        { title: "Bước 1. Khởi tạo & Thư viện dùng chung", href: "04_giai_de_mau_1/01_setup_project_libraries.html" },
+        { title: "Bước 2. Phân tích & Tạo Data Models", href: "04_giai_de_mau_1/02_data_models.html" },
+        { title: "Bước 3. Tầng CSDL DatabaseHelper", href: "04_giai_de_mau_1/03_database_helper.html" },
+        { title: "Bước 4. Màn hình Đăng ký (Task 1)", href: "04_giai_de_mau_1/04_register_screen.html" },
+        { title: "Bước 5. Quản lý Session (Task 3)", href: "04_giai_de_mau_1/05_session_service.html" },
+        { title: "Bước 6. Màn hình Đăng nhập (Task 2)", href: "04_giai_de_mau_1/06_login_screen.html" },
+        { title: "Bước 7. Màn hình Home & Xóa (Task 4 & 7)", href: "04_giai_de_mau_1/07_home_screen.html" },
+        { title: "Bước 8. Màn hình Thêm tác phẩm (Task 5)", href: "04_giai_de_mau_1/08_add_screen.html" },
+        { title: "Bước 9. Màn hình Chi tiết (Task 6)", href: "04_giai_de_mau_1/09_detail_screen.html" },
+        { title: "Bước 10. Khởi chạy main.dart & Nộp bài", href: "04_giai_de_mau_1/10_main_entry.html" }
+      ]
     }
   ];
 
   function renderSidebar() {
     // Determine relative root prefix
-    // If current path includes subfolder like 01_nen_tang or 02_flutter_can_ban, prefix is '../'
+    // If current path includes subfolder like 01_nen_tang, 02_flutter_can_ban, or 03_exam_cheatsheet, prefix is '../'
     // Else it is ''
     const currentPath = window.location.pathname.replace(/\\/g, '/');
     let prefix = '';
-    if (currentPath.includes('/01_nen_tang/') || currentPath.includes('/02_flutter_can_ban/')) {
+    if (currentPath.includes('/01_nen_tang/') || currentPath.includes('/02_flutter_can_ban/') || currentPath.includes('/03_cheat_sheet/') || currentPath.includes('/04_giai_de_mau_1/')) {
       prefix = '../';
     }
 

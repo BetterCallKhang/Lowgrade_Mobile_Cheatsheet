@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 4: Màn hình Đăng ký (Register Screen) - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 4: Register Screen (Task 1)</span>
+        <span class="pill pill-purple">Form UI & Validation</span>
+      </div>
+      <div>
+        <a href="03_database_helper.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 3: Database</a>
+        <a href="05_session_service.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 5: Session &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 4: Xây Dựng Màn Hình Đăng Ký (Task 1: User Registration Screen)</h2>
+        <p>Sau khi đã có tầng CSDL <code>DatabaseHelper</code> ở Bước 3, bây giờ chúng ta bước vào xây dựng <strong>Task 1: Create a Register Screen</strong> theo đúng chuẩn đề thi. Màn hình này thu thập thông tin người dùng, kiểm tra tính hợp lệ của dữ liệu nhập (Validation), kiểm tra trùng username và lưu thông tin vào SQLite thông qua hàm <code>registerUser</code>.</p>
+        <p>Để code không bị dài dòng khó theo dõi, <strong>mỗi thành phần và hàm xử lý đều được tách riêng thành từng mục có viền màu sắc phân biệt</strong>, giải thích bản chất từng dòng code trước khi cung cấp toàn bộ file hoàn chỉnh.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu đề bài Task 1 & Các tiêu chí chấm điểm</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo Form Key, Controllers & Hàm <code>dispose()</code> giải phóng bộ nhớ</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Bộ 3 hàm Validation: Bắt buộc nhập, Regex Email & Khớp mật khẩu</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Hàm xử lý logic chính <code>_handleRegister()</code> (Async/Await & SnackBar)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Chi tiết từng Widget nhập liệu: Username, Email, Password, Confirm</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Widget Nút bấm Đăng ký (ElevatedButton & CircularProgressIndicator)</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Toàn bộ mã nguồn hoàn chỉnh của <code>register_screen.dart</code> (Copy 1 click)</a></li>
+          <li><a href="#sec-8" style="color:var(--accent-blue);">8. Checklist nghiệm thu chấm điểm Task 1</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Yêu Cầu Đề Bài Task 1 & Tiêu Chí Chấm Điểm</h3>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px; margin: 16px 0;">
+        <div class="card">
+          <div class="card-title">Các ô nhập liệu (Fields) bắt buộc</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>👤 <strong>Username:</strong> Tên tài khoản (icon: <code>Icons.person_outline</code>)</li>
+            <li>✉️ <strong>Email:</strong> Địa chỉ email (icon: <code>Icons.email_outlined</code>)</li>
+            <li>🔒 <strong>Password:</strong> Mật khẩu (ẩn ký tự: <code>obscureText: true</code>, icon: <code>Icons.lock_outline</code>)</li>
+            <li>🔑 <strong>Confirm Password:</strong> Nhập lại mật khẩu (icon: <code>Icons.lock_reset</code>)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Các điều kiện bắt buộc (Requirements)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>✅ <strong>Validate all fields are filled:</strong> Không để trống bất kỳ trường nào.</li>
+            <li>✅ <strong>Password and Confirm Password match:</strong> Hai mật khẩu phải trùng khớp 100%.</li>
+            <li>✅ <strong>Username must be unique:</strong> Username chưa từng có trong CSDL SQLite.</li>
+            <li>✅ <strong>Save user to database:</strong> Ghi vào bảng <code>users</code> kèm <code>createdAt</code>.</li>
+            <li>✅ <strong>Navigate to Login Screen:</strong> Đăng ký xong quay về màn hình Đăng nhập.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khai Báo Biến, Controllers & Hàm <code>dispose()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Khai báo Controllers & Hàm thu hồi bộ nhớ dispose()</div>
+        <p><strong>Bản chất:</strong> Mỗi ô <code>TextFormField</code> cần một <code>TextEditingController</code> riêng để hứng giá trị người dùng gõ. Đồng thời bắt buộc phải ghi đè hàm <code>dispose()</code> để thu hồi bộ nhớ khi thoát màn hình, tránh lỗi Memory Leak.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // Key điều khiển trạng thái toàn bộ Form
+  final _formKey = GlobalKey<FormState>();
+
+  // 4 Controllers tương ứng cho 4 ô nhập
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  // Biến cờ theo dõi trạng thái
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  // Bắt buộc: Giải phóng bộ nhớ khi rời màn hình
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Bộ 3 Quy Tắc Validation Phòng Thi</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-orange);">
+        <div class="card-title" style="color:var(--accent-orange);">🟠 Các hàm kiểm tra tính hợp lệ dữ liệu (Validators)</div>
+        <p><strong>Bản chất:</strong> Các hàm này trả về một <code>String</code> báo lỗi màu đỏ nếu dữ liệu không đạt, hoặc trả về <code>null</code> nếu dữ liệu hợp lệ.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// 1. Validator kiểm tra để trống & độ dài tối thiểu
+String? validateUsername(String? val) {
+  if (val == null || val.trim().isEmpty) return 'Username is required';
+  if (val.trim().length < 3) return 'Username must be at least 3 characters';
+  return null;
+}
+
+// 2. Validator kiểm tra cú pháp Email bằng Biểu thức chính quy (Regex)
+String? validateEmail(String? val) {
+  if (val == null || val.trim().isEmpty) return 'Email is required';
+  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  if (!emailRegex.hasMatch(val.trim())) return 'Invalid email format';
+  return null;
+}
+
+// 3. Validator kiểm tra khớp mật khẩu xác nhận
+String? validateConfirmPassword(String? val) {
+  if (val == null || val.isEmpty) return 'Please confirm password';
+  if (val != _passwordController.text) return 'Password and Confirm Password must match';
+  return null;
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Hàm Xử Lý Sự Kiện Nhấn Nút <code>_handleRegister()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 Quy trình 6 bước xử lý đăng ký (Async / Await)</div>
+        <p><strong>Nhiệm vụ:</strong> Kích hoạt kiểm tra form &rarr; Soi CSDL xem có trùng tên không &rarr; Lưu User mới vào SQLite &rarr; Bắn SnackBar thông báo &rarr; Đóng màn hình quay về Login.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  Future<void> _handleRegister() async {
+    // Bước 1: Kiểm tra tính hợp lệ của tất cả các ô nhập trong Form
+    if (!_formKey.currentState!.validate()) {
+      return; // Dừng lại ngay nếu có ô chưa đúng
+    }
+
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Bước 2: Gọi DatabaseHelper kiểm tra username trùng
+      final exists = await DatabaseHelper.instance.checkUsernameExists(username);
+      if (exists) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tên đăng nhập đã tồn tại, vui lòng chọn tên khác!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Bước 3: Lấy ngày hiện tại tự động theo chuẩn YYYY-MM-DD
+      final now = DateTime.now();
+      final createdAt = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      // Bước 4: Đóng gói UserModel và Insert vào SQLite
+      final newUser = UserModel(
+        username: username,
+        email: email,
+        password: password,
+        createdAt: createdAt,
+      );
+
+      await DatabaseHelper.instance.registerUser(newUser);
+
+      if (!mounted) return;
+      // Bước 5: Thông báo thành công bằng SnackBar xanh
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đăng ký tài khoản thành công!'),
+          backgroundColor: Colors.teal,
+        ),
+      );
+
+      // Bước 6: Đóng màn hình quay về màn hình Đăng nhập (Login)
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã xảy ra lỗi: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Chi Tiết Các Ô Nhập Liệu (TextFormField)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Cấu trúc các ô nhập liệu giao diện</div>
+        <p><strong>Gồm:</strong> Ô Username (prefix icon person), Ô Email (keyboardType email), Ô Password & Confirm Password (có icon con mắt bật/tắt ẩn hiện mật khẩu).</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// 1. Ô Username
+TextFormField(
+  controller: _usernameController,
+  decoration: const InputDecoration(
+    labelText: 'Username',
+    hintText: 'testuser123',
+    prefixIcon: Icon(Icons.person_outline),
+    border: OutlineInputBorder(),
+  ),
+  validator: (val) {
+    if (val == null || val.trim().isEmpty) return 'Username is required';
+    if (val.trim().length < 3) return 'Username must be at least 3 characters';
+    return null;
+  },
+),
+
+// 2. Ô Email
+TextFormField(
+  controller: _emailController,
+  keyboardType: TextInputType.emailAddress,
+  decoration: const InputDecoration(
+    labelText: 'Email',
+    hintText: 'test@example.com',
+    prefixIcon: Icon(Icons.email_outlined),
+    border: OutlineInputBorder(),
+  ),
+  validator: (val) {
+    if (val == null || val.trim().isEmpty) return 'Email is required';
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
+      return 'Invalid email format';
+    }
+    return null;
+  },
+),
+
+// 3. Ô Password có nút bật tắt con mắt
+TextFormField(
+  controller: _passwordController,
+  obscureText: _obscurePassword,
+  decoration: InputDecoration(
+    labelText: 'Password',
+    prefixIcon: const Icon(Icons.lock_outline),
+    border: const OutlineInputBorder(),
+    suffixIcon: IconButton(
+      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+    ),
+  ),
+  validator: (val) {
+    if (val == null || val.isEmpty) return 'Password is required';
+    if (val.length < 6) return 'Password must be at least 6 characters';
+    return null;
+  },
+),
+
+// 4. Ô Confirm Password
+TextFormField(
+  controller: _confirmPasswordController,
+  obscureText: _obscureConfirmPassword,
+  decoration: InputDecoration(
+    labelText: 'Confirm Password',
+    prefixIcon: const Icon(Icons.lock_reset),
+    border: const OutlineInputBorder(),
+    suffixIcon: IconButton(
+      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+    ),
+  ),
+  validator: (val) {
+    if (val == null || val.isEmpty) return 'Please confirm password';
+    if (val != _passwordController.text) return 'Password and Confirm Password must match';
+    return null;
+  },
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Widget Nút Bấm Đăng Ký (ElevatedButton)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+        <div class="card-title" style="color:var(--accent-cyan);">🌐 Nút bấm có hiệu ứng Loading xoay vòng</div>
+        <p><strong>Mục đích:</strong> Dùng màu xanh Teal <code>Color(0xFF00695C)</code> chuẩn đề bài. Khi người dùng bấm nút và CSDL đang chạy, hiển thị <code>CircularProgressIndicator</code> để người dùng không bấm nhiều lần liên tiếp.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>SizedBox(
+  height: 50,
+  child: ElevatedButton(
+    onPressed: _isLoading ? null : _handleRegister,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF00695C), // Màu xanh teal đậm chuẩn mock đề
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    child: _isLoading
+        ? const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+          )
+        : const Text('Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+  ),
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-7">7. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>register_screen.dart</code></h3>
+
+      <p>Sau khi đã nắm rõ từng thành phần ở trên, tạo file <code>lib/screens/register_screen.dart</code> và dán toàn bộ mã nguồn bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/screens/register_screen.dart
+import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
+import '../models/user_model.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final exists = await DatabaseHelper.instance.checkUsernameExists(username);
+      if (exists) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tên đăng nhập đã tồn tại, vui lòng chọn tên khác!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final now = DateTime.now();
+      final createdAt = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+      final newUser = UserModel(
+        username: username,
+        email: email,
+        password: password,
+        createdAt: createdAt,
+      );
+
+      await DatabaseHelper.instance.registerUser(newUser);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đăng ký tài khoản thành công!'),
+          backgroundColor: Colors.teal,
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Create your account'),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Create your account',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Start managing artworks with your own gallery space',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // 1. Ô Username
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Username',
+                      hintText: 'testuser123',
+                      prefixIcon: Icon(Icons.person_outline),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Username is required';
+                      if (val.trim().length < 3) return 'Username must be at least 3 characters';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 2. Ô Email
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      hintText: 'test@example.com',
+                      prefixIcon: Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Email is required';
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
+                        return 'Invalid email format';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 3. Ô Password
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Password is required';
+                      if (val.length < 6) return 'Password must be at least 6 characters';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 4. Ô Confirm Password
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      prefixIcon: const Icon(Icons.lock_reset),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      ),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Please confirm password';
+                      if (val != _passwordController.text) return 'Password and Confirm Password must match';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 5. Nút Register
+                  SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleRegister,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00695C),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                            )
+                          : const Text('Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 6. Chuyển sang Sign In
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Already have an account? '),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: const Text('Sign In', style: TextStyle(color: Color(0xFF00695C), fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3 id="sec-8">8. Checklist Nghiệm Thu Chấm Điểm Task 1</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Check</th>
+              <th>Tiêu chí chấm điểm của Giám khảo</th>
+              <th>Cách kiểm tra thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>[ ]</td>
+              <td>Validate để trống</td>
+              <td>Bấm nút "Register" khi chưa nhập gì &rarr; Các ô phải báo lỗi màu đỏ.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Validate khớp mật khẩu</td>
+              <td>Nhập Password và Confirm Password khác nhau &rarr; Báo lỗi "Password and Confirm Password must match".</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Kiểm tra trùng Username</td>
+              <td>Đăng ký tài khoản với username là <code>admin</code> (đã có sẵn trong CSDL) &rarr; Hiện thông báo lỗi SnackBar "Tên đăng nhập đã tồn tại".</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Lưu dữ liệu & Điều hướng</td>
+              <td>Nhập thông tin mới hợp lệ &rarr; Hiện SnackBar xanh và tự động đóng màn hình quay về Login.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Giải phóng tài nguyên</td>
+              <td>Đã có <code>dispose()</code> cho đủ 4 controller.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ HOÀN THÀNH TASK 1:</strong>
+        <p>Màn hình Đăng ký đã sẵn sàng hoạt động hoàn hảo và lưu trữ dữ liệu vào SQLite. Giờ đây người dùng đã có thể tạo tài khoản để sẵn sàng cho bước tiếp theo!</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

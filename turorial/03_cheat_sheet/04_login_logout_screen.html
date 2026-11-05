@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 4: Mẫu Login & Logout Screen (Copy & Paste Cho Kỳ Thi)</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 4: Login & Logout Screens</span>
+        <span class="pill pill-purple">1-Click Copy & Paste</span>
+      </div>
+      <div>
+        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3: Register Screen</a>
+        <a href="05_item_list_screens.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 5: Mẫu List & Grid &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 4: Mẫu Màn Hình Login & Xử Lý Logout (Tối Giản, Đủ Tiêu Chí Chấm Điểm)</h2>
+        <p>Mẫu code được thiết kế <strong>tối giản nhất có thể, không màu mè hay responsive rườm rà</strong>. Chỉ tập trung đúng và đủ các yêu cầu thi: <em>Tên field chuẩn (Username, Password), gọi trực tiếp <code>AppValidator</code> đã tạo ở Mục 2, xác thực SQLite, lưu cờ Session và nút Logout có Confirmation Dialog</em>.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">⚡ Danh mục code mẫu cần copy:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-session" style="color:var(--accent-blue);">1. File dịch vụ Session (Lưu/Xoá cờ login) - lib/services/session_service.dart</a></li>
+          <li><a href="#sec-login" style="color:var(--accent-blue);">2. Màn hình LoginScreen tối giản chuẩn thi - lib/screens/login_screen.dart</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">3. Hình ảnh minh hoạ giao diện UI màn hình Login</a></li>
+          <li><a href="#sec-logout-btn" style="color:var(--accent-blue);">4. Nút Logout đặt trên AppBar / Drawer (Kèm Confirm Dialog)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-session">1. File Quản Lý Session (lib/services/session_service.dart)</h3>
+      <p><strong>Dùng lúc nào?</strong> Lưu trạng thái đăng nhập để khi tắt app mở lại không bắt đăng nhập lại, và xoá cờ khi bấm Logout.</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:shared_preferences/shared_preferences.dart';
+
+class SessionService {
+  static const String keyIsLoggedIn = 'isLoggedIn';
+  static const String keyUsername = 'username';
+
+  // Lưu cờ đăng nhập thành công
+  static Future&lt;void&gt; saveSession(String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(keyIsLoggedIn, true);
+    await prefs.setString(keyUsername, username);
+  }
+
+  // Kiểm tra trạng thái đã đăng nhập chưa
+  static Future&lt;bool&gt; isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(keyIsLoggedIn) ?? false;
+  }
+
+  // Lấy tên người dùng hiện tại
+  static Future&lt;String&gt; getUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(keyUsername) ?? 'User';
+  }
+
+  // Xóa cờ khi Logout
+  static Future&lt;void&gt; clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-login">2. Màn Hình LoginScreen Tối Giản (lib/screens/login_screen.dart)</h3>
+      <p><strong>Dùng lúc nào?</strong> Đáp ứng Task <strong>User Login</strong>. Chỉ gồm đúng 2 ô nhập (Username, Password) dùng thẳng <code>AppValidator</code> của Mục 2, 1 nút Đăng nhập và 1 link Đăng ký nếu đề có.</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
+import '../services/session_service.dart';
+import '../utils/app_validator.dart';
+import 'home_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State&lt;LoginScreen&gt; createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State&lt;LoginScreen&gt; {
+  final _formKey = GlobalKey&lt;FormState&gt;();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future&lt;void&gt; _login() async {
+    // 1. Kiểm tra validator các ô nhập
+    if (!_formKey.currentState!.validate()) return;
+
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // 2. Xác thực tài khoản với DatabaseHelper
+    final user = await DatabaseHelper.instance.loginUser(username, password);
+
+    if (user != null) {
+      // 3. Lưu session
+      await SessionService.saveSession(username);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng nhập thành công! Chào $username')),
+      );
+
+      // 4. Chuyển sang màn HomeScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sai tên đăng nhập hoặc mật khẩu!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Field 1: Username (Có validator từ AppValidator)
+              TextFormField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(),
+                ),
+                validator: AppValidator.loginUsername,
+              ),
+              const SizedBox(height: 16),
+
+              // Field 2: Password (Có validator từ AppValidator)
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+                validator: AppValidator.loginPassword,
+              ),
+              const SizedBox(height: 20),
+
+              // Nút bấm Đăng nhập
+              ElevatedButton(
+                onPressed: _login,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('LOGIN', style: TextStyle(fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3: HÌNH ẢNH MINH HOẠ UI ===================== -->
+      <h3 id="sec-preview">3. Hình Ảnh Minh Hoạ Giao Diện UI Màn Hình Login Chuẩn Flutter</h3>
+      <p>Đối chiếu chính xác 100% với từng dòng code Flutter ở trên (AppBar <code>centerTitle: true</code>, 2 ô <code>OutlineInputBorder</code>, <code>ElevatedButton</code> và hiệu ứng viền đỏ báo lỗi của Form Validator):</p>
+
+      <div style="display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin: 28px 0;">
+        <!-- Hình 1: Màn hình ban đầu chưa làm gì -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-green, #3fb950); font-size: 15px;">
+            1. Màn hình ban đầu (Chưa nhập gì)
+          </h4>
+          <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/login_initial_ui.svg" alt="Flutter Login Initial UI" style="display: block; width: 320px; height: auto;" />
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            Trạng thái nghỉ: Ô nhập viền xám mỏng, label nổi tự nhiên, nút LOGIN sẵn sàng.
+          </p>
+        </div>
+
+        <!-- Hình 2: Màn hình khi bấm Login mà chưa nhập hoặc nhập sai -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-red, #f85149); font-size: 15px;">
+            2. Màn hình khi nhập sai / để trống
+          </h4>
+          <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/login_error_ui.svg" alt="Flutter Login Error UI" style="display: block; width: 320px; height: auto;" />
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            Trạng thái lỗi: Viền đỏ 2px, nhãn đỏ, text báo lỗi bên dưới ô và SnackBar đỏ dưới đáy.
+          </p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-logout-btn">4. Nút Đăng Xuất Logout (Kèm Hộp Thoại Xác Nhận)</h3>
+      <p><strong>Dùng lúc nào?</strong> Gắn vào nút Logout trên <code>AppBar</code> của màn hình <code>HomeScreen</code>:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">// ========================================================
+// 1. HÀM XỬ LÝ LOGOUT KÈM CONFIRM DIALOG (Dán vào _HomeScreenState)
+// ========================================================
+Future&lt;void&gt; _confirmLogout(BuildContext context) async {
+  final bool? confirm = await showDialog&lt;bool&gt;(
+    context: context,
+    builder: (ctx) =&gt; AlertDialog(
+      title: const Text('Xác nhận đăng xuất'),
+      content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
+      actions: [
+        TextButton(
+          onPressed: () =&gt; Navigator.pop(ctx, false),
+          child: const Text('Hủy'),
+        ),
+        ElevatedButton(
+          onPressed: () =&gt; Navigator.pop(ctx, true),
+          child: const Text('Đăng xuất'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm == true) {
+    // Xoá session đã lưu
+    await SessionService.clearSession();
+
+    if (!context.mounted) return;
+    // Quay về LoginScreen và xoá toàn bộ route cũ
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
+      (route) =&gt; false,
+    );
+  }
+}
+
+// ========================================================
+// 2. CÁCH GẮN VÀO APPBAR TRONG MÀN HÌNH HOMESCREEN
+// ========================================================
+AppBar(
+  title: const Text('Home'),
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.logout),
+      tooltip: 'Đăng xuất',
+      onPressed: () =&gt; _confirmLogout(context),
+    ),
+  ],
+)</code></pre>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3: Register Screen</a>
+        <a href="05_item_list_screens.html" class="copy-btn" style="text-decoration:none;">Mục 5: Mẫu List & GridView &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+</html>

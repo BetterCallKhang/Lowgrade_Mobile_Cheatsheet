@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 8: Màn hình Thêm tác phẩm (Add Artwork Screen) - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 8: Add Artwork (Task 5)</span>
+        <span class="pill pill-purple">Form, Dropdown & Insert SQLite</span>
+      </div>
+      <div>
+        <a href="07_home_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 7: Home List</a>
+        <a href="09_detail_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 9: Detail Screen &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 8: Xây Dựng Màn Hình Thêm Mới Tác Phẩm (Task 5: Add Artwork Screen)</h2>
+        <p>Đề bài thi yêu cầu ở <strong>Task 5 &mdash; Add Artwork</strong>: Tạo màn hình <strong>Add Artwork Screen</strong> gồm các trường: <code>Title</code>, <code>Artist</code>, <code>Year</code>, <code>Category</code> (Dropdown), <code>Description</code>. Yêu cầu: ID tự động tăng (auto-increment), lưu vào cơ sở dữ liệu SQLite kèm ID người tạo (<code>createdBy</code> lấy từ Session). Sau khi lưu: hiển thị SnackBar thông báo thành công (<em>"Artwork added successfully"</em>), quay trở lại Home Screen và cập nhật danh sách mới.</p>
+        <p>Các hàm và thành phần giao diện được chia nhỏ theo từng mục có viền màu sắc phân biệt rõ ràng.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu Task 5 & Giao diện mẫu theo đề thi</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo Form Key, Controllers, biến State & Hàm <code>dispose()</code></a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Widget DropdownButtonFormField cho trường Thể loại (Category)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Hàm xử lý lưu vào CSDL <code>_handleSaveArtwork()</code> (Lấy Session ID & Insert)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Chi tiết các ô nhập liệu (Title, Artist, Year số nguyên, Description)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Nút bấm "Save Artwork" & SnackBar thông báo thành công</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Toàn bộ mã nguồn hoàn chỉnh của <code>add_artwork_screen.dart</code> (Bấm copy 1 click)</a></li>
+          <li><a href="#sec-8" style="color:var(--accent-blue);">8. Checklist nghiệm thu chấm điểm Task 5</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Yêu Cầu Task 5 & Giao Diện Mẫu</h3>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px; margin: 16px 0;">
+        <div class="card">
+          <div class="card-title">Các trường nhập liệu (Fields) bắt buộc</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>📝 <strong>Title:</strong> Tên tác phẩm (icon: <code>Icons.title</code>)</li>
+            <li>👤 <strong>Artist:</strong> Tên họa sĩ / nghệ sĩ (icon: <code>Icons.person_outline</code>)</li>
+            <li>📅 <strong>Year:</strong> Năm sáng tác (icon: <code>Icons.calendar_today_outlined</code>, kiểu số)</li>
+            <li>🏷️ <strong>Category:</strong> Thể loại tranh chọn từ Dropdown (ví dụ: Abstract, Modern, Landscape, Portrait...)</li>
+            <li>📄 <strong>Description:</strong> Mô tả tác phẩm (icon: <code>Icons.subject</code>, nhập nhiều dòng)</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Các tiêu chí yêu cầu (Requirements)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>✅ <strong>Validation:</strong> Bắt buộc nhập đầy đủ, hiển thị chữ đỏ báo lỗi nếu để trống.</li>
+            <li>✅ <strong>Artwork ID must auto-increment:</strong> Không nhập ID, SQLite tự sinh.</li>
+            <li>✅ <strong>Lấy Foreign Key createdBy:</strong> Đọc User ID từ <code>SessionService.getUserId()</code>.</li>
+            <li>✅ <strong>Save into SQLite:</strong> Gọi <code>DatabaseHelper.instance.insertArtwork(newArtwork)</code>.</li>
+            <li>✅ <strong>Return & Update:</strong> Gọi <code>Navigator.pop(context, true)</code> để báo cho Home reload danh sách.</li>
+            <li>✅ <strong>SnackBar notification:</strong> Hiện thông báo: <code>Artwork added successfully</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khai Báo Form Key, Controllers & Hàm <code>dispose()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Controllers, Category mặc định & Hàm thu hồi bộ nhớ dispose()</div>
+        <p><strong>Bản chất:</strong> 4 trường dạng chữ dùng <code>TextEditingController</code>, riêng trường <code>Category</code> lưu bằng 1 biến chuỗi <code>_selectedCategory</code> với giá trị ban đầu là <code>'Abstract'</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  final _formKey = GlobalKey<FormState>();
+
+  final _titleController = TextEditingController();
+  final _artistController = TextEditingController();
+  final _yearController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  // Danh sách thể loại tranh
+  final List<String> _categories = ['Abstract', 'Modern', 'Landscape', 'Portrait', 'Still Life'];
+  String _selectedCategory = 'Abstract';
+
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _artistController.dispose();
+    _yearController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Widget DropdownButtonFormField Cho Category</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Chọn Thể loại từ Dropdown chuẩn Material</div>
+        <p><strong>Thiết kế:</strong> Dùng <code>DropdownButtonFormField&lt;String&gt;</code> để đồng bộ giao diện khung viền <code>OutlineInputBorder</code> giống hệt các ô <code>TextFormField</code> khác.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>DropdownButtonFormField<String>(
+  value: _selectedCategory,
+  decoration: const InputDecoration(
+    labelText: 'Category',
+    prefixIcon: Icon(Icons.category_outlined),
+    border: OutlineInputBorder(),
+  ),
+  items: _categories.map((String cat) {
+    return DropdownMenuItem<String>(
+      value: cat,
+      child: Text(cat),
+    );
+  }).toList(),
+  onChanged: (val) {
+    if (val != null) {
+      setState(() => _selectedCategory = val);
+    }
+  },
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Hàm Xử Lý Lưu Tác Phẩm <code>_handleSaveArtwork()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 Quy trình 5 bước Insert vào SQLite & Trả về Home</div>
+        <p><strong>Nhiệm vụ:</strong> Kiểm tra Form &rarr; Lấy ID User từ Session &rarr; Chuyển Year thành số nguyên &rarr; Ghi vào SQLite &rarr; Bắn SnackBar &rarr; Gọi <code>Navigator.pop(context, true)</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  Future<void> _handleSaveArtwork() async {
+    // 1. Kiểm tra Validate toàn bộ Form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 2. Lấy ID của User đang đăng nhập từ Session làm khóa ngoại createdBy
+      final currentUserId = await SessionService.getUserId() ?? 1;
+
+      // 3. Đóng gói đối tượng ArtworkModel
+      final newArtwork = ArtworkModel(
+        title: _titleController.text.trim(),
+        artist: _artistController.text.trim(),
+        year: int.parse(_yearController.text.trim()),
+        category: _selectedCategory,
+        description: _descriptionController.text.trim(),
+        createdBy: currentUserId,
+      );
+
+      // 4. Lưu vào SQLite
+      await DatabaseHelper.instance.insertArtwork(newArtwork);
+
+      if (!mounted) return;
+      // 5. Hiển thị SnackBar thông báo thành công theo đúng yêu cầu đề bài
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Artwork added successfully'),
+          backgroundColor: Colors.black87,
+        ),
+      );
+
+      // Quay về Home Screen và gửi cờ `true` để Home reload danh sách
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Chi Tiết Các Ô Nhập Liệu Khác (Title, Artist, Year, Description)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-orange);">
+        <div class="card-title" style="color:var(--accent-orange);">🟠 Các ô TextFormField & Validator kiểm tra số nguyên</div>
+        <p><strong>Lưu ý:</strong> Ô <code>Year</code> phải đặt <code>keyboardType: TextInputType.number</code> và kiểm tra <code>int.tryParse()</code> để người dùng không gõ chữ cái vào năm.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// 1. Ô Title
+TextFormField(
+  controller: _titleController,
+  decoration: const InputDecoration(
+    labelText: 'Title',
+    prefixIcon: Icon(Icons.title),
+    border: OutlineInputBorder(),
+  ),
+  validator: (val) => (val == null || val.trim().isEmpty) ? 'Title is required' : null,
+),
+const SizedBox(height: 16),
+
+// 2. Ô Artist
+TextFormField(
+  controller: _artistController,
+  decoration: const InputDecoration(
+    labelText: 'Artist',
+    prefixIcon: Icon(Icons.person_outline),
+    border: OutlineInputBorder(),
+  ),
+  validator: (val) => (val == null || val.trim().isEmpty) ? 'Artist is required' : null,
+),
+const SizedBox(height: 16),
+
+// 3. Ô Year (chỉ cho phép nhập số nguyên)
+TextFormField(
+  controller: _yearController,
+  keyboardType: TextInputType.number,
+  decoration: const InputDecoration(
+    labelText: 'Year',
+    prefixIcon: Icon(Icons.calendar_today_outlined),
+    border: OutlineInputBorder(),
+  ),
+  validator: (val) {
+    if (val == null || val.trim().isEmpty) return 'Year is required';
+    final parsed = int.tryParse(val.trim());
+    if (parsed == null || parsed <= 0) return 'Please enter a valid year';
+    return null;
+  },
+),
+const SizedBox(height: 16),
+
+// 4. Ô Description (Cho phép xuống hàng nhiều dòng)
+TextFormField(
+  controller: _descriptionController,
+  maxLines: 3,
+  decoration: const InputDecoration(
+    labelText: 'Description',
+    prefixIcon: Icon(Icons.subject),
+    border: OutlineInputBorder(),
+    alignLabelWithHint: true,
+  ),
+  validator: (val) => (val == null || val.trim().isEmpty) ? 'Description is required' : null,
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Nút Bấm "Save Artwork"</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+        <div class="card-title" style="color:var(--accent-cyan);">🌐 Nút Lưu màu xanh Teal chuẩn nhận diện đề thi</div>
+        <p><strong>Nhiệm vụ:</strong> Bấm để gọi <code>_handleSaveArtwork()</code>, có biểu tượng vòng tròn xoay <code>CircularProgressIndicator</code> khi đang lưu.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>SizedBox(
+  height: 50,
+  child: ElevatedButton(
+    onPressed: _isLoading ? null : _handleSaveArtwork,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF00695C),
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    child: _isLoading
+        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+        : const Text('Save Artwork', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+  ),
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-7">7. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>add_artwork_screen.dart</code></h3>
+
+      <p>Tạo file: <code>lib/screens/add_artwork_screen.dart</code> và dán toàn bộ mã nguồn bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/screens/add_artwork_screen.dart
+import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
+import '../models/artwork_model.dart';
+import '../services/session_service.dart';
+
+class AddArtworkScreen extends StatefulWidget {
+  const AddArtworkScreen({super.key});
+
+  @override
+  State<AddArtworkScreen> createState() => _AddArtworkScreenState();
+}
+
+class _AddArtworkScreenState extends State<AddArtworkScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _titleController = TextEditingController();
+  final _artistController = TextEditingController();
+  final _yearController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  final List<String> _categories = ['Abstract', 'Modern', 'Landscape', 'Portrait', 'Still Life'];
+  String _selectedCategory = 'Abstract';
+
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _artistController.dispose();
+    _yearController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSaveArtwork() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final currentUserId = await SessionService.getUserId() ?? 1;
+
+      final newArtwork = ArtworkModel(
+        title: _titleController.text.trim(),
+        artist: _artistController.text.trim(),
+        year: int.parse(_yearController.text.trim()),
+        category: _selectedCategory,
+        description: _descriptionController.text.trim(),
+        createdBy: currentUserId,
+      );
+
+      await DatabaseHelper.instance.insertArtwork(newArtwork);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Artwork added successfully'),
+          backgroundColor: Colors.black87,
+        ),
+      );
+
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Add Artwork', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'New Artwork',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                const SizedBox(height: 24),
+
+                // 1. Ô Title
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                    prefixIcon: Icon(Icons.title),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) => (val == null || val.trim().isEmpty) ? 'Title is required' : null,
+                ),
+                const SizedBox(height: 16),
+
+                // 2. Ô Artist
+                TextFormField(
+                  controller: _artistController,
+                  decoration: const InputDecoration(
+                    labelText: 'Artist',
+                    prefixIcon: Icon(Icons.person_outline),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) => (val == null || val.trim().isEmpty) ? 'Artist is required' : null,
+                ),
+                const SizedBox(height: 16),
+
+                // 3. Ô Year
+                TextFormField(
+                  controller: _yearController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Year',
+                    prefixIcon: Icon(Icons.calendar_today_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) return 'Year is required';
+                    final parsed = int.tryParse(val.trim());
+                    if (parsed == null || parsed <= 0) return 'Please enter a valid year';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // 4. Ô Dropdown Category
+                DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    prefixIcon: Icon(Icons.category_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _categories.map((String cat) {
+                    return DropdownMenuItem<String>(
+                      value: cat,
+                      child: Text(cat),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _selectedCategory = val);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // 5. Ô Description
+                TextFormField(
+                  controller: _descriptionController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    prefixIcon: Icon(Icons.subject),
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                  validator: (val) => (val == null || val.trim().isEmpty) ? 'Description is required' : null,
+                ),
+                const SizedBox(height: 28),
+
+                // 6. Nút Save Artwork
+                SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSaveArtwork,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00695C),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                        : const Text('Save Artwork', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3 id="sec-8">8. Checklist Nghiệm Thu Chấm Điểm Task 5</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Check</th>
+              <th>Tiêu chí chấm điểm của Giám khảo</th>
+              <th>Cách kiểm tra thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>[ ]</td>
+              <td>Validation các ô bắt buộc</td>
+              <td>Để trống Title, Artist, Year, Description &rarr; Báo lỗi chữ đỏ ở tất cả các ô.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Validate trường Year</td>
+              <td>Nhập chữ cái vào Year &rarr; Báo lỗi "Please enter a valid year".</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Dropdown Category</td>
+              <td>Chọn được các thể loại khác nhau (Abstract, Modern, Landscape...).</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Lưu SQLite thành công</td>
+              <td>Bấm Save &rarr; Hiện thông báo SnackBar <code>Artwork added successfully</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Tự động cập nhật danh sách Home</td>
+              <td>Tự đóng màn hình quay về Home và bức tranh mới lập tức xuất hiện trong danh sách.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 8:</strong>
+        <p>Màn hình Thêm tác phẩm đã hoàn tất 100%! Tiếp theo là <strong>Bước 9: Màn hình Xem chi tiết (Task 6: Artwork Detail Screen)</strong>.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

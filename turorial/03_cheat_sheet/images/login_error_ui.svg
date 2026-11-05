@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow-err" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Device frame / Background Surface white -->
+  <rect width="360" height="640" fill="#ffffff" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- Flutter Material 3 AppBar (title: Text('Login'), centerTitle: true) -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow-err)"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Login</text>
+
+  <!-- ==================== FIELD 1: Username BỊ BÁO LỖI ==================== -->
+  <!-- Flutter error state: Outline viền đỏ #B3261E, label đỏ, text lỗi bên dưới font 12px -->
+  <g transform="translate(16, 190)">
+    <!-- Outline border viền đỏ 2px -->
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#B3261E" stroke-width="2"/>
+    <!-- Floating label đỏ -->
+    <rect x="12" y="-6" width="68" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12" font-weight="500">Username</text>
+    
+    <!-- Text thông báo lỗi đỏ từ validator: AppValidator.loginUsername -->
+    <!-- 'Vui lòng nhập tên đăng nhập' -->
+    <text x="12" y="72" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12">Vui lòng nhập tên đăng nhập</text>
+  </g>
+
+  <!-- ==================== FIELD 2: Password BỊ BÁO LỖI HOẶC NHẬP SAI ĐỘ DÀI ==================== -->
+  <!-- Đang nhập '123' (quá ngắn < 6 ký tự) -> Bị báo lỗi đỏ -->
+  <g transform="translate(16, 282)">
+    <!-- Outline border viền đỏ 2px -->
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#B3261E" stroke-width="2"/>
+    <!-- Floating label đỏ -->
+    <rect x="12" y="-6" width="64" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12" font-weight="500">Password</text>
+    <!-- Giá trị nhập vào (dấu chấm tròn obscureText) -->
+    <text x="16" y="34" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="20" letter-spacing="2">••••</text>
+    
+    <!-- Text thông báo lỗi đỏ từ validator -->
+    <text x="12" y="72" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12">Mật khẩu phải từ 6 ký tự trở lên</text>
+  </g>
+
+  <!-- ==================== BUTTON: LOGIN ==================== -->
+  <g transform="translate(16, 376)">
+    <rect x="0" y="0" width="328" height="48" rx="24" fill="#6750A4" filter="url(#shadow-err)"/>
+    <text x="164" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="14" font-weight="600" letter-spacing="1" text-anchor="middle">LOGIN</text>
+  </g>
+
+  <!-- ==================== FLUTTER SNACKBAR BÁO SAI TÀI KHOẢN (TRƯỜNG HỢP NHẬP SAI VÀO DB) ==================== -->
+  <!-- ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sai tên đăng nhập...'), backgroundColor: Colors.red)) -->
+  <g transform="translate(16, 550)" filter="url(#shadow-err)">
+    <rect width="328" height="48" rx="4" fill="#B3261E"/>
+    <text x="16" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="13">Sai tên đăng nhập hoặc mật khẩu!</text>
+  </g>
+</svg>
+

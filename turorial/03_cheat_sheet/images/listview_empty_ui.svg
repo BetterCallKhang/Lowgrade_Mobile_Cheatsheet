@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow-empty" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Surface Background Material #f8f9fa -->
+  <rect width="360" height="640" fill="#f8f9fa" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- Flutter Material 3 AppBar: title: Text('Danh sách'), centerTitle: true, action: Logout icon -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow-empty)"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Danh sách</text>
+  <!-- Action Logout icon -->
+  <g transform="translate(320, 42)">
+    <path d="M4 2 L12 2 C13 2 14 3 14 4 L14 8 L12 8 L12 4 L4 4 L4 16 L12 16 L12 12 L14 12 L14 16 C14 17 13 18 12 18 L4 18 C3 18 2 17 2 16 L2 4 C2 3 3 2 4 2 Z M10 6 L14 10 L10 14 L8.6 12.6 L10.2 11 L6 11 L6 9 L10.2 9 L8.6 7.4 Z" fill="#ffffff"/>
+  </g>
+
+  <!-- ==================== BODY RỖNG (EMPTY STATE) ==================== -->
+  <g transform="translate(180, 260)">
+    <!-- Icon Hộp rỗng (Inbox empty) -->
+    <circle cx="0" cy="0" r="44" fill="#EADDFF"/>
+    <path d="M-18 -10 L18 -10 L18 8 L8 8 C6 12 -6 12 -8 8 L-18 8 Z" fill="#21005D" opacity="0.6"/>
+    <path d="M-22 -14 L22 -14 L22 14 L-22 14 Z" fill="none" stroke="#21005D" stroke-width="2.5" rx="2"/>
+
+    <!-- Text thông báo chuẩn bài thi -->
+    <text x="0" y="68" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">Chưa có dữ liệu nào</text>
+    <text x="0" y="90" fill="#79747E" font-family="Roboto, sans-serif" font-size="13" text-anchor="middle">(No items found)</text>
+    <text x="0" y="116" fill="#6750A4" font-family="Roboto, sans-serif" font-size="12" text-anchor="middle">Bấm nút (+) bên dưới để thêm mới</text>
+  </g>
+
+  <!-- ==================== FLOATING ACTION BUTTON (Add) ==================== -->
+  <g transform="translate(288, 552)" filter="url(#shadow-empty)">
+    <circle cx="28" cy="28" r="28" fill="#6750A4"/>
+    <path d="M26 18 L30 18 L30 26 L38 26 L38 30 L30 30 L30 38 L26 38 L26 30 L18 30 L18 26 L26 26 Z" fill="#ffffff"/>
+  </g>
+</svg>
+

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Device frame / Background Material (Surface: white #ffffff) -->
+  <rect width="360" height="640" fill="#ffffff" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- Flutter Material 3 AppBar (centerTitle: true, title: Text('Login')) -->
+  <!-- Primary Container: #6750A4 (DeepPurple M3 default) or Primary -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow)"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Login</text>
+
+  <!-- Body Content: Padding(padding: EdgeInsets.all(16.0)) -->
+  <!-- Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.stretch) -->
+  <!-- Center Y is around 320. Form starts around Y = 210 -->
+
+  <!-- ==================== FIELD 1: Username ==================== -->
+  <!-- TextFormField(decoration: InputDecoration(labelText: 'Username', border: OutlineInputBorder())) -->
+  <!-- Resting unfocused OutlineInputBorder in Material 3: border #79747E, label floating or resting -->
+  <g transform="translate(16, 210)">
+    <!-- Outline border -->
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#79747E" stroke-width="1"/>
+    <!-- Floating label with cut-out background -->
+    <rect x="12" y="-6" width="68" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Username</text>
+    <!-- Cursor / Placeholder hint if any, or empty resting -->
+  </g>
+
+  <!-- SizedBox(height: 16) -> Gap of 16px -->
+
+  <!-- ==================== FIELD 2: Password ==================== -->
+  <!-- TextFormField(decoration: InputDecoration(labelText: 'Password', border: OutlineInputBorder()), obscureText: true) -->
+  <g transform="translate(16, 282)">
+    <!-- Outline border -->
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#79747E" stroke-width="1"/>
+    <!-- Floating label -->
+    <rect x="12" y="-6" width="64" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Password</text>
+  </g>
+
+  <!-- SizedBox(height: 20) -> Gap of 20px -->
+
+  <!-- ==================== BUTTON: LOGIN ==================== -->
+  <!-- ElevatedButton(style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14)), child: Text('LOGIN')) -->
+  <!-- In M3: filled elevated button with primary color #6750A4 and rounded corners rx=24 or rx=8 -->
+  <g transform="translate(16, 358)">
+    <rect x="0" y="0" width="328" height="48" rx="24" fill="#6750A4" filter="url(#shadow)"/>
+    <text x="164" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="14" font-weight="600" letter-spacing="1" text-anchor="middle">LOGIN</text>
+  </g>
+
+  <!-- Subtle state badge -->
+  <g transform="translate(16, 580)">
+    <rect width="328" height="32" rx="6" fill="#F3EDF7"/>
+    <text x="164" y="20" fill="#49454F" font-family="Roboto, sans-serif" font-size="12" text-anchor="middle">Màn hình ban đầu: Chưa nhập gì, các ô ở trạng thái nghỉ</text>
+  </g>
+</svg>
+

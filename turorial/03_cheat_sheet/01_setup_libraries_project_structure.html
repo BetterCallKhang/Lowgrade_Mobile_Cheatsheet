@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 1: Bộ Thư Viện Chuẩn & Cấu Trúc Dự Án Sẵn (Copy & Paste Cho Kỳ Thi)</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 1: Libraries & Project Structure</span>
+        <span class="pill pill-purple">1-Click Copy & Paste</span>
+      </div>
+      <div>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none;">&larr; Mục lục</a>
+        <a href="02_database_validator_helper.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 2: Helpers & Validators &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 1: Danh Sách Thư Viện Cốt Lõi & Cấu Trúc Dự Án Mẫu Vào Thi Là Dùng</h2>
+        <p>Tài liệu này được tối ưu hoá triệt để cho <strong>kỳ thi thực hành (PE / Practical Exam)</strong> theo tiêu chí: <em>Người dùng đọc vào hiểu ngay thư viện đó là gì, dùng vào lúc nào, khi thi chỉ việc bấm nút <strong>Copy</strong> và dán vào dự án là chạy ngay mà không lo lỗi tương thích hay quên cú pháp</em>.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">⚡ Danh mục thao tác nhanh vào phòng thi:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-quick-cmd" style="color:var(--accent-blue);">1. Lệnh Terminal khởi tạo & cài trọn bộ 1 dòng (Nhanh nhất)</a></li>
+          <li><a href="#sec-libs-table" style="color:var(--accent-blue);">2. Bảng tra cứu: Thư viện là gì? Dùng lúc nào? Task thi nào cần?</a></li>
+          <li><a href="#sec-pubspec" style="color:var(--accent-blue);">3. File pubspec.yaml chuẩn hoàn chỉnh (Copy & Dán đè)</a></li>
+          <li><a href="#sec-tree" style="color:var(--accent-blue);">4. Cấu trúc thư mục lib/ chuẩn hoá sẵn sàng mọi dạng đề</a></li>
+          <li><a href="#sec-shell-script" style="color:var(--accent-blue);">5. Lệnh tạo toàn bộ cây thư mục & file rỗng trong 1 giây</a></li>
+          <li><a href="#sec-main-skeleton" style="color:var(--accent-blue);">6. Khung sườn main.dart chuẩn khởi động app an toàn</a></li>
+          <li><a href="#sec-exam-tips" style="color:var(--accent-blue);">7. Lưu ý sống còn trong phòng thi (Chống 0 điểm)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-quick-cmd">1. Lệnh Terminal Khởi Tạo Dự Án & Cài Trọn Bộ Thư Viện (Trong 1 Phút)</h3>
+      <p>Vừa nhận đề bài thi, đọc tên thư mục yêu cầu ở trang 1 (ví dụ đề bắt đặt tên là <code>se181234</code> hoặc <code>sp26studentcode</code>), mở Terminal tại thư mục chỉ định và copy dán đoạn lệnh sau:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># 1. Khởi tạo project (thay 'se181234' bằng tên đề bài yêu cầu)
+flutter create se181234
+cd se181234
+
+# 2. Cài trọn bộ 6 thư viện dùng xuyên suốt bài thi (Mobile + Web testing)
+flutter pub add sqflite sqflite_common_ffi sqflite_common_ffi_web shared_preferences flutter_riverpod http
+
+# 3. Mở project trong VS Code / Android Studio
+code .</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-libs-table">2. Bảng Tra Cứu: Thư Viện Là Gì? Dùng Khi Nào?</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 22%;">Tên Thư Viện</th>
+              <th style="width: 25%;">Là gì?</th>
+              <th style="width: 33%;">Dùng khi nào trong bài thi?</th>
+              <th style="width: 20%;">Task đề thi liên quan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sqflite</code></td>
+              <td>Hệ quản trị CSDL SQLite cục bộ trên thiết bị di động (Android / iOS).</td>
+              <td>Dùng khi đề thi yêu cầu lưu trữ dữ liệu offline, thực hiện thêm, sửa, xóa, đọc danh sách (CRUD) Users và Items.</td>
+              <td>Task Register, Task Login, Task CRUD (Artwork/Book/Product)</td>
+            </tr>
+            <tr>
+              <td><code>sqflite_common_ffi</code> &amp; <br/><code>sqflite_common_ffi_web</code></td>
+              <td>Bộ cầu nối FFI cho phép chạy SQLite trên môi trường Web Chrome hoặc Desktop máy giám thị.</td>
+              <td>Bắt buộc phải có nếu máy thi không mở được máy ảo Android (AVD) mà phải chạy trực tiếp ứng dụng trên Google Chrome.</td>
+              <td>Tương thích đa nền tảng lúc chấm bài thi</td>
+            </tr>
+            <tr>
+              <td><code>shared_preferences</code></td>
+              <td>Bộ nhớ lưu trữ dữ liệu dạng Key - Value cục bộ siêu nhẹ.</td>
+              <td>Dùng khi làm chức năng <strong>ghi nhớ đăng nhập (Session)</strong>: Lưu `isLoggedIn: true/false`, `userId`, `username`, kiểm tra khi app mở lên, và xoá cờ khi người dùng bấm Logout.</td>
+              <td>Task Session Management (Login / Logout / Gatekeeper)</td>
+            </tr>
+            <tr>
+              <td><code>flutter_riverpod</code></td>
+              <td>Thư viện quản lý trạng thái (State Management) hiện đại, an toàn và dễ debug bậc nhất Flutter.</td>
+              <td>Dùng khi cần đồng bộ dữ liệu giữa các màn hình (ví dụ: màn Add thêm xong thì màn Home tự cập nhật ngay danh sách) hoặc quản lý trạng thái Filter, Theme.</td>
+              <td>State Management, Auto Refresh List sau khi Thêm/Sửa/Xóa</td>
+            </tr>
+            <tr>
+              <td><code>http</code></td>
+              <td>Thư viện gửi HTTP Request (GET, POST, PUT, DELETE) lên máy chủ API.</td>
+              <td>Dùng khi đề bài yêu cầu fetch danh sách từ Mock API (MockAPI.io, Reqres, JSONPlaceholder) hoặc gửi JSON đăng ký / đăng nhập.</td>
+              <td>Task Call REST API / Mock Data Online (nếu đề có API)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-pubspec">3. File pubspec.yaml Hoàn Chỉnh (Copy & Dán Đè)</h3>
+      <p>Nếu bạn không muốn chạy lệnh Terminal từng cái, hãy mở trực tiếp file <code>pubspec.yaml</code> ở thư mục gốc của project, dán đoạn khai báo dưới đây vào phần <code>dependencies</code> và <code>assets</code>:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-yaml">name: my_exam_project
+description: "A cheatsheet exam project prepared for PE."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '&gt;=3.0.0 &lt;4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 1. Cơ sở dữ liệu SQLite cục bộ (Mobile)
+  sqflite: ^2.4.2
+
+  # 2. Hỗ trợ chạy SQLite trên Web (Chrome) &amp; Desktop nếu máy thi yếu
+  sqflite_common_ffi: ^2.3.4+4
+  sqflite_common_ffi_web: ^0.4.5+1
+
+  # 3. Quản lý phiên đăng nhập (Session: isLoggedIn, username, userId)
+  shared_preferences: ^2.5.3
+
+  # 4. Quản lý State toàn app (Đồng bộ dữ liệu màn hình)
+  flutter_riverpod: ^2.6.1
+
+  # 5. Gọi REST API (GET, POST JSON) nếu đề bài yêu cầu kết nối mạng
+  http: ^1.3.0
+
+  # Icon chuẩn Flutter
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Cấu hình nạp ảnh banner/logo đề thi cấp sẵn trong thư mục assets/
+  assets:
+    - assets/</code></pre>
+      </div>
+
+      <div class="callout tip">
+        <strong>💡 Mẹo phòng thi sau khi sửa pubspec.yaml:</strong>
+        <p>Sau khi dán và lưu file <code>pubspec.yaml</code>, mở Terminal gõ lệnh sau để tải packages về:</p>
+        <pre style="margin-top:6px; background:#0d1117; padding:8px 12px; border-radius:6px;"><code>flutter pub get</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-tree">4. Cấu Trúc Thư Mục Chuẩn Trong Thư Mục lib/ (Gọn Gàng & Dễ Chấm)</h3>
+      <p>Dựa trên cấu trúc chuẩn từ Đề mẫu 1, bất kỳ đề thi PE nào cũng gồm 4 nhóm file chính: <strong>Models</strong> (khuôn dữ liệu), <strong>Database/Services</strong> (lưu trữ CSDL & Session), <strong>Screens</strong> (các màn hình giao diện) và <strong>main.dart</strong> (cổng điều hướng khởi động).</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>lib/
+├── main.dart                      # Điểm khởi chạy app + Session Gatekeeper (kiểm tra login)
+│
+├── models/                        # Chứa các khuôn mẫu đối tượng (Data Models)
+│   ├── user_model.dart            # Model tài khoản người dùng (id, username, password, email)
+│   └── item_model.dart            # Model dữ liệu chính của đề (Artwork / Book / Student / Product)
+│
+├── database/                      # Tầng truy vấn CSDL SQLite
+│   └── database_helper.dart       # Singleton SQLite, tạo bảng, seed data mẫu, CRUD toàn bộ
+│
+├── services/                      # Dịch vụ phụ trợ
+│   ├── session_service.dart       # Quản lý SharedPreferences (saveSession, getSession, clearSession)
+│   └── api_service.dart           # (Tùy chọn) Gọi API bằng http nếu đề yêu cầu REST API
+│
+└── screens/                       # Toàn bộ giao diện màn hình theo từng Task
+    ├── login_screen.dart          # Task Đăng nhập (Logo + Form xác thực + Remember me)
+    ├── register_screen.dart       # Task Đăng ký (Form validate, kiểm tra username duy nhất)
+    ├── home_screen.dart           # Task Danh sách chính (Banner, ListView.builder, Dialog Xóa, Logout)
+    ├── add_screen.dart            # Task Thêm mới / Chỉnh sửa dữ liệu (Form + Dropdown + Date)
+    └── detail_screen.dart         # Task Xem chi tiết một Item (Card thông tin + Nút Back)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-shell-script">5. Lệnh Tạo Nhanh Toàn Bộ Cây Thư Mục & File Rỗng Trong 1 Giây</h3>
+      <p>Khi ngồi vào máy thi, đừng tốn thời gian tạo từng thư mục bằng chuột. Mở Terminal ngay tại thư mục project và dán lệnh sau để sinh sẵn toàn bộ cấu trúc file:</p>
+
+      <h4>Dành cho Windows (PowerShell):</h4>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Tạo thư mục assets &amp; các thư mục con trong lib
+mkdir assets, lib\models, lib\database, lib\services, lib\screens -Force
+
+# Tạo sẵn các file mã nguồn rỗng
+New-Item lib\models\user_model.dart, lib\models\item_model.dart, lib\database\database_helper.dart, lib\services\session_service.dart, lib\screens\login_screen.dart, lib\screens\register_screen.dart, lib\screens\home_screen.dart, lib\screens\add_screen.dart, lib\screens\detail_screen.dart -ItemType File -Force</code></pre>
+      </div>
+
+      <h4>Dành cho Linux / macOS / Git Bash:</h4>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># 1 Dòng tạo sạch sẽ toàn bộ thư mục và file
+mkdir -p assets lib/models lib/database lib/services lib/screens
+touch lib/models/user_model.dart lib/models/item_model.dart lib/database/database_helper.dart lib/services/session_service.dart lib/screens/login_screen.dart lib/screens/register_screen.dart lib/screens/home_screen.dart lib/screens/add_screen.dart lib/screens/detail_screen.dart</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-main-skeleton">6. Khung Sườn main.dart Chuẩn Khởi Động An Toàn</h3>
+      <p>Dùng lúc nào? <strong>Ngay khi tạo dự án xong</strong>. Đoạn code này đã cấu hình sẵn <code>WidgetsFlutterBinding.ensureInitialized()</code> (bắt buộc khi dùng SQLite/Async trước runApp), bọc <code>ProviderScope</code> cho Riverpod, và có cổng phân luồng kiểm tra Session (nếu đã đăng nhập thì vào thẳng Home, chưa thì vào Login):</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'services/session_service.dart';
+import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+
+void main() async {
+  // 1. BẮT BUỘC: Khởi tạo engine Flutter trước khi gọi bất kỳ hàm async nào (SQLite / SharedPreferences)
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Kiểm tra cờ trạng thái đăng nhập từ Session
+  final bool isLoggedIn = await SessionService.isLoggedIn();
+
+  // 3. Khởi chạy ứng dụng bọc trong ProviderScope của Riverpod
+  runApp(
+    ProviderScope(
+      child: MyApp(startAtHome: isLoggedIn),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  final bool startAtHome;
+  const MyApp({super.key, required this.startAtHome});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Exam Practical App',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      // Phân luồng điều hướng: Đã đăng nhập -&gt; Home, chưa đăng nhập -&gt; Login
+      home: startAtHome ? const HomeScreen() : const LoginScreen(),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-exam-tips">7. Bốn Lưu Ý Sống Còn Trong Phòng Thi (Tránh Mất Điểm Oan)</h3>
+      <div class="callout danger">
+        <strong>⚠️ NHỚ KỸ TRƯỚC KHI BẮT ĐẦU VÀ TRƯỚC KHI NỘP BÀI:</strong>
+        <ol style="margin-top:8px; margin-left:18px; line-height:1.9;">
+          <li><strong>Không tự ý đổi tên thư mục gốc của project:</strong> Đề bài ghi tên gì thì lúc <code>flutter create &lt;ten_de&gt;</code> phải đặt chuẩn 100%. Nếu lỡ tạo sai tên, hãy tạo lại project mới chứ không đổi tên thư mục bằng Rename của Windows vì sẽ làm gãy đường dẫn Android/iOS build.</li>
+          <li><strong>Chép ảnh đề thi vào thư mục assets/:</strong> Đề thi thường đính kèm file nén chứa <code>banner.jpg</code> hoặc <code>logo.png</code>. Nhớ chép các file này vào thư mục <code>assets/</code> vừa tạo ở bước 5, sau đó kiểm tra lại file <code>pubspec.yaml</code> đã bật dòng <code>- assets/</code> chưa.</li>
+          <li><strong>Chạy thử F5 ngay từ đầu:</strong> Đừng code một mạch cả 7 tasks rồi mới bấm F5 chạy app. Hãy chạy thử khung sườn sườn rỗng này trước. Nếu app hiện màn hình Login thành công nghĩa là môi trường SDK máy thi đã ổn định.</li>
+          <li><strong>Lệnh dọn rác bắt buộc trước khi nén zip nộp:</strong> Khi giám thị thông báo còn 5 phút hết giờ, mở Terminal gõ ngay:
+            <pre style="margin:4px 0; background:#0d1117; padding:4px 8px; border-radius:4px;"><code>flutter clean</code></pre>
+            Lệnh này sẽ xoá folder <code>build/</code> nặng hàng trăm MB giúp file nộp chỉ còn dưới 1-2 MB, nộp lên phần mềm chấm thi EOS trong tích tắc!
+          </li>
+        </ol>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="../index.html" class="copy-btn" style="text-decoration:none;">&larr; Về Trang Chủ Cheatsheet</a>
+        <a href="02_database_validator_helper.html" class="copy-btn" style="text-decoration:none;">Mục 2: Helpers & Validators &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 5: Quản lý Phiên Đăng Nhập (Session Management) - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 5: Session Management (Task 3)</span>
+        <span class="pill pill-purple">SharedPreferences Service</span>
+      </div>
+      <div>
+        <a href="04_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 4: Register Screen</a>
+        <a href="06_login_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 6: Login Screen &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 5: Xây Dựng <code>SessionService</code> Với SharedPreferences (Task 3: Session Management)</h2>
+        <p>Đề bài thi yêu cầu ở <strong>Task 3 &mdash; Session Management</strong>: <em>"The application must remember login status. When the application starts: Check stored session information. If a session exists &rarr; Open Home Screen. If no session exists &rarr; Open Login Screen."</em></p>
+        <p>Để code mạch lạc, chuyên nghiệp và tái sử dụng ở mọi nơi (khi Login thì ghi session, khi mở App ở <code>main.dart</code> thì đọc session, khi Logout thì xóa session), chúng ta tạo riêng 1 file dịch vụ <code>lib/services/session_service.dart</code>. Mỗi hàm được tách riêng từng mục kèm màu sắc phân biệt.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 6 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu đề bài Task 3: Session là gì? Cần lưu những gì?</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khởi tạo SessionService & Bộ Keys hằng số chuẩn</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Hàm lưu phiên đăng nhập <code>saveUserSession()</code> (Gọi khi Login thành công)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Các hàm đọc phiên: <code>isLoggedIn()</code>, <code>getUserId()</code>, <code>getUsername()</code></a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Hàm đăng xuất <code>clearSession()</code> (Gọi khi người dùng Logout)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Toàn bộ mã nguồn hoàn chỉnh của <code>session_service.dart</code> (Bấm copy 1 click)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Yêu Cầu Task 3: Session Là Gì? Cần Lưu Những Gì?</h3>
+
+      <div class="def">
+        <span class="def-term">Khái niệm Session trong App Mobile</span>
+        <p><strong>Session (Phiên làm việc)</strong> là cơ chế ghi nhớ trạng thái người dùng đã đăng nhập vào thiết bị, để lần sau khi người dùng tắt app đi mở lại (hoặc reload trang), app <strong>tự động nhận diện tài khoản và mở thẳng vào màn hình Home</strong> mà không bắt đăng nhập lại từ đầu.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Khóa (Key)</th>
+              <th>Kiểu dữ liệu</th>
+              <th>Giá trị mẫu</th>
+              <th>Mục đích sử dụng trong đề thi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>is_logged_in</code></td>
+              <td><code>bool</code></td>
+              <td><code>true</code> / <code>false</code></td>
+              <td>Cờ kiểm tra ở <code>main.dart</code>: nếu <code>true</code> thì mở Home, ngược lại mở Login.</td>
+            </tr>
+            <tr>
+              <td><code>user_id</code></td>
+              <td><code>int</code></td>
+              <td><code>1</code></td>
+              <td>Lưu ID người dùng để gán vào trường <code>createdBy</code> khi thêm mới tác phẩm (Task 5).</td>
+            </tr>
+            <tr>
+              <td><code>username</code></td>
+              <td><code>String</code></td>
+              <td><code>"admin"</code></td>
+              <td>Hiển thị lời chào trên Banner Home Screen: <em>"Welcome testuser123"</em> (Task 4).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khởi Tạo Class SessionService & Bộ Keys Hằng Số</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Cấu trúc Class & Định nghĩa Keys hằng số</div>
+        <p><strong>Mục đích:</strong> Định nghĩa các chuỗi key thành biến <code>static const</code> để khi gọi không bị gõ nhầm chính tả. Mọi hàm đều là <code>static</code> giúp gọi trực tiếp ở bất kỳ đâu dạng <code>SessionService.tênHàm()</code> mà không cần khởi tạo đối tượng rườm rà.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// lib/services/session_service.dart
+import 'package:shared_preferences/shared_preferences.dart';
+
+class SessionService {
+  // Bộ keys hằng số tránh gõ sai chính tả
+  static const String _keyIsLoggedIn = 'is_logged_in';
+  static const String _keyUserId = 'user_id';
+  static const String _keyUsername = 'username';
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Hàm Lưu Phiên Đăng Nhập <code>saveUserSession()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 Hàm lưu phiên khi User đăng nhập thành công</div>
+        <p><strong>Nhiệm vụ:</strong> Nhận vào <code>userId</code> và <code>username</code> từ User vừa đăng nhập, ghi đồng thời 3 thông tin vào SharedPreferences: đặt <code>is_logged_in = true</code>, lưu <code>userId</code> và <code>username</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // Lưu thông tin khi đăng nhập thành công (Gọi tại LoginScreen)
+  static Future<void> saveUserSession(int userId, String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsLoggedIn, true);
+    await prefs.setInt(_keyUserId, userId);
+    await prefs.setString(_keyUsername, username);
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Các Hàm Đọc Dữ Liệu Phiên Đăng Nhập</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Bộ 3 hàm lấy dữ liệu phiên ra sử dụng</div>
+        <p><strong>Nhiệm vụ:</strong></p>
+        <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+          <li><code>isLoggedIn()</code> &rarr; Trả về <code>true/false</code> (dùng tại <code>main.dart</code> để phân luồng).</li>
+          <li><code>getUserId()</code> &rarr; Trả về ID của user (dùng gán cho <code>createdBy</code> khi thêm tác phẩm mới).</li>
+          <li><code>getUsername()</code> &rarr; Trả về tên tài khoản (dùng hiển thị lời chào trên Home).</li>
+        </ul>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // 1. Kiểm tra xem người dùng đã đăng nhập chưa
+  static Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyIsLoggedIn) ?? false;
+  }
+
+  // 2. Lấy ID của người dùng hiện tại (trả về null nếu chưa đăng nhập)
+  static Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyUserId);
+  }
+
+  // 3. Lấy Username của người dùng hiện tại
+  static Future<String?> getUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUsername);
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Hàm Đăng Xuất & Xóa Phiên <code>clearSession()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-red);">
+        <div class="card-title" style="color:var(--accent-red);">🔴 Hàm xóa sạch phiên khi Logout</div>
+        <p><strong>Nhiệm vụ:</strong> Khi người dùng bấm nút Đăng xuất trên thanh AppBar hoặc Drawer của màn hình Home, hàm này sẽ xoá sạch bộ nhớ SharedPreferences và đưa người dùng quay lại màn hình Login.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // Xóa toàn bộ phiên đăng nhập khi người dùng bấm Đăng xuất (Logout)
+  static Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyIsLoggedIn);
+    await prefs.remove(_keyUserId);
+    await prefs.remove(_keyUsername);
+    // Hoặc có thể dùng: await prefs.clear();
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>session_service.dart</code></h3>
+
+      <p>Tạo file: <code>lib/services/session_service.dart</code> và dán toàn bộ code bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/services/session_service.dart
+import 'package:shared_preferences/shared_preferences.dart';
+
+class SessionService {
+  // Bộ khóa định danh dữ liệu
+  static const String _keyIsLoggedIn = 'is_logged_in';
+  static const String _keyUserId = 'user_id';
+  static const String _keyUsername = 'username';
+
+  // 1. Lưu phiên khi đăng nhập thành công
+  static Future<void> saveUserSession(int userId, String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsLoggedIn, true);
+    await prefs.setInt(_keyUserId, userId);
+    await prefs.setString(_keyUsername, username);
+  }
+
+  // 2. Kiểm tra trạng thái đã đăng nhập hay chưa
+  static Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyIsLoggedIn) ?? false;
+  }
+
+  // 3. Lấy ID của user đang đăng nhập
+  static Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyUserId);
+  }
+
+  // 4. Lấy Username của user đang đăng nhập
+  static Future<String?> getUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUsername);
+  }
+
+  // 5. Đăng xuất: Xóa sạch phiên làm việc
+  static Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyIsLoggedIn);
+    await prefs.remove(_keyUserId);
+    await prefs.remove(_keyUsername);
+  }
+}</code></pre>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 5:</strong>
+        <p>Tầng quản lý Session đã hoàn tất. Bây giờ chúng ta sẽ bước sang <a href="06_login_screen.html" style="color:var(--accent-blue); font-weight:bold;">Bước 6: Màn hình Đăng nhập (Login Screen - Task 2)</a> để nối kết nối giữa DatabaseHelper và SessionService thành một luồng hoàn chỉnh!</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

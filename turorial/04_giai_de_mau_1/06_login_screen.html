@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 6: Màn hình Đăng nhập (Login Screen) & Điều Hướng - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 6: Login Screen (Task 2)</span>
+        <span class="pill pill-purple">Auth & Navigation</span>
+      </div>
+      <div>
+        <a href="05_session_service.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 5: Session</a>
+        <a href="07_home_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 7: Home & Delete &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 6: Xây Dựng Màn Hình Đăng Nhập (Task 2: User Login Screen) & Liên Kết Session</h2>
+        <p>Đề bài thi yêu cầu ở <strong>Task 2 &mdash; User Login</strong>: Tạo màn hình Đăng nhập với 2 ô <code>Username</code> và <code>Password</code>. Validate không để trống dữ liệu, xác thực tài khoản và mật khẩu từ SQLite Database. Nếu đăng nhập thành công: tạo phiên lưu trữ (Create User Session) và điều hướng vào <strong>Home Screen</strong>. Nếu thất bại: hiển thị thông báo lỗi <code>Invalid username or password</code>.</p>
+        <p>Mỗi hàm và thành phần giao diện được tách riêng từng mục kèm viền màu sắc phân biệt để bạn học đến đâu hiểu bản chất ngay đến đó.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu đề bài Task 2 & Hình ảnh UI mẫu Login</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo Form Key, Controllers & Thu hồi bộ nhớ dispose()</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Hàm kiểm tra hợp lệ Validation (Bắt buộc nhập Username & Password)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Hàm xử lý logic đăng nhập <code>_handleLogin()</code> (So khớp CSDL & Lưu Session)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Chi tiết các ô nhập liệu & Widget Logo thương hiệu Art Gallery</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Nút Đăng nhập & Điều hướng sang trang Đăng ký (Register)</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Toàn bộ mã nguồn hoàn chỉnh của <code>login_screen.dart</code> (Bấm copy 1 click)</a></li>
+          <li><a href="#sec-8" style="color:var(--accent-blue);">8. Checklist nghiệm thu chấm điểm Task 2</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Yêu Cầu Đề Bài Task 2 & Hình Ảnh UI</h3>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px; margin: 16px 0;">
+        <div class="card">
+          <div class="card-title">Các ô nhập liệu (Fields) bắt buộc</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>👤 <strong>Username:</strong> Tên tài khoản (icon: <code>Icons.person_outline</code>)</li>
+            <li>🔒 <strong>Password:</strong> Mật khẩu (ẩn ký tự: <code>obscureText: true</code>, icon: <code>Icons.lock_outline</code>)</li>
+            <li>🖼️ <strong>Header Logo/Icon:</strong> Biểu tượng bảo tàng nghệ thuật (<code>Icons.museum_outlined</code>) nằm gọn trong ô vuông màu xanh teal nhạt.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Các điều kiện bắt buộc (Requirements)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>✅ <strong>Validate input fields:</strong> Không để trống ô Username và Password.</li>
+            <li>✅ <strong>Verify credentials from database:</strong> Đối chiếu cặp tài khoản/mật khẩu với SQLite.</li>
+            <li>✅ <strong>If login succeeds:</strong> Gọi <code>SessionService.saveUserSession()</code> & điều hướng vào <strong>Home Screen</strong> (thay thế ngăn xếp để bấm Back không bị quay lại Login).</li>
+            <li>❌ <strong>If login fails:</strong> Hiển thị thông báo lỗi chính xác: <code>Invalid username or password</code> bằng SnackBar đỏ.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khai Báo Biến, Controllers & Hàm <code>dispose()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Controllers & Thu hồi bộ nhớ dispose()</div>
+        <p><strong>Bản chất:</strong> Màn hình Login chỉ cần 2 bộ điều khiển văn bản cho <code>_usernameController</code> và <code>_passwordController</code>, cùng biến cờ <code>_isLoading</code> và <code>_obscurePassword</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Hàm Kiểm Tra Hợp Lệ Dữ Liệu (Validators)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-orange);">
+        <div class="card-title" style="color:var(--accent-orange);">🟠 Hàm kiểm tra không được để trống</div>
+        <p><strong>Nhiệm vụ:</strong> Kiểm tra người dùng đã gõ đầy đủ tên tài khoản và mật khẩu hay chưa trước khi gửi lệnh truy vấn CSDL.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// 1. Validator Username
+String? validateUsername(String? val) {
+  if (val == null || val.trim().isEmpty) {
+    return 'Username is required';
+  }
+  return null;
+}
+
+// 2. Validator Password
+String? validatePassword(String? val) {
+  if (val == null || val.isEmpty) {
+    return 'Password is required';
+  }
+  return null;
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Hàm Xử Lý Sự Kiện Đăng Nhập <code>_handleLogin()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 Quy trình 5 bước xác thực & tạo Session</div>
+        <p><strong>Nhiệm vụ:</strong> Kiểm tra Form &rarr; Gọi hàm <code>DatabaseHelper.instance.loginUser</code> &rarr; Nếu khớp thì gọi <code>SessionService.saveUserSession</code> &rarr; Chuyển sang <code>HomeScreen</code> bằng <code>pushReplacement</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  Future<void> _handleLogin() async {
+    // 1. Kiểm tra validation form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 2. Xác thực tài khoản với CSDL SQLite
+      final user = await DatabaseHelper.instance.loginUser(username, password);
+
+      if (user != null) {
+        // ĐĂNG NHẬP THÀNH CÔNG (Login succeeds):
+        // 3. Khởi tạo phiên làm việc (Create user session)
+        await SessionService.saveUserSession(user.id!, user.username);
+
+        if (!mounted) return;
+        // Thông báo thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Xin chào, ${user.username}! Đăng nhập thành công.'),
+            backgroundColor: Colors.teal,
+          ),
+        );
+
+        // 4. Chuyển sang Home Screen (Dùng pushReplacement để không Back lại màn Login)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        // ĐĂNG NHẬP THẤT BẠI (Login fails):
+        // 5. Hiển thị thông báo lỗi chuẩn theo yêu cầu đề bài
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid username or password'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Chi Tiết Header Logo & Các Ô Nhập Liệu</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Header Logo Art Gallery & Text Form Fields</div>
+        <p><strong>Thiết kế:</strong> Logo biểu tượng bảo tàng nghệ thuật với viền bo tròn nhẹ, tên app <em>"Art Gallery Manager"</em> và slogan <em>"Sign in to manage your collection"</em> đúng như ảnh đề thi.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// 1. Header Logo
+Container(
+  width: 60,
+  height: 60,
+  decoration: BoxDecoration(
+    color: const Color(0xFFE0F2F1), // Màu xanh ngọc nhạt
+    borderRadius: BorderRadius.circular(16),
+  ),
+  child: const Icon(Icons.museum_outlined, color: Color(0xFF00695C), size: 36),
+),
+const SizedBox(height: 16),
+const Text(
+  'Art Gallery Manager',
+  textAlign: TextAlign.center,
+  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+),
+const SizedBox(height: 6),
+const Text(
+  'Sign in to manage your collection',
+  textAlign: TextAlign.center,
+  style: TextStyle(color: Colors.grey, fontSize: 14),
+),
+const SizedBox(height: 32),
+
+// 2. Ô Username
+TextFormField(
+  controller: _usernameController,
+  decoration: const InputDecoration(
+    labelText: 'Username',
+    hintText: 'testuser123',
+    prefixIcon: Icon(Icons.person_outline),
+    border: OutlineInputBorder(),
+  ),
+  validator: (val) {
+    if (val == null || val.trim().isEmpty) return 'Username is required';
+    return null;
+  },
+),
+const SizedBox(height: 16),
+
+// 3. Ô Password
+TextFormField(
+  controller: _passwordController,
+  obscureText: _obscurePassword,
+  decoration: InputDecoration(
+    labelText: 'Password',
+    prefixIcon: const Icon(Icons.lock_outline),
+    border: const OutlineInputBorder(),
+    suffixIcon: IconButton(
+      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+    ),
+  ),
+  validator: (val) {
+    if (val == null || val.isEmpty) return 'Password is required';
+    return null;
+  },
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Nút Bấm Đăng Nhập & Liên Kết Sang Trang Đăng Ký</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+        <div class="card-title" style="color:var(--accent-cyan);">🌐 Nút bấm Login & Dòng chuyển sang Register Screen</div>
+        <p><strong>Nhiệm vụ:</strong> Nút bấm kích hoạt <code>_handleLogin()</code>, bên dưới có dòng chữ <em>"No account? Register now"</em> giúp mở <code>RegisterScreen</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// Nút Login
+SizedBox(
+  height: 50,
+  child: ElevatedButton(
+    onPressed: _isLoading ? null : _handleLogin,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF00695C),
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    child: _isLoading
+        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+        : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+  ),
+),
+const SizedBox(height: 20),
+
+// Liên kết mở RegisterScreen
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    const Text('No account? '),
+    GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+        );
+      },
+      child: const Text('Register now', style: TextStyle(color: Color(0xFF00695C), fontWeight: FontWeight.bold)),
+    ),
+  ],
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-7">7. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>login_screen.dart</code></h3>
+
+      <p>Tạo file: <code>lib/screens/login_screen.dart</code> và dán toàn bộ mã nguồn bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/screens/login_screen.dart
+import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
+import '../services/session_service.dart';
+import 'home_screen.dart';
+import 'register_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 1. Xác thực từ Database SQLite
+      final user = await DatabaseHelper.instance.loginUser(username, password);
+
+      if (user != null) {
+        // Đăng nhập thành công: Lưu phiên làm việc
+        await SessionService.saveUserSession(user.id!, user.username);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Xin chào, ${user.username}! Đăng nhập thành công.'),
+            backgroundColor: Colors.teal,
+          ),
+        );
+
+        // Chuyển sang màn hình Home
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        // Đăng nhập thất bại: Thông báo lỗi theo đúng yêu cầu đề bài
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid username or password'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 1. Header Logo
+                  Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0F2F1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.museum_outlined, color: Color(0xFF00695C), size: 38),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Art Gallery Manager',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Sign in to manage your collection',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 2. Ô Username
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Username',
+                      hintText: 'testuser123',
+                      prefixIcon: Icon(Icons.person_outline),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Username is required';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 3. Ô Password
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Password is required';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 4. Nút bấm Login
+                  SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00695C),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 5. Chuyển sang Register Screen
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No account? '),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                          );
+                        },
+                        child: const Text('Register now', style: TextStyle(color: Color(0xFF00695C), fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3 id="sec-8">8. Checklist Nghiệm Thu Chấm Điểm Task 2</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Check</th>
+              <th>Tiêu chí chấm điểm của Giám khảo</th>
+              <th>Cách kiểm tra thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>[ ]</td>
+              <td>Validate để trống</td>
+              <td>Để trống Username hoặc Password rồi bấm "Login" &rarr; Hiện chữ đỏ báo lỗi.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Đăng nhập sai thông tin</td>
+              <td>Nhập tài khoản không tồn tại hoặc sai mật khẩu &rarr; Hiện thông báo SnackBar đỏ chính xác chữ: <code>Invalid username or password</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Đăng nhập đúng tài khoản</td>
+              <td>Nhập tài khoản <code>admin</code> mật khẩu <code>123456</code> (đã nạp sẵn) &rarr; Lưu session và mở thẳng sang màn hình Home Screen.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Ngăn xếp điều hướng</td>
+              <td>Dùng <code>pushReplacement</code> khi vào Home để người dùng bấm phím Back trên điện thoại không bị văng ngược lại màn hình Login.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 6:</strong>
+        <p>Màn hình Đăng nhập (Task 2) và Quản lý phiên làm việc (Task 3) đã hoàn thành xuất sắc! Tiếp theo sẽ là <strong>Bước 7: Màn hình Danh sách chính (Task 4 & Task 7: Home Screen & Delete Artwork)</strong>.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

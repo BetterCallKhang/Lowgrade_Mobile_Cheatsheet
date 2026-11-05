@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 7: Mẫu Màn Hình Chi Tiết (Detail Screen) - Copy & Paste Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 7: Detail Screen</span>
+        <span class="pill pill-purple">Hiển Thị Chi Tiết & Nút Sửa</span>
+      </div>
+      <div>
+        <a href="06_add_edit_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 6: Thêm & Sửa</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Trang chủ &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 7: Mẫu Màn Hình Chi Tiết (Detail Screen)</h2>
+        <p>Màn hình đáp ứng Task <strong>Item Detail Screen</strong>: Nhận đối tượng <code>ItemModel</code> qua Constructor, trình bày thông tin đẹp mắt và đầy đủ (Tên, Giá, Category, Mô tả, ID) dưới dạng Card thông tin, có nút chỉnh sửa trên AppBar và nút quay lại danh sách.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">⚡ Danh mục phần code:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-detail-code" style="color:var(--accent-blue);">1. Code DetailScreen hoàn chỉnh (lib/screens/detail_screen.dart)</a></li>
+          <li><a href="#sec-how-to-call" style="color:var(--accent-blue);">2. Cách mở DetailScreen từ HomeScreen khi nhấn vào một Item</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">3. Hình ảnh minh hoạ giao diện UI Detail Screen</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1: CODE DETAIL ===================== -->
+      <h3 id="sec-detail-code">1. Code DetailScreen Hoàn Chỉnh (lib/screens/detail_screen.dart)</h3>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../models/item_model.dart';
+import 'add_edit_item_screen.dart'; // Mở màn Sửa nếu cần
+
+class DetailScreen extends StatelessWidget {
+  final ItemModel item;
+
+  const DetailScreen({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chi tiết'),
+        centerTitle: true,
+        actions: [
+          // Nút bấm chuyển sang màn hình Chỉnh sửa
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Chỉnh sửa mục này',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =&gt; AddEditItemScreen(item: item),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Thẻ Card lớn chứa toàn bộ thông tin chi tiết
+            Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    // Avatar hoặc Biểu tượng lớn
+                    CircleAvatar(
+                      radius: 36,
+                      child: Text(
+                        item.title.isNotEmpty ? item.title[0].toUpperCase() : '?',
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Tiêu đề
+                    Text(
+                      item.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Giá tiền
+                    Text(
+                      '\$${item.price ?? 0.0}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const Divider(height: 32),
+
+                    // Thông tin dạng bảng dòng
+                    _buildInfoRow('Mã định danh (ID):', '#${item.id ?? 0}'),
+                    const SizedBox(height: 12),
+                    _buildInfoRow('Thể loại (Category):', item.category ?? 'Mặc định'),
+                    const SizedBox(height: 16),
+
+                    // Mô tả chi tiết
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Mô tả chi tiết:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        item.subtitle.isNotEmpty ? item.subtitle : 'Không có mô tả chi tiết.',
+                        style: TextStyle(color: Colors.grey.shade800, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Nút Quay lại
+            ElevatedButton(
+              onPressed: () =&gt; Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('QUAY LẠI DANH SÁCH', style: TextStyle(fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget phụ tạo dòng thông tin hai bên
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+      ],
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-how-to-call">2. Cách Mở DetailScreen Từ HomeScreen</h3>
+      <p>Trong <code>HomeScreen</code> (ở hàm <code>itemBuilder</code>), chỉ cần truyền hàm này vào <code>onTap:</code>:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">ItemCardWidget(
+  item: item,
+  index: index,
+  onDelete: () =&gt; _confirmDelete(context, ref, item),
+  // NHẤN VÀO MỞ MÀN HÌNH CHI TIẾT
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =&gt; DetailScreen(item: item),
+      ),
+    );
+  },
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3: HÌNH ẢNH ===================== -->
+      <h3 id="sec-preview">3. Hình Ảnh Minh Hoạ UI Detail Screen Chuẩn Flutter</h3>
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+          <img src="images/detail_screen_ui.svg" alt="Flutter Detail Screen UI" style="display: block; width: 320px; height: auto;" />
+        </div>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="06_add_edit_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 6: Màn Thêm & Sửa</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none;">Về Trang Chủ Cheatsheet &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+</html>
+
