@@ -31,8 +31,8 @@
 
       <div style="display:flex; flex-direction:column; gap:20px;">
         <!-- NHÓM NỀN TẢNG -->
-        <div class="card">
-          <div class="card-title">Nhóm 1: Nền tảng Công cụ & Ngôn ngữ Dart</div>
+        <div class="card" style="border-left: 4px solid var(--accent-blue);">
+          <div class="card-title" style="font-size: 17px; color: #58a6ff;">📘 Nhóm 1: Nền tảng Công cụ & Ngôn ngữ Dart</div>
           <p>Môi trường phát triển, công cụ gỡ lỗi và ngữ pháp ngôn ngữ lập trình Dart cốt lõi:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
             <li><a href="01_nen_tang/01_setup_format_cautruc.html" style="color:var(--accent-blue); font-weight:600;">Phần 1. Setup, Format & Cấu trúc dự án</a>: Cài đặt SDK, cấu hình biến môi trường PATH, Android Studio, bảng phím tắt, định dạng code chuẩn.</li>
@@ -45,8 +45,8 @@
         </div>
 
         <!-- NHÓM GIAO DIỆN & STATE -->
-        <div class="card">
-          <div class="card-title">Nhóm 2: Giao diện (UI), State & Cơ sở dữ liệu</div>
+        <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+          <div class="card-title" style="font-size: 17px; color: #39c5cf;">🎨 Nhóm 2: Giao diện (UI), State & Cơ sở dữ liệu</div>
           <p>Các kiến trúc ứng dụng giao diện Flutter hoàn chỉnh:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
             <li><a href="02_flutter_can_ban/01_widgets_can_ban.html" style="color:var(--accent-blue); font-weight:600;">Mục 1. Toàn diện về Flutter Widgets</a>: Khái niệm Widget, bộ 3 cây (Widget - Element - Render), StatelessWidget vs StatefulWidget & Lifecycle, MaterialApp & Scaffold Anatomy, cơ chế setState(), ListView, Card, ListTile kèm ảnh, GridView và bộ sưu tập các input widget thường dùng (Button, TextField, Checkbox, Switch, RadioListTile, Slider...).</li>
@@ -63,7 +63,7 @@
 
         <!-- NHÓM CHEAT SHEET PHÒNG THI -->
         <div class="card" style="border-left: 4px solid var(--accent-purple, #bc8cff);">
-          <div class="card-title">Mục 3: Cheat Sheet Phòng Thi (Copy & Paste Thực Chiến)</div>
+          <div class="card-title" style="font-size: 17px; color: #d2a8ff;">⚡ Cheat Sheet Phòng Thi (Copy & Paste Thực Chiến)</div>
           <p>Tài liệu siêu tốc phục vụ kỳ thi thực hành PE: Giải thích ngắn gọn thư viện là gì, dùng khi nào và toàn bộ code mẫu chuẩn chỉ việc copy và paste:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
             <li><a href="03_cheat_sheet/01_setup_libraries_project_structure.html" style="color:var(--accent-blue); font-weight:600;">Mục 1. Thư viện & Cấu trúc dự án sẵn (Copy & Paste)</a>: Lệnh terminal cài 1 dòng, bảng tra cứu vai trò các thư viện (sqflite, web ffi, shared_preferences, riverpod, http), file pubspec.yaml chuẩn, cây thư mục lib/ sẵn sàng cho mọi đề thi và khung sườn main.dart an toàn.</li>
@@ -73,12 +73,13 @@
             <li><a href="03_cheat_sheet/05_item_list_screens.html" style="color:var(--accent-blue); font-weight:600;">Mục 5. Mẫu Danh Sách ListView (Riverpod Code Gen)</a>: Chuẩn cú pháp `@riverpod` annotation, lệnh `build_runner`, tách riêng `ItemCardWidget`, tự động cập nhật khi Thêm/Xóa và xử lý `.when()` mượt mà.</li>
             <li><a href="03_cheat_sheet/06_add_edit_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)</a>: Kỹ thuật "2 trong 1" dùng chung 1 màn hình cho cả Thêm và Chỉnh sửa, Form dropdown, validation và lưu qua Riverpod.</li>
             <li><a href="03_cheat_sheet/07_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 7. Mẫu Màn Hình Chi Tiết (Detail Screen)</a>: Nhận Model qua Constructor, trình bày thẻ thông tin thanh lịch, nút Edit trên AppBar và nút quay lại.</li>
+            <li><a href="03_cheat_sheet/08_common_widgets_reference.html" style="color:var(--accent-blue); font-weight:600;">Mục 8. Tra Cứu Colors, Icons & Widgets Thường Dùng</a>: Bảng màu thường dùng, danh sách Icons thực chiến, và toàn bộ constructors/tham số của ListView (.builder, .separated), GridView (.count, .builder, .extent), Form, Buttons...</li>
           </ul>
         </div>
 
         <!-- NHÓM PHÒNG THI THỰC CHIẾN -->
         <div class="card" style="border-left: 4px solid var(--accent-green, #238636);">
-          <div class="card-title">Mục 4: Hướng Dẫn Giải Đề Mẫu 1 (Art Gallery Manager)</div>
+          <div class="card-title" style="font-size: 17px; color: #3fb950;">🛠️ Hướng Dẫn Giải Đề Mẫu 1 (Art Gallery Manager)</div>
           <p>Hướng dẫn "cầm tay chỉ việc" giải quyết trọn vẹn đề thi thực hành từ A đến Z, dùng chung cho mọi dạng đề:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
             <li><a href="04_giai_de_mau_1/01_setup_project_libraries.html" style="color:var(--accent-blue); font-weight:600;">Bước 1. Khởi tạo dự án & Cấu hình thư viện chung</a>: Quy tắc phòng thi, khởi tạo project linh hoạt theo mọi đề, khai báo trọn bộ package cốt lõi (sqflite, shared_preferences, flutter_riverpod, http), cấu hình assets/banner và phân chia thư mục chuẩn.</li>

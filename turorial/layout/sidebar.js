@@ -8,7 +8,7 @@
       ]
     },
     {
-      group: "Nền tảng",
+      group: "📘 Nền tảng",
       items: [
         { title: "1. Setup, Format, Cấu trúc", href: "01_nen_tang/01_setup_format_cautruc.html" },
         { title: "2. Debug và lỗi thường gặp", href: "01_nen_tang/02_debug_loi.html" },
@@ -19,7 +19,7 @@
       ]
     },
     {
-      group: "Flutter Căn Bản & Giao Diện",
+      group: " Flutter Căn Bản & Giao Diện",
       items: [
         { title: "1. Toàn diện về Flutter Widgets", href: "02_flutter_can_ban/01_widgets_can_ban.html" },
         { title: "2. ThemeData và Drawer", href: "02_flutter_can_ban/02_theme_drawer.html" },
@@ -33,7 +33,7 @@
       ]
     },
     {
-      group: "Mục 3: Cheat Sheet Phòng Thi (Copy & Paste)",
+      group: " Cheat Sheet Phòng Thi",
       items: [
         { title: "1. Thư viện & Cấu trúc dự án sẵn", href: "03_cheat_sheet/01_setup_libraries_project_structure.html" },
         { title: "2. Database & Static Validators Helper", href: "03_cheat_sheet/02_database_validator_helper.html" },
@@ -41,11 +41,12 @@
         { title: "4. Mẫu Login & Logout Screens", href: "03_cheat_sheet/04_login_logout_screen.html" },
         { title: "5. Mẫu Danh Sách ListView (Riverpod Code Gen)", href: "03_cheat_sheet/05_item_list_screens.html" },
         { title: "6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)", href: "03_cheat_sheet/06_add_edit_screen.html" },
-        { title: "7. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/07_detail_screen.html" }
+        { title: "7. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/07_detail_screen.html" },
+        { title: "8. Tra Cứu Colors, Icons & Widgets", href: "03_cheat_sheet/08_common_widgets_reference.html" }
       ]
     },
     {
-      group: "Mục 4: Giải Đề Mẫu 1 (Art Gallery Manager)",
+      group: " Giải Đề Mẫu 1 (Art Gallery)",
       items: [
         { title: "Bước 1. Khởi tạo & Thư viện dùng chung", href: "04_giai_de_mau_1/01_setup_project_libraries.html" },
         { title: "Bước 2. Phân tích & Tạo Data Models", href: "04_giai_de_mau_1/02_data_models.html" },
@@ -85,12 +86,43 @@
     <nav class="nav-menu">
     `;
 
+    // Đọc trạng thái đóng/mở đã lưu từ localStorage
+    let savedState = {};
+    try {
+      savedState = JSON.parse(localStorage.getItem('sidebar_group_state') || '{}');
+    } catch (e) {
+      savedState = {};
+    }
+
     menuConfig.forEach(section => {
-      html += `<div class="nav-group">`;
-      if (section.group) {
-        html += `<div class="nav-group-header" onclick="toggleNavGroup(this)">${section.group}</div>`;
-        html += `<div class="nav-group-content">`;
+      if (!section.group) {
+        html += `<div class="nav-group">`;
+        section.items.forEach(item => {
+          const itemHref = prefix + item.href;
+          const targetFilename = item.href.substring(item.href.lastIndexOf('/') + 1);
+          const isActive = (filename === targetFilename) || (item.id === 'home' && (filename === '' || filename === 'index.html'));
+          const activeClass = isActive ? ' active' : '';
+          html += `<a class="nav-item${activeClass}" href="${itemHref}"><span>${item.title}</span></a>`;
+        });
+        html += `</div>`;
+        return;
       }
+
+      // Kiểm tra xem nhóm này có chứa trang hiện tại không
+      const hasActiveChild = section.items.some(item => {
+        const targetFilename = item.href.substring(item.href.lastIndexOf('/') + 1);
+        return filename === targetFilename;
+      });
+
+      // Nếu chứa trang hiện tại -> luôn mở để người dùng biết mình đang ở đâu
+      // Nếu không chứa trang hiện tại -> tôn trọng trạng thái lưu trong localStorage (nếu người dùng đã đóng)
+      const isSavedCollapsed = Boolean(savedState[section.group]);
+      const isCollapsed = hasActiveChild ? false : isSavedCollapsed;
+      const collapsedClass = isCollapsed ? ' collapsed' : '';
+
+      html += `<div class="nav-group${collapsedClass}">`;
+      html += `<div class="nav-group-header" data-group="${section.group}" onclick="toggleNavGroup(this)">${section.group}</div>`;
+      html += `<div class="nav-group-content">`;
 
       section.items.forEach(item => {
         if (item.disabled) {
@@ -105,9 +137,7 @@
         }
       });
 
-      if (section.group) {
-        html += `</div>`;
-      }
+      html += `</div>`;
       html += `</div>`;
     });
 
