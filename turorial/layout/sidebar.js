@@ -41,7 +41,8 @@
         { title: "4. Mẫu Login & Logout Screens", href: "03_cheat_sheet/04_login_logout_screen.html" },
         { title: "5. Mẫu Danh Sách ListView (Riverpod Code Gen)", href: "03_cheat_sheet/05_item_list_screens.html" },
         { title: "6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)", href: "03_cheat_sheet/06_add_edit_screen.html" },
-        { title: "7. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/07_detail_screen.html" }
+        { title: "7. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/07_detail_screen.html" },
+        { title: "8. Tra Cứu Colors, Icons & Widgets", href: "03_cheat_sheet/08_common_widgets_reference.html" }
       ]
     },
     {
