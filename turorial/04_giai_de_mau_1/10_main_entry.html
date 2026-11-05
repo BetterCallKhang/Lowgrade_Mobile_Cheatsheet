@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 10: File khởi chạy main.dart & Kiểm tra Session - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 10: Khởi chạy main.dart</span>
+        <span class="pill pill-purple">Session Gate & Theme</span>
+      </div>
+      <div>
+        <a href="09_detail_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 9: Detail Screen</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Trang chủ &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 10: Hoàn Thiện File Khởi Chạy <code>lib/main.dart</code> (Cổng Phân Luồng Session & Nộp Bài Thi)</h2>
+        <p>Đây là <strong>mảnh ghép cuối cùng</strong> để kết nối toàn bộ hệ thống lại với nhau. File <code>main.dart</code> sẽ hiện thực hóa phần còn lại của <strong>Task 3 &mdash; Session Management</strong>: <em>"When the application starts: Check stored session information. If a session exists &rarr; Open Home Screen. If no session exists &rarr; Open Login Screen."</em></p>
+        <p>Đồng thời hướng dẫn quy trình kiểm thử tổng thể từ đầu đến cuối và lệnh nén nộp bài thi <code>flutter clean</code> chuẩn xác không bị trừ điểm.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 6 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Cơ chế hoạt động của Cổng kiểm tra Session (Session Gatekeeper)</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khởi tạo <code>WidgetsFlutterBinding.ensureInitialized()</code> bắt buộc</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Cấu hình Theme & Màu sắc chủ đạo ColorScheme</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Toàn bộ mã nguồn hoàn chỉnh của <code>lib/main.dart</code> (Bấm copy 1 click)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Kịch bản Test toàn diện 7 Tasks trước khi nộp bài thi</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Lệnh dọn dẹp flutter clean & Nén nộp bài (Tránh bị 0 điểm)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Cơ Chế Hoạt Động Của Cổng Kiểm Tra Session</h3>
+
+      <div class="def">
+        <span class="def-term">Nguyên lý phân luồng màn hình mở đầu (Home vs Login)</span>
+        <p>Khi người dùng bấm mở App, trước khi vẽ màn hình đầu tiên lên thiết bị, hàm <code>main()</code> sẽ chạy hàm bất đồng bộ <code>await SessionService.isLoggedIn()</code>:</p>
+        <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+          <li>Nếu trả về <code>true</code> (đã đăng nhập lần trước đó) &rarr; Thuộc tính <code>home:</code> của <code>MaterialApp</code> được gán là <code>HomeScreen()</code>.</li>
+          <li>Nếu trả về <code>false</code> (chưa đăng nhập hoặc đã logout) &rarr; Thuộc tính <code>home:</code> của <code>MaterialApp</code> được gán là <code>LoginScreen()</code>.</li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Lệnh <code>WidgetsFlutterBinding.ensureInitialized()</code> Bắt Buộc</h3>
+
+      <div class="callout warning">
+        <strong>⚠️ LƯU Ý SỐNG CÒN:</strong>
+        <p>Nếu bạn gọi bất kỳ hàm <code>async</code> nào (như <code>SharedPreferences.getInstance()</code> hoặc mở CSDL) <strong>bên trong hàm <code>main()</code> trước khi gọi <code>runApp()</code></strong>, bạn <strong>bắt buộc phải đặt dòng lệnh:</strong></p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code>WidgetsFlutterBinding.ensureInitialized();</code></pre>
+        </div>
+        <p>ở ngay dòng đầu tiên của hàm <code>main()</code>. Nếu thiếu dòng này, Flutter SDK sẽ báo lỗi crash ngay khi vừa khởi động app!</p>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Cấu Hình Theme Chuẩn Theo Đề Thi</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 ColorScheme màu xanh Teal chủ đạo</div>
+        <p>Sử dụng màu hạt giống (seed color) <code>Color(0xFF00695C)</code> để toàn bộ các nút bấm, icon và viền ô nhập liệu trong app tự động mang tông màu xanh ngọc bích chuẩn như đề bài.</p>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>lib/main.dart</code></h3>
+
+      <p>Mở file <code>lib/main.dart</code> trong dự án của bạn, xóa sạch nội dung mẫu ban đầu và dán toàn bộ code bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/main.dart
+import 'package:flutter/material.dart';
+import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/session_service.dart';
+
+void main() async {
+  // Bắt buộc khởi tạo Flutter engine trước khi gọi async trong main
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Task 3: Kiểm tra session đã lưu khi app khởi chạy
+  final bool isLoggedIn = await SessionService.isLoggedIn();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn));
+}
+
+class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Art Gallery Manager',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00695C),
+          primary: const Color(0xFF00695C),
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: 0.5,
+        ),
+      ),
+      // Phân luồng: Có session thì vào Home, không thì vào Login
+      home: isLoggedIn ? const HomeScreen() : const LoginScreen(),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Kịch Bản Test Toàn Diện 7 Tasks Trước Khi Nộp Bài</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Chức năng</th>
+              <th>Thao tác kiểm thử thực tế</th>
+              <th>Kết quả mong đợi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Task 1</strong></td>
+              <td>Đăng ký (Register)</td>
+              <td>Vào Sign In &rarr; bấm Register now &rarr; thử để trống để test validate &rarr; nhập username trùng <code>admin</code> để xem báo lỗi &rarr; tạo tài khoản mới hợp lệ.</td>
+              <td>Báo lỗi màu đỏ đúng trường hợp, tạo thành công hiện SnackBar và quay lại Login.</td>
+            </tr>
+            <tr>
+              <td><strong>Task 2</strong></td>
+              <td>Đăng nhập (Login)</td>
+              <td>Nhập sai mật khẩu &rarr; xem có hiện <code>Invalid username or password</code> không. Sau đó đăng nhập bằng tài khoản vừa tạo (hoặc tài khoản mẫu <code>admin</code> mật khẩu <code>123456</code>).</td>
+              <td>Mở thành công vào màn hình Home Screen.</td>
+            </tr>
+            <tr>
+              <td><strong>Task 3</strong></td>
+              <td>Quản lý Session</td>
+              <td>Khi đang ở Home Screen &rarr; Tắt hẳn app (hoặc reload lại trang web) &rarr; Mở app lại.</td>
+              <td>App tự động mở thẳng vào Home Screen mà không bắt đăng nhập lại! Bấm icon Logout trên AppBar thì quay lại Login Screen.</td>
+            </tr>
+            <tr>
+              <td><strong>Task 4</strong></td>
+              <td>Danh sách (Home)</td>
+              <td>Quan sát Banner, dòng chữ <em>"Welcome &lt;username&gt;"</em>, danh sách các bức tranh mẫu gồm Title, Artist, Year.</td>
+              <td>Hiển thị đẹp mắt bằng ListView.builder.</td>
+            </tr>
+            <tr>
+              <td><strong>Task 5</strong></td>
+              <td>Thêm mới (Add)</td>
+              <td>Bấm nút <code>+ Add Artwork</code> &rarr; thử để trống &rarr; điền đầy đủ tranh mới &rarr; bấm Save Artwork.</td>
+              <td>Hiện SnackBar <code>Artwork added successfully</code> & tranh mới lập tức xuất hiện ở đầu danh sách Home.</td>
+            </tr>
+            <tr>
+              <td><strong>Task 6</strong></td>
+              <td>Chi tiết (Detail)</td>
+              <td>Chạm vào 1 bức tranh bất kỳ trên danh sách Home.</td>
+              <td>Hiện đầy đủ Title, Artist, Year, Category, Description và bấm nút Back quay lại được Home.</td>
+            </tr>
+            <tr>
+              <td><strong>Task 7</strong></td>
+              <td>Xóa (Delete)</td>
+              <td>Bấm icon thùng rác của 1 bức tranh &rarr; bấm Cancel &rarr; bấm lại thùng rác &rarr; bấm Delete.</td>
+              <td>Hiện SnackBar <code>Artwork deleted successfully</code> và bức tranh biến mất khỏi danh sách.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Lệnh Dọn Dẹp <code>flutter clean</code> & Nén Nộp Bài Thi</h3>
+
+      <div class="callout danger">
+        <strong>⚠️ HÀNH ĐỘNG BẮT BUỘC TRƯỚC KHI NÉN FILE ZIP NỘP CHO GIÁM THỊ:</strong>
+        <p>1. Mở Terminal tại thư mục dự án và chạy duy nhất lệnh sau:</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code>flutter clean</code></pre>
+        </div>
+        <p>2. Lệnh này sẽ xóa các thư mục <code>build/</code> và file cache nặng từ vài trăm MB xuống chỉ còn 1&ndash;2 MB.</p>
+        <p>3. Chuột phải vào thư mục dự án &rarr; Chọn <strong>Send to &rarr; Compressed (zipped) folder</strong> (hoặc nén dạng <code>.zip</code> theo đúng mã sinh viên mà giám thị yêu cầu).</p>
+      </div>
+
+      <div class="callout success">
+        <strong>🎉 CHÚC MỪNG BẠN!</strong>
+        <p>Bạn đã hoàn thành trọn bộ 100% Cẩm nang giải đề thi thực hành Flutter PE! Với kiến trúc sạch, từng bước suy luận logic vững vàng và mã nguồn chuẩn xác, bạn hoàn toàn có thể tự tin đạt điểm tối đa (10/10) trong bất kỳ kỳ thi thực hành Mobile nào!</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

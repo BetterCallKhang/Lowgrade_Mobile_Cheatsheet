@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 3: Xử lý CSDL SQLite với DatabaseHelper - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 3: Tầng Database</span>
+        <span class="pill pill-purple">SQLite Singleton Helper</span>
+      </div>
+      <div>
+        <a href="02_data_models.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 2: Data Models</a>
+        <a href="04_register_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 4: Register Screen &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 3: Thiết Kế & Xây Dựng <code>DatabaseHelper</code> (SQLite Cục Bộ Toàn App)</h2>
+        <p>Trước khi dựng bất kỳ màn hình nào (Đăng ký, Đăng nhập, Danh sách, Thêm mới, Xóa), chúng ta <strong>bắt buộc phải có tầng xử lý Cơ sở dữ liệu (Database Layer)</strong>. Tầng này chịu trách nhiệm: khởi tạo file CSDL, tự động tạo các bảng, nạp sẵn dữ liệu mẫu (Seeding Data) và cung cấp các hàm truy vấn cho toàn bộ ứng dụng.</p>
+        <p>Để bạn dễ học và tra cứu nhanh, <strong>mỗi hàm được tách thành từng mục riêng biệt kèm màu sắc phân biệt</strong>, giải thích rõ input/output và mục đích sử dụng trước khi xem file code hoàn chỉnh ở cuối trang.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích lược đồ CSDL & Mối quan hệ bảng (User 1 - n Artwork)</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khởi tạo Singleton & Hàm mở kết nối <code>_initDB()</code> (Mobile + Web)</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Hàm tạo bảng & Nạp dữ liệu mẫu <code>_createDB()</code> (Data Seeding)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Hàm kiểm tra trùng Username <code>checkUsernameExists()</code> (Phục vụ Task 1)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Hàm đăng ký tài khoản <code>registerUser()</code> (Phục vụ Task 1)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Hàm xác thực đăng nhập <code>loginUser()</code> (Phục vụ Task 2)</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Các hàm CRUD Artwork: <code>getAllArtworks()</code>, <code>insertArtwork()</code>, <code>deleteArtwork()</code></a></li>
+          <li><a href="#sec-8" style="color:var(--accent-blue);">8. Tổng hợp toàn bộ file <code>database_helper.dart</code> (Bấm copy 1 click)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Lược Đồ CSDL & Mối Quan Hệ Bảng</h3>
+
+      <div class="def">
+        <span class="def-term">Mối quan hệ 1 - Nhiều (1 to Many)</span>
+        <p><strong>User (1) &mdash;&mdash;&mdash;&mdash; (n) Artwork</strong></p>
+        <p>• Một User có thể tạo nhiều tác phẩm nghệ thuật (Artworks).<br />
+        • Mỗi Artwork thuộc về đúng một User thông qua khoá ngoại: <code>createdBy INTEGER REFERENCES users(id)</code>.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bảng</th>
+              <th>Cột</th>
+              <th>Kiểu SQLite</th>
+              <th>Ràng buộc & Ý nghĩa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="5"><strong>users</strong></td>
+              <td><code>id</code></td>
+              <td><code>INTEGER</code></td>
+              <td><code>PRIMARY KEY AUTOINCREMENT</code> (Khóa chính tự tăng)</td>
+            </tr>
+            <tr>
+              <td><code>username</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL UNIQUE</code> (Bắt buộc, không trùng lặp)</td>
+            </tr>
+            <tr>
+              <td><code>email</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Email người dùng)</td>
+            </tr>
+            <tr>
+              <td><code>password</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Mật khẩu)</td>
+            </tr>
+            <tr>
+              <td><code>createdAt</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Ngày tạo YYYY-MM-DD)</td>
+            </tr>
+            <tr>
+              <td rowspan="7"><strong>artworks</strong></td>
+              <td><code>id</code></td>
+              <td><code>INTEGER</code></td>
+              <td><code>PRIMARY KEY AUTOINCREMENT</code> (Khóa chính tự tăng)</td>
+            </tr>
+            <tr>
+              <td><code>title</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Tên tác phẩm)</td>
+            </tr>
+            <tr>
+              <td><code>artist</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Tên nghệ sĩ)</td>
+            </tr>
+            <tr>
+              <td><code>year</code></td>
+              <td><code>INTEGER</code></td>
+              <td><code>NOT NULL</code> (Năm sáng tác)</td>
+            </tr>
+            <tr>
+              <td><code>category</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Thể loại)</td>
+            </tr>
+            <tr>
+              <td><code>description</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>NOT NULL</code> (Mô tả chi tiết)</td>
+            </tr>
+            <tr>
+              <td><code>createdBy</code></td>
+              <td><code>INTEGER</code></td>
+              <td><code>NOT NULL</code> (Khóa ngoại trỏ về <code>users.id</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khởi Tạo Singleton & Hàm Mở Kết Nối <code>_initDB()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Khởi tạo Singleton & Getter mở Database</div>
+        <p><strong>Mục đích:</strong> Đảm bảo toàn bộ ứng dụng chỉ có duy nhất 1 kết nối SQLite, tránh xung đột khóa file (Database Locked). Hỗ trợ chạy mượt trên cả <strong>Android Emulator</strong> lẫn <strong>Web Browser</strong> (Chrome/Edge khi máy ảo lag).</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>class DatabaseHelper {
+  // Thể hiện duy nhất (Singleton Instance)
+  static final DatabaseHelper instance = DatabaseHelper._init();
+  static Database? _database;
+
+  // Constructor Private ngăn chặn new từ bên ngoài
+  DatabaseHelper._init();
+
+  // Getter: Nếu đã mở thì trả về luôn, chưa thì gọi _initDB()
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB('app_gallery.db');
+    return _database!;
+  }
+
+  // Hàm mở database đa nền tảng (Mobile + Web)
+  Future<Database> _initDB(String filePath) async {
+    // 1. Nếu chạy trên Trình duyệt Web
+    if (kIsWeb) {
+      final databaseFactory = databaseFactoryFfiWeb;
+      return await databaseFactory.openDatabase(
+        filePath,
+        options: OpenDatabaseOptions(
+          version: 1,
+          onCreate: _createDB,
+        ),
+      );
+    }
+
+    // 2. Nếu chạy trên Android / iOS
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Hàm Tạo Bảng & Nạp Dữ Liệu Mẫu Ban Đầu <code>_createDB()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Hàm tạo bảng & Chèn dữ liệu mẫu (Data Seeding)</div>
+        <p><strong>Mục đích:</strong> Tự động chạy khi ứng dụng được cài đặt lần đầu tiên. Tạo 2 bảng <code>users</code> và <code>artworks</code>, đồng thời nạp sẵn tài khoản <code>admin</code> và 3 bức tranh mẫu từ <code>dataSample.txt</code> của đề thi để tiện đăng nhập và test ngay.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  Future _createDB(Database db, int version) async {
+    // 1. Tạo bảng users
+    await db.execute('''
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    // 2. Tạo bảng artworks (Khóa ngoại createdBy trỏ về users.id)
+    await db.execute('''
+      CREATE TABLE artworks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        artist TEXT NOT NULL,
+        year INTEGER NOT NULL,
+        category TEXT NOT NULL,
+        description TEXT NOT NULL,
+        createdBy INTEGER NOT NULL,
+        FOREIGN KEY (createdBy) REFERENCES users (id) ON DELETE CASCADE
+      )
+    ''');
+
+    // 3. Nạp sẵn tài khoản mẫu để test đăng nhập ngay mà không cần tạo mới
+    await db.insert('users', {
+      'username': 'admin',
+      'email': 'admin@gallery.com',
+      'password': '123456',
+      'createdAt': '2026-01-10',
+    });
+
+    await db.insert('users', {
+      'username': 'artist01',
+      'email': 'artist01@gallery.com',
+      'password': '123456',
+      'createdAt': '2026-01-12',
+    });
+
+    // 4. Nạp sẵn 3 tác phẩm mẫu để test màn hình danh sách (Home)
+    await db.insert('artworks', {
+      'title': 'Starry Night',
+      'artist': 'Vincent van Gogh',
+      'year': 1889,
+      'category': 'Abstract',
+      'description': 'A famous Abstract of a swirling night sky over a small town.',
+      'createdBy': 1,
+    });
+
+    await db.insert('artworks', {
+      'title': 'Mona Lisa',
+      'artist': 'Leonardo da Vinci',
+      'year': 1503,
+      'category': 'Abstract',
+      'description': 'A portrait Abstract known for the subject\'s mysterious smile.',
+      'createdBy': 1,
+    });
+
+    await db.insert('artworks', {
+      'title': 'The Persistence of Memory',
+      'artist': 'Salvador Dali',
+      'year': 1931,
+      'category': 'Abstract',
+      'description': 'A surreal Abstract featuring melting clocks.',
+      'createdBy': 1,
+    });
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Hàm Kiểm Tra Trùng Username <code>checkUsernameExists()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-orange);">
+        <div class="card-title" style="color:var(--accent-orange);">🟠 Hàm kiểm tra trùng tài khoản (Phục vụ Task 1: Register)</div>
+        <p><strong>Nhiệm vụ:</strong> Nhận vào một chuỗi <code>username</code>, tìm trong bảng <code>users</code> xem có ai đã sử dụng tên này chưa. Trả về <code>true</code> nếu đã bị trùng (không cho đăng ký), <code>false</code> nếu hợp lệ.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // Kiểm tra username đã tồn tại chưa: true = ĐÃ TỒN TẠI, false = HỢP LỆ
+  Future<bool> checkUsernameExists(String username) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'username = ?',
+      whereArgs: [username.trim()],
+    );
+    return result.isNotEmpty; // Nếu kết quả khác rỗng tức là đã bị trùng
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Hàm Đăng Ký Người Dùng Mới <code>registerUser()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 Hàm thêm User vào Database (Phục vụ Task 1: Register)</div>
+        <p><strong>Nhiệm vụ:</strong> Nhận vào đối tượng <code>UserModel</code> từ Form đăng ký, gọi hàm <code>user.toMap()</code> và thực hiện câu lệnh <code>INSERT INTO users</code>. SQLite sẽ tự động cấp một số <code>id</code> tự tăng.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // Thêm người dùng mới vào database, trả về ID vừa sinh
+  Future<int> registerUser(UserModel user) async {
+    final db = await instance.database;
+    return await db.insert('users', user.toMap());
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Hàm Xác Thực Đăng Nhập <code>loginUser()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+        <div class="card-title" style="color:var(--accent-cyan);">🌐 Hàm xác thực tài khoản & mật khẩu (Phục vụ Task 2: Login)</div>
+        <p><strong>Nhiệm vụ:</strong> Kiểm tra cặp <code>username</code> và <code>password</code> trong bảng <code>users</code>. Nếu đúng, trả về đầy đủ đối tượng <code>UserModel</code> (có chứa ID của user). Nếu sai, trả về <code>null</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // Tìm người dùng theo username và password
+  Future<UserModel?> loginUser(String username, String password) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'username = ? AND password = ?',
+      whereArgs: [username.trim(), password],
+    );
+
+    if (result.isNotEmpty) {
+      // Chuyển Map thành UserModel
+      return UserModel.fromMap(result.first);
+    }
+    return null; // Đăng nhập thất bại (sai tài khoản hoặc mật khẩu)
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-7">7. Các Hàm CRUD Artwork (Danh Sách, Thêm Mới, Xóa)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-red);">
+        <div class="card-title" style="color:var(--accent-red);">🔴 Bộ 3 hàm xử lý Artwork (Phục vụ Task 4, 5, 7)</div>
+        <p><strong>Nhiệm vụ:</strong> Lấy toàn bộ danh sách tranh để hiển thị lên Home Screen, chèn tranh mới khi submit Add Artwork Screen, và xoá tranh theo ID khi nhấn nút Delete.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  // 1. Lấy toàn bộ danh sách tác phẩm (Sắp xếp mới nhất lên đầu - Task 4)
+  Future<List<ArtworkModel>> getAllArtworks() async {
+    final db = await instance.database;
+    final result = await db.query('artworks', orderBy: 'id DESC');
+    return result.map((json) => ArtworkModel.fromMap(json)).toList();
+  }
+
+  // 2. Thêm mới tác phẩm vào CSDL (Task 5)
+  Future<int> insertArtwork(ArtworkModel artwork) async {
+    final db = await instance.database;
+    return await db.insert('artworks', artwork.toMap());
+  }
+
+  // 3. Xoá tác phẩm theo ID (Task 7)
+  Future<int> deleteArtwork(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'artworks',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3 id="sec-8">8. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>database_helper.dart</code></h3>
+
+      <p>Sau khi đã hiểu bản chất từng hàm ở trên, bạn tạo file <code>lib/database/database_helper.dart</code> và dán toàn bộ file hoàn chỉnh này vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/database/database_helper.dart
+import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import '../models/user_model.dart';
+import '../models/artwork_model.dart';
+
+class DatabaseHelper {
+  // 1. Singleton
+  static final DatabaseHelper instance = DatabaseHelper._init();
+  static Database? _database;
+
+  DatabaseHelper._init();
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB('app_gallery.db');
+    return _database!;
+  }
+
+  // 2. Mở kết nối
+  Future<Database> _initDB(String filePath) async {
+    if (kIsWeb) {
+      final databaseFactory = databaseFactoryFfiWeb;
+      return await databaseFactory.openDatabase(
+        filePath,
+        options: OpenDatabaseOptions(
+          version: 1,
+          onCreate: _createDB,
+        ),
+      );
+    }
+
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
+  }
+
+  // 3. Tạo bảng & Nạp dữ liệu mẫu
+  Future _createDB(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE artworks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        artist TEXT NOT NULL,
+        year INTEGER NOT NULL,
+        category TEXT NOT NULL,
+        description TEXT NOT NULL,
+        createdBy INTEGER NOT NULL,
+        FOREIGN KEY (createdBy) REFERENCES users (id) ON DELETE CASCADE
+      )
+    ''');
+
+    // Chèn user mẫu
+    await db.insert('users', {
+      'username': 'admin',
+      'email': 'admin@gallery.com',
+      'password': '123456',
+      'createdAt': '2026-01-10',
+    });
+
+    await db.insert('users', {
+      'username': 'artist01',
+      'email': 'artist01@gallery.com',
+      'password': '123456',
+      'createdAt': '2026-01-12',
+    });
+
+    // Chèn tranh mẫu
+    await db.insert('artworks', {
+      'title': 'Starry Night',
+      'artist': 'Vincent van Gogh',
+      'year': 1889,
+      'category': 'Abstract',
+      'description': 'A famous Abstract of a swirling night sky over a small town.',
+      'createdBy': 1,
+    });
+
+    await db.insert('artworks', {
+      'title': 'Mona Lisa',
+      'artist': 'Leonardo da Vinci',
+      'year': 1503,
+      'category': 'Abstract',
+      'description': 'A portrait Abstract known for the subject\'s mysterious smile.',
+      'createdBy': 1,
+    });
+
+    await db.insert('artworks', {
+      'title': 'The Persistence of Memory',
+      'artist': 'Salvador Dali',
+      'year': 1931,
+      'category': 'Abstract',
+      'description': 'A surreal Abstract featuring melting clocks.',
+      'createdBy': 1,
+    });
+  }
+
+  // 4. Xử lý User
+  Future<bool> checkUsernameExists(String username) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'username = ?',
+      whereArgs: [username.trim()],
+    );
+    return result.isNotEmpty;
+  }
+
+  Future<int> registerUser(UserModel user) async {
+    final db = await instance.database;
+    return await db.insert('users', user.toMap());
+  }
+
+  Future<UserModel?> loginUser(String username, String password) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'username = ? AND password = ?',
+      whereArgs: [username.trim(), password],
+    );
+
+    if (result.isNotEmpty) {
+      return UserModel.fromMap(result.first);
+    }
+    return null;
+  }
+
+  // 5. Xử lý Artwork
+  Future<List<ArtworkModel>> getAllArtworks() async {
+    final db = await instance.database;
+    final result = await db.query('artworks', orderBy: 'id DESC');
+    return result.map((json) => ArtworkModel.fromMap(json)).toList();
+  }
+
+  Future<int> insertArtwork(ArtworkModel artwork) async {
+    final db = await instance.database;
+    return await db.insert('artworks', artwork.toMap());
+  }
+
+  Future<int> deleteArtwork(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'artworks',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future close() async {
+    final db = await instance.database;
+    db.close();
+  }
+}</code></pre>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 3:</strong>
+        <p>Tầng Database đã được phân tích từng hàm cực kỳ rõ ràng, trực quan. Bây giờ mời bạn chuyển sang <a href="04_register_screen.html" style="color:var(--accent-blue); font-weight:bold;">Bước 4: Màn hình Đăng ký (Register Screen)</a> để gọi các hàm này vào giao diện nhé!</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 1: Khởi tạo dự án và Cấu hình thư viện dùng chung - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 1: Khởi tạo & Thư viện</span>
+        <span class="pill pill-purple">Phiên bản thư viện chuẩn phòng thi</span>
+      </div>
+      <div>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none;">&larr; Trang chủ</a>
+        <a href="02_data_models.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 2. Data Models &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 1: Khởi Tạo Dự Án & Cấu Hình Bộ Thư Viện Dùng Chung Cho Mọi Đề Thi</h2>
+        <p>Đây là <strong>kim chỉ nam đầu tiên</strong> khi bạn bước vào phòng thi thực hành Mobile Flutter. Dù đề bài yêu cầu quản lý Tranh ảnh (Art Gallery), Sách (Bookstore), Sinh viên (Student Management), Sản phẩm (E-commerce) hay Khách sạn... thì thao tác khởi tạo dự án và khai báo các package cốt lõi luôn luôn theo một quy chuẩn thống nhất.</p>
+        <p>Tài liệu này được biên soạn tỉ mỉ theo phương châm <em>"người chưa biết gì đọc vào cũng hiểu và làm được ngay"</em>, cung cấp <strong>chính xác phiên bản các thư viện chuẩn</strong> (SQLite, Web FFI, Shared Preferences, Riverpod Code Generator, HTTP), giải thích rõ ràng và có sẵn mã copy nhanh không lo lỗi thụt dòng.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung hướng dẫn Bước 1 gồm 7 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Quy tắc sống còn trong phòng thi PE (Tránh bị 0 điểm oan)</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khởi tạo dự án Flutter linh hoạt theo tên yêu cầu của từng đề thi</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Danh mục phiên bản các thư viện chuẩn (Mobile & Web Test)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. File pubspec.yaml hoàn chỉnh & Lệnh cài đặt nhanh qua Terminal</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Cấu hình Assets (Hình ảnh, Banner, Logo đề thi cấp)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Cấu trúc thư mục chuẩn trong lib/ (Gọn gàng, dễ chấm điểm)</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Checklist kiểm tra hoàn thành Bước 1</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Quy Tắc Sống Còn Trong Phòng Thi PE</h3>
+      
+      <div class="callout danger">
+        <strong>⚠️ 4 NGUYÊN TẮC BẤT DI BẤT DỊCH CẦN KHẮC CỐT GHI TÂM:</strong>
+        <ol style="margin-top: 8px; margin-left: 18px; line-height: 1.9;">
+          <li><strong>Tên dự án theo đề bài:</strong> Đề bài thi KHÔNG BAO GIỜ cố định 1 tên duy nhất. Tùy học kỳ và ca thi, đề bài sẽ chỉ định: <code>sp26studentcode</code>, <code>fa25studentcode</code>, hoặc chính mã sinh viên của bạn (ví dụ: <code>se171234</code>, <code>he180999</code>). Bạn phải đọc kỹ mục <em>"Project folder name"</em> ở trang 1 đề thi và đặt tên cho chính xác.</li>
+          <li><strong>Quy tắc đặt tên dự án Flutter:</strong> Phải viết <strong>chữ thường</strong>, không viết hoa, không dấu tiếng Việt, không chứa khoảng trắng hay ký tự đặc biệt (chỉ dùng chữ cái, số và dấu gạch dưới <code>_</code> nếu cần). Ví dụ: <code>se170001_exam</code> hoặc <code>sp26studentcode</code>.</li>
+          <li><strong>Chạy thử dự án ban đầu (Run F5):</strong> Tạo xong dự án phải bấm F5 chạy thử ngay. Nếu máy thi bị treo giả lập hoặc lỗi môi trường thì báo ngay cho giám thị đổi máy trước khi làm bài.</li>
+          <li><strong>DỌN DẸP DỰ ÁN TRƯỚC KHI NỘP:</strong> Khi hết giờ làm bài, <strong>bắt buộc</strong> phải mở Terminal tại dự án và gõ lệnh: <code>flutter clean</code>. Lệnh này sẽ xoá các file cache build tạm nặng hàng trăm MB, giúp file zip nén lại chỉ còn vài trăm KB đến 1-2 MB, tránh bị giám thị huỷ bài hoặc lỗi hệ thống nộp bài EOS/Cổng thi.</li>
+        </ol>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khởi Tạo Dự Án Flutter Linh Hoạt Theo Từng Đề Thi</h3>
+
+      <h4>Cách 1: Sử dụng Terminal / Dòng lệnh (Nhanh nhất & Tuyệt đối chính xác)</h4>
+      <p>Mở Terminal (trên Windows là PowerShell / Git Bash / Command Prompt) tại thư mục được chỉ định lưu bài (thường là ổ D: hoặc Desktop theo hướng dẫn của giám thị):</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Cú pháp tổng quát: flutter create <ten_du_an_theo_de_bai>
+
+# Trường hợp 1: Đề yêu cầu đặt theo cú pháp học kỳ + studentcode
+flutter create sp26studentcode
+
+# Trường hợp 2: Đề yêu cầu đặt theo Mã số sinh viên của bạn
+# flutter create se171234
+
+# Di chuyển ngay vào thư mục vừa tạo
+cd sp26studentcode
+
+# Mở dự án lên bằng VS Code (hoặc mở bằng Android Studio)
+code .</code></pre>
+      </div>
+
+      <h4>Cách 2: Sử dụng giao diện đồ hoạ Android Studio</h4>
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Khởi chạy Android Studio & Tạo New Project</strong>
+          <p>Mở Android Studio &rarr; Bấm nút <strong>New Flutter Project</strong> (hoặc trên thanh Menu chọn <strong>File</strong> &rarr; <strong>New</strong> &rarr; <strong>New Flutter Project</strong>).</p>
+        </div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Kiểm tra SDK & Điền thông tin đề bài</strong>
+          <p>Đảm bảo ô <strong>Flutter SDK path</strong> đã nhận diện SDK &rarr; Nhấn <strong>Next</strong>.</p>
+          <p>Ở ô <strong>Project name</strong>: Nhập đúng tên đề bài yêu cầu (ví dụ: <code>sp26studentcode</code> hoặc mã SV của bạn). Chọn thư mục lưu bài thi &rarr; Nhấn <strong>Create</strong>.</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Danh Mục Phiên Bản Các Thư Viện Chuẩn</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nhóm Chức Năng</th>
+              <th>Package & Phiên Bản Chuẩn</th>
+              <th>Vai Trò & Lưu Ý Phòng Thi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cơ sở dữ liệu SQLite (Mobile)</strong></td>
+              <td>
+                <code>sqflite: ^2.4.2</code><br />
+                <code>path: ^1.9.1</code>
+              </td>
+              <td>Tạo database local, thực hiện các câu lệnh SQL CRUD (INSERT, SELECT, UPDATE, DELETE). Hàm <code>join()</code> trong package <code>path</code> dùng để nối đường dẫn file <code>.db</code> an toàn.</td>
+            </tr>
+            <tr>
+              <td><strong>Hỗ trợ Test SQLite trên Web Browser</strong></td>
+              <td>
+                <code>sqflite_common_ffi_web:</code>
+              </td>
+              <td>
+                <span class="pill pill-yellow">Đặc biệt quan trọng</span> Khi máy thi không mở được máy ảo Android (Emulator) hoặc máy quá lag, bạn chạy thử trên Chrome/Edge (Web) thì <strong>bắt buộc phải có package này</strong> để SQLite hoạt động được trên Web.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Lưu phiên làm việc (Session)</strong></td>
+              <td>
+                <code>shared_preferences: ^2.5.4</code>
+              </td>
+              <td>Lưu dữ liệu nhẹ dạng Key-Value (lưu <code>isLoggedIn</code>, <code>userId</code>, <code>username</code>), phục vụ cho Task Session: tự động mở Home nếu đã đăng nhập trước đó.</td>
+            </tr>
+            <tr>
+              <td><strong>State Management (Riverpod)</strong></td>
+              <td>
+                <code>flutter_riverpod: ^3.2.0</code><br />
+                <code>riverpod_annotation: ^4.0.1</code>
+              </td>
+              <td>Bộ State Management reactive hiện đại, cung cấp <code>ProviderScope</code>, <code>ConsumerWidget</code>, <code>ref.watch</code>, <code>ref.read</code> giúp chia sẻ dữ liệu toàn app mượt mà.</td>
+            </tr>
+            <tr>
+              <td><strong>Công cụ sinh code tự động (Dev)</strong></td>
+              <td>
+                <code>build_runner:</code><br />
+                <code>riverpod_generator: ^4.0.2</code><br />
+                <code>flutter_lints: ^6.0.0</code>
+              </td>
+              <td>Nằm trong <code>dev_dependencies</code>: Dùng để sinh file <code>.g.dart</code> tự động khi dùng cú pháp <code>@riverpod</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Ghi đè xung đột phiên bản</strong></td>
+              <td>
+                <code>test_api: ^0.7.9</code>
+              </td>
+              <td>Nằm trong <code>dependency_overrides</code>: Ngăn chặn triệt để lỗi đỏ xung đột package giữa Flutter SDK và Riverpod Generator.</td>
+            </tr>
+            <tr>
+              <td><strong>Kết nối mạng (REST API)</strong></td>
+              <td>
+                <code>http: ^1.2.0</code>
+              </td>
+              <td>Gửi GET, POST, PUT, DELETE dữ liệu qua mạng khi đề bài yêu cầu kết nối Server / Fake API.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. File pubspec.yaml Hoàn Chỉnh & Lệnh Cài Đặt Nhanh</h3>
+
+      <h4>Cách 1: Sao chép nguyên khối vào file <code>pubspec.yaml</code> (Chuẩn xác 100%)</h4>
+      <p>Mở file <code>pubspec.yaml</code> ở thư mục gốc của dự án vừa tạo, thay thế nội dung các khối <code>dependencies</code>, <code>dev_dependencies</code>, <code>dependency_overrides</code> bằng khối dưới đây:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>name: my_exam_project
+description: "Flutter Exam Practical Project"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ========================================================
+  # 1. CƠ SỞ DỮ LIỆU SQLITE (MOBILE + WEB BROWSER TEST)
+  # ========================================================
+  sqflite: ^2.4.2
+  path: ^1.9.1
+  # Thư viện SQLite chạy trên Web Browser (Chrome/Edge khi máy ảo lag)
+  sqflite_common_ffi_web:
+
+  # ========================================================
+  # 2. LƯU TRỮ PHIÊN ĐĂNG NHẬP (SESSION MANAGEMENT)
+  # ========================================================
+  shared_preferences: ^2.5.4
+
+  # ========================================================
+  # 3. QUẢN LÝ TRẠNG THÁI (STATE MANAGEMENT - RIVERPOD)
+  # ========================================================
+  flutter_riverpod: ^3.2.0
+  riverpod_annotation: ^4.0.1
+
+  # ========================================================
+  # 4. KẾT NỐI MẠNG REST API (NẾU ĐỀ YÊU CẦU FETCH API)
+  # ========================================================
+  http: ^1.2.0
+
+  # Icon chuẩn Material & iOS
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Công cụ sinh mã tự động cho Riverpod (.g.dart)
+  build_runner:
+  riverpod_generator: ^4.0.2
+
+# Chặn xung đột phiên bản test_api với Flutter SDK mới
+dependency_overrides:
+  test_api: ^0.7.9
+
+flutter:
+  uses-material-design: true
+
+  # Khai báo đường dẫn tài nguyên hình ảnh đề thi
+  assets:
+    - assets/images/</code></pre>
+      </div>
+
+      <h4>Cách 2: Cài đặt từng phần qua dòng lệnh Terminal</h4>
+      <p>Nếu bạn muốn gõ lệnh tự động tải package mà không cần mở file:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># 1. Thêm SQLite, Shared Preferences, Riverpod và HTTP:
+flutter pub add sqflite:^2.4.2 path:^1.9.1 sqflite_common_ffi_web shared_preferences:^2.5.4 flutter_riverpod:^3.2.0 riverpod_annotation:^4.0.1 http:^1.2.0
+
+# 2. Thêm các công cụ sinh mã dev_dependencies:
+flutter pub add dev:build_runner dev:riverpod_generator:^4.0.2 dev:flutter_lints:^6.0.0</code></pre>
+      </div>
+
+      <div class="callout tip">
+        <strong>Lệnh kích hoạt tải thư viện:</strong>
+        <p>Sau khi lưu file hoặc chạy lệnh, hãy gõ <code>flutter pub get</code> trong Terminal. Khi màn hình hiện <code>exit code 0</code> nghĩa là tất cả các thư viện đã sẵn sàng hoạt động!</p>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Cấu Hình Assets (Hình Ảnh, Banner, Logo Đề Thi Cấp)</h3>
+
+      <p>Trong đề thi thực hành (như thư mục <code>material/</code> của đề mẫu), giám thị luôn cấp sẵn các file tài nguyên đi kèm: hình ảnh <code>banner.jpg</code>, logo, hoặc file <code>dataSample.txt</code> chứa dữ liệu mẫu.</p>
+
+      <div class="step-box">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Tạo thư mục assets/images trong dự án</strong>
+          <p>Tại thư mục gốc của project (ngang hàng với thư mục <code>lib</code>), bạn tạo một thư mục mới tên là <code>assets</code>, bên trong tạo tiếp thư mục <code>images</code>.</p>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Sao chép ảnh từ đề bài vào thư mục</strong>
+          <p>Copy toàn bộ file ảnh đề bài cấp (ví dụ <code>banner.jpg</code>) dán vào thư mục <code>assets/images/</code> vừa tạo.</p>
+          <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code># Cấu trúc hiển thị trên cây thư mục:
+<ten_du_an>/
+  ├── assets/
+  │   └── images/
+  │       └── banner.jpg    <-- Ảnh banner/logo đề thi cấp
+  ├── lib/
+  └── pubspec.yaml</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-box">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Khai báo đường dẫn trong pubspec.yaml</strong>
+          <p>Trong <code>pubspec.yaml</code>, dưới mục <code>flutter:</code>, hãy đảm bảo có khai báo:</p>
+          <div class="code-wrapper">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/</code></pre>
+          </div>
+          <div class="callout warning">
+            <strong>Mẹo thi cử:</strong> Luôn kết thúc bằng dấu gạch chéo <code>/</code> (ví dụ: <code>- assets/images/</code>). Dấu gạch chéo này báo hiệu cho Flutter nhận diện toàn bộ file ảnh bên trong thư mục, bạn không cần phải khai báo từng tên file lẻ tẻ.
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Phân Chia Cấu Trúc Thư Mục Chuẩn Trong lib/ (Cho Mọi Đề Thi)</h3>
+
+      <p>Để code không bị rối và giám khảo chấm bài nhìn vào thấy ngay tính chuyên nghiệp, hãy tạo sẵn 4 thư mục cốt lõi bên trong <code>lib/</code> ngay từ đầu:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>lib/
+├── models/         # 1. Chứa các lớp khuôn mẫu dữ liệu (User, Artwork, Product, Book...)
+│   ├── user_model.dart
+│   └── item_model.dart (hoặc artwork_model tùy theo đề bài)
+│
+├── database/       # 2. Chứa DatabaseHelper (Khởi tạo SQLite, tạo bảng, câu lệnh CRUD)
+│   └── database_helper.dart
+│
+├── services/       # 3. Chứa gọi API (http) hoặc xử lý Session SharedPreferences
+│   ├── api_service.dart
+│   └── session_service.dart
+│
+├── providers/      # 4. Chứa các State Notifier / Riverpod Providers quản lý dữ liệu
+│   └── item_provider.dart
+│
+├── screens/        # 5. Chứa toàn bộ các màn hình giao diện (UI) của từng Task đề yêu cầu
+│   ├── login_screen.dart           # Màn hình Đăng nhập (Task 2)
+│   ├── register_screen.dart        # Màn hình Đăng ký (Task 1)
+│   ├── home_screen.dart            # Màn hình Danh sách chính (Task 4)
+│   ├── add_screen.dart             # Màn hình Thêm mới dữ liệu (Task 5)
+│   └── detail_screen.dart          # Màn hình Xem chi tiết (Task 6)
+│
+└── main.dart       # Điểm bắt đầu của ứng dụng (Khởi tạo ProviderScope & Kiểm tra Session)</code></pre>
+      </div>
+
+      <div class="callout tip">
+        <strong>Lệnh Terminal tạo nhanh trọn bộ cấu trúc thư mục trong 1 giây:</strong>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code>mkdir -p lib/models lib/database lib/services lib/providers lib/screens assets/images</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-7">7. Checklist Kiểm Tra Hoàn Thành Bước 1</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Xong</th>
+              <th>Tiêu chí kiểm tra</th>
+              <th>Kết quả yêu cầu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>[ ]</td>
+              <td>Tên thư mục dự án</td>
+              <td>Đúng theo quy định của đề thi (chữ thường, không dấu cách, không dấu tiếng Việt).</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Phiên bản Packages</td>
+              <td>Đầy đủ <code>sqflite: ^2.4.2</code>, <code>path: ^1.9.1</code>, <code>sqflite_common_ffi_web:</code>, <code>shared_preferences: ^2.5.4</code>, <code>flutter_riverpod: ^3.2.0</code>, <code>riverpod_annotation: ^4.0.1</code>, <code>riverpod_generator: ^4.0.2</code>, <code>test_api: ^0.7.9</code>, <code>http: ^1.2.0</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Lệnh Pub Get</td>
+              <td>Chạy <code>flutter pub get</code> thành công với mã <code>process finished with exit code 0</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Tài nguyên Assets</td>
+              <td>Thư mục <code>assets/images/</code> đã chứa ảnh đề cấp và đã khai báo đường dẫn trong <code>pubspec.yaml</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Khung thư mục lib/</td>
+              <td>Đã tạo sẵn các thư mục <code>models</code>, <code>database</code>, <code>services</code>, <code>providers</code>, <code>screens</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Chạy thử nghiệm ban đầu</td>
+              <td>Bấm F5 (Run) ứng dụng chạy thành công lên thiết bị (Android Emulator hoặc Chrome/Edge) không bị văng lỗi.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 1:</strong>
+        <p>Bộ khung nền móng vững chắc của dự án thi với <strong>phiên bản thư viện chuẩn</strong> đã hoàn thành 100%. Toàn bộ "vũ khí" cần thiết để xử lý Database (Mobile & Web Test), Session, State Riverpod Generator, REST API và Assets đã sẵn sàng để bước sang các phần code logic tiếp theo!</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>

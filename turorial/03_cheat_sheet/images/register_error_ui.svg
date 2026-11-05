@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow-reg-err" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Surface Background White -->
+  <rect width="360" height="640" fill="#ffffff" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- AppBar: centerTitle: true, title: Text('Register') -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow-reg-err)"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Register</text>
+
+  <!-- ==================== FIELD 1: Username để trống ==================== -->
+  <g transform="translate(16, 100)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#B3261E" stroke-width="2"/>
+    <rect x="12" y="-6" width="68" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12" font-weight="500">Username</text>
+    <text x="12" y="72" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12">Tên đăng nhập không được để trống</text>
+  </g>
+
+  <!-- ==================== FIELD 2: Email sai định dạng ==================== -->
+  <g transform="translate(16, 190)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#B3261E" stroke-width="2"/>
+    <rect x="12" y="-6" width="42" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12" font-weight="500">Email</text>
+    <text x="16" y="34" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="14">abcxyz</text>
+    <text x="12" y="72" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12">Email không hợp lệ (ví dụ: user@gmail.com)</text>
+  </g>
+
+  <!-- ==================== FIELD 3: Password ==================== -->
+  <g transform="translate(16, 280)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#79747E" stroke-width="1"/>
+    <rect x="12" y="-6" width="64" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Password</text>
+    <text x="16" y="34" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="18" letter-spacing="2">••••••</text>
+  </g>
+
+  <!-- ==================== FIELD 4: Confirm Password không khớp ==================== -->
+  <g transform="translate(16, 352)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="none" stroke="#B3261E" stroke-width="2"/>
+    <rect x="12" y="-6" width="112" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12" font-weight="500">Confirm Password</text>
+    <text x="16" y="34" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="18" letter-spacing="2">••••</text>
+    <text x="12" y="72" fill="#B3261E" font-family="Roboto, sans-serif" font-size="12">Mật khẩu xác nhận không trùng khớp</text>
+  </g>
+
+  <!-- ==================== BUTTON: REGISTER ==================== -->
+  <g transform="translate(16, 442)">
+    <rect x="0" y="0" width="328" height="48" rx="24" fill="#6750A4" filter="url(#shadow-reg-err)"/>
+    <text x="164" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="14" font-weight="600" letter-spacing="1" text-anchor="middle">REGISTER</text>
+  </g>
+
+  <!-- SnackBar báo lỗi trùng username nếu có -->
+  <g transform="translate(16, 564)" filter="url(#shadow-reg-err)">
+    <rect width="328" height="48" rx="4" fill="#B3261E"/>
+    <text x="16" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="13">Tên đăng nhập đã tồn tại trong CSDL!</text>
+  </g>
+</svg>
+

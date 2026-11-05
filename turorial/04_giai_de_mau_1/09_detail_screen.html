@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 9: Màn hình Chi tiết tác phẩm (Artwork Detail Screen) - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 9: Artwork Detail (Task 6)</span>
+        <span class="pill pill-purple">Object Passing & UI Display</span>
+      </div>
+      <div>
+        <a href="08_add_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 8: Add Artwork</a>
+        <a href="10_main_entry.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 10: Khởi chạy main.dart &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 9: Xây Dựng Màn Hình Chi Tiết Tác Phẩm (Task 6: Artwork Detail Screen)</h2>
+        <p>Đề bài thi yêu cầu ở <strong>Task 6 &mdash; Artwork Detail</strong>: Khi người dùng chạm vào một tác phẩm bất kỳ từ danh sách ở Home Screen, điều hướng sang <strong>Artwork Detail Screen</strong> để hiển thị toàn bộ thông tin chi tiết: <code>Title</code>, <code>Artist</code>, <code>Year</code>, <code>Category</code>, <code>Description</code>. Màn hình phải có <strong>nút Back</strong> trên AppBar để người dùng dễ dàng quay trở lại Home Screen.</p>
+        <p>Tài liệu này hướng dẫn kỹ thuật truyền tham số đối tượng (Passing Object via Constructor) & cách dựng giao diện thẻ thông tin (Card Layout) thanh lịch, chuẩn xác theo hình chụp đề thi.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 6 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu Task 6 & Giao diện mẫu theo đề thi</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Kỹ thuật truyền nhận dữ liệu qua Constructor (Object Passing)</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Widget hiển thị từng hàng thông tin nhãn - giá trị (Label - Value Row)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. AppBar với nút Back chuẩn Android/iOS</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Toàn bộ mã nguồn hoàn chỉnh của <code>artwork_detail_screen.dart</code> (Bấm copy 1 click)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Checklist nghiệm thu chấm điểm Task 6</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Yêu Cầu Task 6 & Giao Diện Mẫu</h3>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px; margin: 16px 0;">
+        <div class="card">
+          <div class="card-title">Các thông tin hiển thị (Display Information)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>🏷️ <strong>Title:</strong> Tiêu đề tranh to, in đậm (ví dụ: <em>The Persistence of Memory</em>).</li>
+            <li>👤 <strong>Artist:</strong> Tên nghệ sĩ (ví dụ: <em>Salvador Dali</em>).</li>
+            <li>📅 <strong>Year:</strong> Năm sáng tác (ví dụ: <em>1931</em>).</li>
+            <li>🎨 <strong>Category:</strong> Thể loại (ví dụ: <em>Landscape</em> hoặc <em>Abstract</em>).</li>
+            <li>📄 <strong>Description:</strong> Đoạn văn mô tả chi tiết tác phẩm bên dưới.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Yêu cầu điều hướng (Requirements)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>✅ <strong>Trigger từ Home:</strong> Người dùng chạm vào item trong <code>ListView.builder</code> thì mở màn hình này.</li>
+            <li>✅ <strong>Back button:</strong> Màn hình bắt buộc phải có nút Back (mũi tên quay lại trên AppBar) để trở về Home Screen.</li>
+            <li>✅ <strong>StatelessWidget:</strong> Màn hình này chỉ đọc và hiển thị dữ liệu tĩnh đã truyền sang, không cần gọi SQLite hay đổi state nên viết dạng <code>StatelessWidget</code> là tối ưu hiệu năng nhất!</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Kỹ Thuật Truyền Nhận Dữ Liệu Qua Constructor</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Truyền thẳng nguyên một đối tượng Model</div>
+        <p><strong>Cách làm tối ưu:</strong> Thay vì phải truyền rời rạc 5 biến (<code>title, artist, year, category, description</code>), ta chỉ cần khai báo 1 thuộc tính duy nhất: <code>final ArtworkModel artwork;</code> trong Constructor.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>class ArtworkDetailScreen extends StatelessWidget {
+  // Nhận đối tượng ArtworkModel từ HomeScreen truyền sang
+  final ArtworkModel artwork;
+
+  const ArtworkDetailScreen({super.key, required this.artwork});
+  ...
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Widget Hiển Thị Từng Dòng Thông Tin (Label & Value)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Hàm phụ tái sử dụng _buildInfoRow()</div>
+        <p><strong>Mục đích:</strong> Dùng chung cho 3 dòng <em>Artist</em>, <em>Year</em>, <em>Category</em>. Cột nhãn bên trái màu xám nhạt, cột giá trị bên phải màu đen đậm, giúp giao diện gọn gàng và không lặp lại code.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>Widget _buildInfoRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            label,
+            style: const TextStyle(color: Colors.grey, fontSize: 15, fontWeight: FontWeight.w500),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87),
+          ),
+        ),
+      ],
+    ),
+  );
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. AppBar Chuẩn Kèm Nút Back</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 AppBar với nút Back tự động</div>
+        <p><strong>Bản chất:</strong> Trong Flutter, khi dùng <code>Navigator.push()</code> từ Home sang Detail, <code>Scaffold</code> có <code>AppBar</code> sẽ <strong>tự động tạo nút mũi tên Back (&larr;)</strong> bên trái thanh tiêu đề. Bấm vào nút này sẽ tự động gọi <code>Navigator.pop(context)</code> quay lại Home.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>AppBar(
+  title: const Text('Artwork Detail', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+  backgroundColor: Colors.white,
+  foregroundColor: Colors.black87,
+  elevation: 0.5,
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () => Navigator.pop(context),
+  ),
+)</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>artwork_detail_screen.dart</code></h3>
+
+      <p>Tạo file: <code>lib/screens/artwork_detail_screen.dart</code> và dán toàn bộ mã nguồn bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/screens/artwork_detail_screen.dart
+import 'package:flutter/material.dart';
+import '../models/artwork_model.dart';
+
+class ArtworkDetailScreen extends StatelessWidget {
+  final ArtworkModel artwork;
+
+  const ArtworkDetailScreen({super.key, required this.artwork});
+
+  // Widget hiển thị 1 dòng thông tin dạng Nhãn : Giá trị
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.grey, fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        title: const Text('Artwork Detail', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Tiêu đề tác phẩm nổi bật
+                  Text(
+                    artwork.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 2. Các thông tin chi tiết
+                  _buildInfoRow('Artist:', artwork.artist),
+                  _buildInfoRow('Year:', artwork.year.toString()),
+                  _buildInfoRow('Category:', artwork.category),
+
+                  const SizedBox(height: 8),
+                  const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+                  const SizedBox(height: 12),
+
+                  // 3. Phần Mô tả tác phẩm (Description)
+                  const Text(
+                    'Description',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    artwork.description,
+                    style: const TextStyle(
+                      fontSize: 14.5,
+                      color: Colors.black87,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Checklist Nghiệm Thu Chấm Điểm Task 6</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Check</th>
+              <th>Tiêu chí chấm điểm của Giám khảo</th>
+              <th>Cách kiểm tra thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>[ ]</td>
+              <td>Mở từ Home Screen</td>
+              <td>Chạm vào bức tranh bất kỳ trong danh sách ở Home &rarr; Mở đúng màn hình Detail.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Dữ liệu hiển thị chính xác</td>
+              <td>Hiện đủ 5 thông tin: Title (to đậm), Artist, Year, Category, Description.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Nút Back hoạt động</td>
+              <td>Bấm mũi tên Back trên AppBar &rarr; Quay trở lại Home Screen trơn tru.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 9:</strong>
+        <p>Toàn bộ các màn hình nghiệp vụ (Tasks 1, 2, 4, 5, 6, 7) đã xong trọn vẹn! Bây giờ chỉ còn một bước cuối cùng: <strong>Bước 10: Khởi chạy ứng dụng tại main.dart (Task 3: Kiểm tra Session phân luồng)</strong> để hoàn tất 100% đồ án phòng thi.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow-detail" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Surface Background Material #f8f9fa -->
+  <rect width="360" height="640" fill="#f8f9fa" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- AppBar: centerTitle: true, title: Text('Chi tiết'), nút Back và nút Sửa Edit icon -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow-detail)"/>
+  <path d="M28 52 L20 44 L28 36 L26.6 34.6 L17.2 44 L26.6 53.4 Z" fill="#ffffff"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Chi tiết</text>
+  <!-- Nút Edit icon bên phải AppBar -->
+  <g transform="translate(320, 42)">
+    <path d="M3 17.25 V21 h3.75 L17.81 9.94 l-3.75-3.75 L3 17.25 z M20.71 7.04 c.39-.39.39-1.02 0-1.41 l-2.34-2.34 c-.39-.39-1.02-.39-1.41 0 l-1.83 1.83 3.75 3.75 1.83-1.83 z" fill="#ffffff"/>
+  </g>
+
+  <!-- ==================== CARD CHI TIẾT SẢN PHẨM ==================== -->
+  <g transform="translate(16, 100)" filter="url(#shadow-detail)">
+    <rect width="328" height="340" rx="12" fill="#ffffff"/>
+
+    <!-- Avatar to hoặc Icon tượng trưng -->
+    <circle cx="164" cy="60" r="36" fill="#EADDFF"/>
+    <path d="M152 48 L176 48 L176 72 L152 72 Z" fill="#21005D" opacity="0.3"/>
+    <text x="164" y="66" fill="#21005D" font-family="Roboto, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">ITEM</text>
+
+    <!-- Tiêu đề lớn -->
+    <text x="164" y="125" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">Sản phẩm mẫu số 1</text>
+    <text x="164" y="150" fill="#2E7D32" font-family="Roboto, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">$99.0</text>
+
+    <!-- Đường kẻ ngăn cách -->
+    <line x1="20" y1="175" x2="308" y2="175" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Các trường chi tiết -->
+    <text x="24" y="205" fill="#49454F" font-family="Roboto, sans-serif" font-size="13">Mã định danh (ID):</text>
+    <text x="304" y="205" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="13" font-weight="bold" text-anchor="end">#1</text>
+
+    <text x="24" y="235" fill="#49454F" font-family="Roboto, sans-serif" font-size="13">Thể loại (Category):</text>
+    <text x="304" y="235" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="13" font-weight="bold" text-anchor="end">Đồ gia dụng</text>
+
+    <text x="24" y="265" fill="#49454F" font-family="Roboto, sans-serif" font-size="13">Mô tả chi tiết:</text>
+    <text x="24" y="290" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="13">Mô tả sản phẩm phục vụ bài thi thực hành PE.</text>
+  </g>
+
+  <!-- Nút Quay lại to bản ở dưới -->
+  <g transform="translate(16, 460)">
+    <rect width="328" height="48" rx="24" fill="#6750A4" filter="url(#shadow-detail)"/>
+    <text x="164" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">QUAY LẠI DANH SÁCH</text>
+  </g>
+</svg>
+

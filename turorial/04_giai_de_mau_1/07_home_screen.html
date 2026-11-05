@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 7: Màn hình Danh sách chính & Xóa (Home Screen) - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 7: Home & Delete (Task 4 & 7)</span>
+        <span class="pill pill-purple">ListView, Dialog & SnackBar</span>
+      </div>
+      <div>
+        <a href="06_login_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 6: Login</a>
+        <a href="08_add_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 8: Add Artwork &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 7: Xây Dựng Màn Hình Danh Sách Chính & Xóa (Task 4: Home Screen & Task 7: Delete Artwork)</h2>
+        <p>Theo đề thi, <strong>Home Screen</strong> là trái tim của ứng dụng: hiển thị Banner tài nguyên kèm lời chào Session (<em>"Welcome &lt;username&gt;"</em>), tải danh sách tác phẩm từ SQLite bằng <code>ListView.builder</code> (Title, Artist, Year), xử lý trạng thái khi danh sách trống (<em>"No artworks found"</em>), bấm vào từng item để xem chi tiết (Task 6), có nút <code>+ Add Artwork</code> để thêm mới (Task 5), và mỗi item có nút <strong>Delete kèm Hộp thoại xác nhận (Confirmation Dialog)</strong> thông báo SnackBar (Task 7).</p>
+        <p>Tất cả các hàm và khối giao diện được tách thành từng mục riêng biệt với viền màu sắc phân biệt để bạn dễ theo dõi và hiểu tường tận.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung bài học gồm 9 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu Task 4 (Home List) & Task 7 (Delete Artwork)</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo State & Hàm tải dữ liệu <code>_loadData()</code> từ SQLite và Session</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. Widget Banner hình ảnh & Hiển thị lời chào Username người dùng</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Xử lý trạng thái Danh sách rỗng ("No artworks found")</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Dựng danh sách tác phẩm với <code>ListView.builder</code> & Thẻ Card/ListTile</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Hàm xác nhận và Xóa tác phẩm <code>_confirmDelete()</code> (Task 7)</a></li>
+          <li><a href="#sec-7" style="color:var(--accent-blue);">7. Nút bấm nổi "+ Add Artwork" & Xử lý Reload dữ liệu khi quay về</a></li>
+          <li><a href="#sec-8" style="color:var(--accent-blue);">8. Toàn bộ mã nguồn hoàn chỉnh của <code>home_screen.dart</code> (Bấm copy 1 click)</a></li>
+          <li><a href="#sec-9" style="color:var(--accent-blue);">9. Checklist nghiệm thu chấm điểm Task 4 & Task 7</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Phân Tích Yêu Cầu Đề Bài (Task 4 & Task 7)</h3>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px; margin: 16px 0;">
+        <div class="card">
+          <div class="card-title">Task 4 &mdash; Home Screen (Artwork List)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>🖼️ <strong>Header Banner / Logo:</strong> Hiển thị ảnh banner đề thi cấp kèm lời chào: <em>"Welcome &lt;username&gt;"</em> lấy từ Session.</li>
+            <li>📋 <strong>Load Artwork Data:</strong> Đọc toàn bộ danh sách từ SQLite.</li>
+            <li>📜 <strong>ListView.builder:</strong> Hiển thị mỗi bức tranh gồm: <code>Title</code>, <code>Artist</code>, <code>Year</code>.</li>
+            <li>🔍 <strong>Trường hợp rỗng:</strong> Nếu chưa có tranh thì hiện chữ <em>"No artworks found"</em>.</li>
+            <li>👉 <strong>Tương tác:</strong> Chạm vào item để mở <strong>Artwork Detail Screen</strong>; bấm nút nổi phía dưới để mở <strong>Add Artwork Screen</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Task 7 &mdash; Delete Artwork</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li>🗑️ <strong>Nút Delete:</strong> Đặt icon thùng rác bên phải mỗi item trong danh sách.</li>
+            <li>❓ <strong>Show Confirmation Dialog:</strong> Tiêu đề <em>"Delete Artwork"</em>, nội dung: <em>"Are you sure you want to delete this artwork?"</em>, có 2 nút: <code>Cancel</code> và <code>Delete</code>.</li>
+            <li>⚡ <strong>Khi xác nhận xóa:</strong>
+              <br />• Xóa tranh khỏi CSDL SQLite qua <code>DatabaseHelper.instance.deleteArtwork(id)</code>.
+              <br />• Cập nhật lại danh sách trên Home tức thì.
+              <br />• Bắn thông báo: <code>Artwork deleted successfully</code> bằng SnackBar.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Khai Báo State & Hàm Tải Dữ Liệu <code>_loadData()</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-blue);">
+        <div class="card-title" style="color:var(--accent-blue);">🔷 Khai báo biến State & Hàm tải dữ liệu ban đầu</div>
+        <p><strong>Nhiệm vụ:</strong> Trong <code>initState()</code>, gọi hàm tải đồng thời 2 nguồn: (1) Tên người dùng từ <code>SessionService.getUsername()</code> và (2) Danh sách tác phẩm từ <code>DatabaseHelper.instance.getAllArtworks()</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  List<ArtworkModel> _artworks = [];
+  String _currentUsername = 'User';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  // Hàm tải dữ liệu từ CSDL và Session
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      // 1. Lấy username từ Session để hiển thị lên Banner
+      final username = await SessionService.getUsername();
+      // 2. Lấy danh sách tranh từ SQLite
+      final list = await DatabaseHelper.instance.getAllArtworks();
+
+      if (mounted) {
+        setState(() {
+          _currentUsername = username ?? 'User';
+          _artworks = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. Widget Banner Hình Ảnh & Lời Chào Username</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-purple);">
+        <div class="card-title" style="color:var(--accent-purple);">🟣 Header Banner đề thi & Chữ chào đón Session</div>
+        <p><strong>Thiết kế:</strong> Sử dụng ảnh <code>assets/images/banner.jpg</code> (đã cấu hình ở Bước 1). Dùng widget <code>Stack</code> để đặt lời chào <em>"Welcome &lt;username&gt;"</em> và icon ngôi nhà bảo tàng đè lên trên nền ảnh như đúng mẫu đề thi.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>Widget _buildHeaderBanner() {
+  return Container(
+    height: 140,
+    width: double.infinity,
+    margin: const EdgeInsets.all(16.0),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      image: const DecorationImage(
+        image: AssetImage('assets/images/banner.jpg'),
+        fit: BoxFit.cover,
+      ),
+    ),
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        ),
+      ),
+      padding: const EdgeInsets.all(16.0),
+      alignment: Alignment.bottomLeft,
+      child: Row(
+        children: [
+          const Icon(Icons.home, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            'Welcome $_currentUsername',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Xử Lý Trạng Thái Danh Sách Rỗng ("No artworks found")</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-orange);">
+        <div class="card-title" style="color:var(--accent-orange);">🟠 Giao diện khi chưa có dữ liệu tranh</div>
+        <p><strong>Yêu cầu đề:</strong> Nếu CSDL chưa có bức tranh nào hoặc đã bị xóa hết, hiển thị dòng chữ <strong>"No artworks found"</strong> ở giữa màn hình.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>Widget _buildEmptyState() {
+  return const Center(
+    child: Padding(
+      padding: EdgeInsets.symmetric(vertical: 40),
+      child: Text(
+        'No artworks found',
+        style: TextStyle(color: Colors.grey, fontSize: 16, fontStyle: FontStyle.italic),
+      ),
+    ),
+  );
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Dựng Danh Sách Tác Phẩm Bằng <code>ListView.builder</code></h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+        <div class="card-title" style="color:var(--accent-cyan);">🌐 Danh sách thẻ Card bo góc & Sự kiện chạm xem Chi tiết</div>
+        <p><strong>Bản chất:</strong> Mỗi item là 1 <code>Card</code> bo tròn nhẹ màu trắng, bên trong có <code>ListTile</code>: icon bên trái, tiêu đề tranh <code>Title</code>, nghệ sĩ <code>Artist</code> kèm năm <code>Year</code> (ví dụ: <em>Salvador Dali - 1931</em>). Bấm vào item thì mở <code>ArtworkDetailScreen</code> (Task 6).</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>Widget _buildArtworkList() {
+  return ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    itemCount: _artworks.length,
+    itemBuilder: (context, index) {
+      final artwork = _artworks[index];
+      return Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: const Color(0xFFE0F2F1),
+            child: const Icon(Icons.palette_outlined, color: Color(0xFF00695C)),
+          ),
+          title: Text(
+            artwork.title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          subtitle: Text(
+            '${artwork.artist} - ${artwork.year}',
+            style: const TextStyle(color: Colors.grey),
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.grey),
+            onPressed: () => _confirmDelete(artwork),
+          ),
+          onTap: () {
+            // Task 6: Chạm vào item để mở xem chi tiết
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ArtworkDetailScreen(artwork: artwork),
+              ),
+            );
+          },
+        ),
+      );
+    },
+  );
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Hàm Xác Nhận & Xóa Tác Phẩm <code>_confirmDelete()</code> (Task 7)</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-red);">
+        <div class="card-title" style="color:var(--accent-red);">🔴 Hộp thoại xác nhận xóa & Bắn SnackBar thông báo (Task 7)</div>
+        <p><strong>Yêu cầu đề thi:</strong> Khi bấm vào icon thùng rác, hiển thị <code>AlertDialog</code> với câu hỏi <em>"Are you sure you want to delete this artwork?"</em>. Nếu chọn <strong>Delete</strong> thì xóa trong SQLite, reload lại danh sách và hiện SnackBar <code>Artwork deleted successfully</code>.</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>  Future<void> _confirmDelete(ArtworkModel artwork) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Delete Artwork', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text('Are you sure you want to delete this artwork?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00695C),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Nếu người dùng đồng ý xóa
+    if (confirm == true && artwork.id != null) {
+      await DatabaseHelper.instance.deleteArtwork(artwork.id!);
+
+      // Tải lại danh sách sau khi xóa
+      await _loadData();
+
+      if (!mounted) return;
+      // Bắn SnackBar theo đúng yêu cầu đề
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Artwork deleted successfully'),
+          backgroundColor: Colors.black87,
+        ),
+      );
+    }
+  }</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 7 ===================== -->
+      <h3 id="sec-7">7. Nút Bấm "+ Add Artwork" & Xử Lý Reload Khi Quay Về</h3>
+
+      <div class="card" style="border-left: 4px solid var(--accent-green);">
+        <div class="card-title" style="color:var(--accent-green);">🟢 Nút thêm mới có cơ chế chờ Await tự động cập nhật</div>
+        <p><strong>Mẹo quan trọng:</strong> Dùng <code>final result = await Navigator.push(...)</code>. Khi màn hình Thêm mới hoàn tất và trả về <code>true</code>, hàm sẽ lập tức gọi lại <code>_loadData()</code> để hiển thị bức tranh mới vừa thêm ngay lập tức!</p>
+      </div>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>Widget _buildAddButton() {
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: SizedBox(
+      height: 48,
+      child: ElevatedButton.icon(
+        onPressed: () async {
+          // Task 5: Mở màn hình Thêm tác phẩm
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddArtworkScreen()),
+          );
+          // Nếu thêm thành công thì reload lại danh sách
+          if (result == true) {
+            _loadData();
+          }
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Add Artwork', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF80CBC4), // Màu xanh teal nhạt theo thiết kế mock
+          foregroundColor: const Color(0xFF004D40),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    ),
+  );
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 8 ===================== -->
+      <h3 id="sec-8">8. Toàn Bộ Mã Nguồn Hoàn Chỉnh Của <code>home_screen.dart</code></h3>
+
+      <p>Tạo file: <code>lib/screens/home_screen.dart</code> và dán toàn bộ mã nguồn bên dưới vào:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy Toàn Bộ File</button>
+        <pre><code>// lib/screens/home_screen.dart
+import 'package:flutter/material.dart';
+import '../database/database_helper.dart';
+import '../models/artwork_model.dart';
+import '../services/session_service.dart';
+import 'add_artwork_screen.dart';
+import 'artwork_detail_screen.dart';
+import 'login_screen.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<ArtworkModel> _artworks = [];
+  String _currentUsername = 'User';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  // Tải danh sách từ SQLite & Session username
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      final username = await SessionService.getUsername();
+      final list = await DatabaseHelper.instance.getAllArtworks();
+      if (mounted) {
+        setState(() {
+          _currentUsername = username ?? 'User';
+          _artworks = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // Task 7: Hộp thoại xác nhận & Xóa tác phẩm
+  Future<void> _confirmDelete(ArtworkModel artwork) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Delete Artwork', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text('Are you sure you want to delete this artwork?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00695C),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true && artwork.id != null) {
+      await DatabaseHelper.instance.deleteArtwork(artwork.id!);
+      await _loadData();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Artwork deleted successfully'),
+          backgroundColor: Colors.black87,
+        ),
+      );
+    }
+  }
+
+  // Xử lý Đăng xuất (Logout)
+  Future<void> _handleLogout() async {
+    await SessionService.clearSession();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        title: const Text('Home - Artwork List', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.black54),
+            tooltip: 'Logout',
+            onPressed: _handleLogout,
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF00695C)))
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 1. Header Banner kèm Lời chào Session
+                  Container(
+                    height: 140,
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/banner.jpg'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: [Colors.black.withOpacity(0.65), Colors.transparent],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(16.0),
+                      alignment: Alignment.bottomLeft,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.home, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Welcome $_currentUsername',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 2. Danh sách tranh hoặc Trạng thái rỗng
+                  if (_artworks.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          'No artworks found',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _artworks.length,
+                      itemBuilder: (context, index) {
+                        final artwork = _artworks[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: ListTile(
+                            leading: const CircleAvatar(
+                              backgroundColor: Color(0xFFE0F2F1),
+                              child: Icon(Icons.palette_outlined, color: Color(0xFF00695C)),
+                            ),
+                            title: Text(
+                              artwork.title,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            subtitle: Text(
+                              '${artwork.artist} - ${artwork.year}',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                              onPressed: () => _confirmDelete(artwork),
+                            ),
+                            onTap: () {
+                              // Task 6: Mở màn hình xem chi tiết
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ArtworkDetailScreen(artwork: artwork),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+
+                  // 3. Nút bấm nổi "+ Add Artwork"
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AddArtworkScreen()),
+                          );
+                          if (result == true) {
+                            _loadData();
+                          }
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Artwork', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF80CBC4),
+                          foregroundColor: const Color(0xFF004D40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 9 ===================== -->
+      <h3 id="sec-9">9. Checklist Nghiệm Thu Chấm Điểm Task 4 & Task 7</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Check</th>
+              <th>Tiêu chí chấm điểm của Giám khảo</th>
+              <th>Cách kiểm tra thực tế</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>[ ]</td>
+              <td>Banner & Lời chào Session</td>
+              <td>Banner hiển thị ảnh <code>banner.jpg</code>, chữ lời chào hiện đúng username người đang đăng nhập.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Hiển thị danh sách</td>
+              <td>Hiện đủ Title, Artist, Year bằng <code>ListView.builder</code>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Trường hợp rỗng</td>
+              <td>Khi CSDL không có tranh thì hiện chữ <em>"No artworks found"</em>.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Hộp thoại xác nhận Delete</td>
+              <td>Bấm nút thùng rác &rarr; Hiện Dialog hỏi <em>"Are you sure you want to delete this artwork?"</em>; bấm Cancel thì không xóa, bấm Delete thì xóa.</td>
+            </tr>
+            <tr>
+              <td>[ ]</td>
+              <td>Cập nhật & SnackBar</td>
+              <td>Xóa thành công danh sách tự động biến mất item đó và hiện SnackBar <code>Artwork deleted successfully</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT THÚC BƯỚC 7:</strong>
+        <p>Màn hình Home (Task 4) và Tính năng Xóa (Task 7) đã xong hoàn hảo! Tiếp theo là <strong>Bước 8: Màn hình Thêm tác phẩm (Task 5: Add Artwork Screen)</strong>.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+

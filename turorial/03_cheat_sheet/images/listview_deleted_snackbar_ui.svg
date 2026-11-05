@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow-del-done" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Surface Background Material #f8f9fa -->
+  <rect width="360" height="640" fill="#f8f9fa" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- Flutter Material 3 AppBar: title: Text('Danh sách'), centerTitle: true, action: Logout icon -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow-del-done)"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Danh sách</text>
+  <!-- Action Logout icon -->
+  <g transform="translate(320, 42)">
+    <path d="M4 2 L12 2 C13 2 14 3 14 4 L14 8 L12 8 L12 4 L4 4 L4 16 L12 16 L12 12 L14 12 L14 16 C14 17 13 18 12 18 L4 18 C3 18 2 17 2 16 L2 4 C2 3 3 2 4 2 Z M10 6 L14 10 L10 14 L8.6 12.6 L10.2 11 L6 11 L6 9 L10.2 9 L8.6 7.4 Z" fill="#ffffff"/>
+  </g>
+
+  <!-- ==================== CÁC ITEM CÒN LẠI SAU KHI ĐÃ XÓA ITEM 1 ==================== -->
+  <!-- ITEM 2 CŨ NAY THÀNH ITEM 1 MỚI -->
+  <g transform="translate(12, 92)" filter="url(#shadow-del-done)">
+    <rect width="336" height="72" rx="8" fill="#ffffff"/>
+    <circle cx="36" cy="36" r="20" fill="#EADDFF"/>
+    <text x="36" y="42" fill="#21005D" font-family="Roboto, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">1</text>
+    
+    <text x="68" y="32" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="15" font-weight="600">Sản phẩm mẫu số 2</text>
+    <text x="68" y="50" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Loại: Điện tử • $150.0</text>
+    
+    <g transform="translate(296, 24)">
+      <path d="M6 19 C6 20.1 6.9 21 8 21 L16 21 C17.1 21 18 20.1 18 19 L18 7 L6 7 L6 19 Z M19 4 L15.5 4 L14.5 3 L9.5 3 L8.5 4 L5 4 L5 6 L19 6 L19 4 Z" fill="#B3261E" transform="scale(0.9) translate(-2, -1)"/>
+    </g>
+  </g>
+
+  <!-- ITEM 3 CŨ NAY THÀNH ITEM 2 MỚI -->
+  <g transform="translate(12, 172)" filter="url(#shadow-del-done)">
+    <rect width="336" height="72" rx="8" fill="#ffffff"/>
+    <circle cx="36" cy="36" r="20" fill="#EADDFF"/>
+    <text x="36" y="42" fill="#21005D" font-family="Roboto, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">2</text>
+    
+    <text x="68" y="32" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="15" font-weight="600">Sản phẩm mẫu số 3</text>
+    <text x="68" y="50" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Loại: Văn phòng phẩm • $45.0</text>
+    
+    <g transform="translate(296, 24)">
+      <path d="M6 19 C6 20.1 6.9 21 8 21 L16 21 C17.1 21 18 20.1 18 19 L18 7 L6 7 L6 19 Z M19 4 L15.5 4 L14.5 3 L9.5 3 L8.5 4 L5 4 L5 6 L19 6 L19 4 Z" fill="#B3261E" transform="scale(0.9) translate(-2, -1)"/>
+    </g>
+  </g>
+
+  <!-- ==================== SNACKBAR XANH LÁ BÁO XÓA THÀNH CÔNG DƯỚI ĐÁY ==================== -->
+  <g transform="translate(16, 520)" filter="url(#shadow-del-done)">
+    <!-- SnackBar background đen / xanh sẫm -->
+    <rect width="328" height="48" rx="8" fill="#1D1B20"/>
+    <!-- Icon check tròn màu xanh lá -->
+    <circle cx="28" cy="24" r="10" fill="#2E7D32"/>
+    <path d="M24 24 L27 27 L33 21" stroke="#ffffff" stroke-width="2" fill="none"/>
+    <text x="46" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="13">Đã xóa "Sản phẩm mẫu số 1" thành công!</text>
+  </g>
+
+  <!-- FLOATING ACTION BUTTON (Add) -->
+  <g transform="translate(288, 452)" filter="url(#shadow-del-done)">
+    <circle cx="28" cy="28" r="28" fill="#6750A4"/>
+    <path d="M26 18 L30 18 L30 26 L38 26 L38 30 L30 30 L30 38 L26 38 L26 30 L18 30 L18 26 L26 26 Z" fill="#ffffff"/>
+  </g>
+</svg>
+

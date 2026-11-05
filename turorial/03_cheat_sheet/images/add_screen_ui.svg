@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 640" width="360" height="640">
+  <defs>
+    <filter id="shadow-add-fix" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Surface Background White #ffffff -->
+  <rect width="360" height="640" fill="#ffffff" rx="16"/>
+
+  <!-- Android Status Bar -->
+  <rect width="360" height="24" fill="#6750A4"/>
+  <text x="16" y="16" fill="#ffffff" font-family="Roboto, sans-serif" font-size="11" font-weight="500">12:30</text>
+  <circle cx="320" cy="12" r="3" fill="#ffffff"/>
+  <path d="M332 9 L340 16 L340 9 Z" fill="#ffffff"/>
+  <rect x="344" y="8" width="6" height="8" rx="1" fill="#ffffff"/>
+
+  <!-- AppBar: centerTitle: true, title: Text('Thêm mới') kèm nút Back -->
+  <rect y="24" width="360" height="56" fill="#6750A4" filter="url(#shadow-add-fix)"/>
+  <!-- Nút Back mũi tên -->
+  <path d="M28 52 L20 44 L28 36 L26.6 34.6 L17.2 44 L26.6 53.4 Z" fill="#ffffff"/>
+  <text x="180" y="58" fill="#ffffff" font-family="Roboto, -apple-system, sans-serif" font-size="19" font-weight="500" text-anchor="middle">Thêm mới</text>
+
+  <!-- ==================== FIELD 1: Title ==================== -->
+  <g transform="translate(16, 110)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="#ffffff" stroke="#79747E" stroke-width="1"/>
+    <rect x="12" y="-6" width="36" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Title</text>
+  </g>
+
+  <!-- ==================== FIELD 2: Description ==================== -->
+  <g transform="translate(16, 182)">
+    <rect x="0" y="0" width="328" height="72" rx="4" fill="#ffffff" stroke="#79747E" stroke-width="1"/>
+    <rect x="12" y="-6" width="82" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Description</text>
+  </g>
+
+  <!-- ==================== FIELD 3: Category Dropdown ==================== -->
+  <g transform="translate(16, 270)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="#ffffff" stroke="#79747E" stroke-width="1"/>
+    <rect x="12" y="-6" width="62" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Category</text>
+    <text x="16" y="34" fill="#1D1B20" font-family="Roboto, sans-serif" font-size="15">Loại A</text>
+    <path d="M304 24 L310 30 L316 24 Z" fill="#49454F"/>
+  </g>
+
+  <!-- ==================== FIELD 4: Price ==================== -->
+  <g transform="translate(16, 342)">
+    <rect x="0" y="0" width="328" height="56" rx="4" fill="#ffffff" stroke="#79747E" stroke-width="1"/>
+    <rect x="12" y="-6" width="40" height="12" fill="#ffffff"/>
+    <text x="16" y="4" fill="#49454F" font-family="Roboto, sans-serif" font-size="12">Price</text>
+  </g>
+
+  <!-- ==================== BUTTON: LƯU ==================== -->
+  <g transform="translate(16, 422)">
+    <rect x="0" y="0" width="328" height="48" rx="24" fill="#6750A4" filter="url(#shadow-add-fix)"/>
+    <text x="164" y="29" fill="#ffffff" font-family="Roboto, sans-serif" font-size="14" font-weight="600" letter-spacing="1" text-anchor="middle">LƯU DỮ LIỆU</text>
+  </g>
+
+  <g transform="translate(16, 580)">
+    <rect width="328" height="32" rx="6" fill="#F3EDF7"/>
+    <text x="164" y="20" fill="#49454F" font-family="Roboto, sans-serif" font-size="12" text-anchor="middle">AddScreen: Form nhập dữ liệu &amp; Dropdown Category</text>
+  </g>
+</svg>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bước 2: Phân tích & Xây dựng Data Models - Hướng Dẫn Giải Đề Mẫu 1</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Hướng Dẫn Giải Đề Mẫu 1</span>
+        <span class="pill pill-green">Bước 2: Data Models</span>
+        <span class="pill pill-purple">Tư duy suy luận giải đề</span>
+      </div>
+      <div>
+        <a href="01_setup_project_libraries.html" class="copy-btn" style="text-decoration:none;">&larr; Bước 1: Setup</a>
+        <a href="03_database_helper.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Bước 3. Database Helper &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Bước 2: Phương Pháp Suy Luận & Xây Dựng Data Models Chuẩn Phòng Thi</h2>
+        <p>Sau khi đã setup xong dự án, <strong>nhiệm vụ số 1 về mặt code</strong> luôn là tạo các <strong>Data Models</strong>. Model là "bộ khung xương" định hình toàn bộ dữ liệu của ứng dụng: từ việc tạo bảng SQLite, chuyển đổi dữ liệu khi đọc ghi database, cho đến việc hiển thị lên giao diện hoặc gọi API.</p>
+        <p>Phần này sẽ hướng dẫn bạn phương pháp tư duy suy luận từ đề bài (bảng biểu & file <code>dataSample.txt</code>) thành code Dart hoàn chỉnh kèm các hàm sống còn: <code>toMap()</code>, <code>fromMap()</code>, <code>copyWith()</code>.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 28px;">
+        <div class="card-title">📌 Nội dung hướng dẫn Bước 2 gồm 6 phần chi tiết:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-1" style="color:var(--accent-blue);">1. Data Model là gì? Vì sao phải tạo Model trước tiên?</a></li>
+          <li><a href="#sec-2" style="color:var(--accent-blue);">2. Phương pháp suy luận: Cách đọc đề bài & đối chiếu file dataSample.txt</a></li>
+          <li><a href="#sec-3" style="color:var(--accent-blue);">3. "Công thức vàng" của một Model chuẩn phòng thi (Cấu trúc 5 phần)</a></li>
+          <li><a href="#sec-4" style="color:var(--accent-blue);">4. Thực hành Model 1: User (Tài khoản người dùng & Đăng nhập)</a></li>
+          <li><a href="#sec-5" style="color:var(--accent-blue);">5. Thực hành Model 2: Artwork (Thực thể chính CRUD & Khóa ngoại createdBy)</a></li>
+          <li><a href="#sec-6" style="color:var(--accent-blue);">6. Bảng tổng hợp kiểu dữ liệu Dart vs SQLite vs JSON (Tránh ép sai kiểu)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 1 ===================== -->
+      <h3 id="sec-1">1. Data Model Là Gì? Vì Sao Phải Tạo Model Trước Tiên?</h3>
+
+      <div class="def">
+        <span class="def-term">Bản chất của Model</span>
+        <p><strong>Model (Lớp mô hình dữ liệu)</strong> là một <code>class</code> trong Dart đại diện cho một đối tượng trong đời thực được số hóa (ví dụ: một người dùng <code>User</code>, một bức tranh <code>Artwork</code>, một sản phẩm <code>Product</code>).</p>
+        <p>Khi làm việc với CSDL SQLite hoặc REST API, dữ liệu thô luôn ở dạng <code>Map&lt;String, dynamic&gt;</code> (các cặp key - value như <code>{"id": 1, "title": "Mona Lisa"}</code>). Nếu cứ dùng trực tiếp biến Map:</p>
+        <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+          <li>❌ Rất dễ gõ sai chính tả tên key: <code>item['titel']</code> thay vì <code>item['title']</code> dẫn đến lỗi <code>null</code> hoặc sập app khi chạy.</li>
+          <li>❌ Không có gợi ý code (IntelliSense) từ Android Studio / VS Code.</li>
+          <li>✅ Khi có <strong>Model</strong>: Bạn chỉ cần chấm <code>artwork.title</code>, máy sẽ gợi ý code tức thì và kiểm tra lỗi sai kiểu dữ liệu ngay lúc gõ phím!</li>
+        </ul>
+      </div>
+
+      <!-- ===================== PHẦN 2 ===================== -->
+      <h3 id="sec-2">2. Phương Pháp Suy Luận: Cách Đọc Đề Bài & Soi dataSample.txt</h3>
+
+      <p>Khi cầm đề thi trên tay, làm thế nào để biết Model cần bao nhiêu trường (fields), trường nào được phép null, trường nào là khóa chính?</p>
+
+      <h4>Bước A: Đọc bảng thông số ở mục "2. Data Models" của đề bài</h4>
+      <p>Đề bài thi luôn có 2 bảng biểu rõ ràng:</p>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:16px; margin: 16px 0;">
+        <div class="card">
+          <div class="card-title">Bảng 2.1 User Model (Người dùng)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li><code>id</code> (int) &rarr; User ID (Primary Key)</li>
+            <li><code>username</code> (String) &rarr; Tên đăng nhập</li>
+            <li><code>email</code> (String) &rarr; Email người dùng</li>
+            <li><code>password</code> (String) &rarr; Mật khẩu</li>
+            <li><code>createdAt</code> (String) &rarr; Ngày tạo tài khoản</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Bảng 2.2 Artwork Model (Bức tranh)</div>
+          <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
+            <li><code>id</code> (int) &rarr; Artwork ID (Primary Key)</li>
+            <li><code>title</code> (String) &rarr; Tên tác phẩm</li>
+            <li><code>artist</code> (String) &rarr; Tên tác giả</li>
+            <li><code>year</code> (int) &rarr; Năm sáng tác</li>
+            <li><code>category</code> (String) &rarr; Thể loại tranh</li>
+            <li><code>description</code> (String) &rarr; Mô tả chi tiết</li>
+            <li><code>createdBy</code> (int) &rarr; Khóa ngoại trỏ đến User ID</li>
+          </ul>
+        </div>
+      </div>
+
+      <h4>Bước B: Soi file tài nguyên <code>dataSample.txt</code> (Đề thi cấp)</h4>
+      <p>Mở file <code>dataSample.txt</code> trong thư mục <code>material/</code>. File này cho bạn biết cấu trúc JSON thực tế mà giảng viên dùng để chấm điểm:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "email": "admin@gallery.com",
+      "password": "123456",
+      "createdAt": "2026-01-10"
+    }
+  ],
+  "artworks": [
+    {
+      "id": 1,
+      "title": "Starry Night",
+      "artist": "Vincent van Gogh",
+      "year": 1889,
+      "category": "Abstract",
+      "description": "A famous Abstract of a swirling night sky over a small town.",
+      "createdBy": 1
+    }
+  ]
+}</code></pre>
+      </div>
+
+      <div class="callout warning">
+        <strong>💡 ĐÚC KẾT SUY LUẬN TỐI QUAN TRỌNG:</strong>
+        <ol style="margin-top: 8px; margin-left: 18px; line-height: 1.8;">
+          <li><strong>Trường <code>id</code>:</strong> Khi tạo mới (Insert) vào SQLite thì <code>id</code> sẽ do cơ sở dữ liệu <strong>tự tăng (AUTOINCREMENT)</strong> nên lúc khởi tạo đối tượng mới để thêm, <code>id</code> có thể là <code>null</code>. Do đó kiểu dữ liệu của <code>id</code> nên là <code>int?</code> (nullable).</li>
+          <li><strong>Trường <code>createdBy</code>:</strong> Đây là khoá ngoại (Foreign Key) liên kết 1-nhiều (User 1 &rarr; N Artwork). Khi thêm tranh, giá trị này sẽ lấy từ ID của tài khoản đang đăng nhập!</li>
+          <li><strong>Tên các thuộc tính trong class Dart:</strong> Phải khớp 100% từng chữ hoa/thường (camelCase) với các key trong JSON và tên cột trong SQLite: <code>createdAt</code>, <code>createdBy</code>.</li>
+        </ol>
+      </div>
+
+      <!-- ===================== PHẦN 3 ===================== -->
+      <h3 id="sec-3">3. "Công Thức Vàng" Của Một Data Model Chuẩn Phòng Thi</h3>
+
+      <p>Mỗi một file Model trong <code>lib/models/</code> luôn tuân theo đúng <strong>5 thành phần bất hủ</strong> sau:</p>
+
+      <div class="grid-2" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin: 16px 0;">
+        <div class="card">
+          <strong>1. Các thuộc tính (Fields)</strong>
+          <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 6px;">Khai báo <code>final</code> cho tất cả thuộc tính để đảm bảo tính bất biến (Immutable), riêng <code>id</code> để <code>int?</code>.</p>
+        </div>
+        <div class="card">
+          <strong>2. Constructor chuẩn (Named Parameters)</strong>
+          <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 6px;">Dùng ngoặc nhọn <code>{this.id, required this.username, ...}</code> giúp khi gọi tạo đối tượng cực kỳ rõ ràng.</p>
+        </div>
+        <div class="card">
+          <strong>3. Hàm <code>toMap()</code> (hoặc <code>toJson()</code>)</strong>
+          <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 6px;">Biến đối tượng Model thành <code>Map&lt;String, dynamic&gt;</code> để đẩy vào SQLite (Insert/Update) hoặc gửi lên API (POST).</p>
+        </div>
+        <div class="card">
+          <strong>4. Hàm <code>fromMap()</code> (hoặc <code>fromJson()</code>)</strong>
+          <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 6px;">Là Factory Constructor nhận vào một dòng dữ liệu từ SQLite (Map) và trả về đối tượng Model để giao diện vẽ lên màn hình.</p>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4 ===================== -->
+      <h3 id="sec-4">4. Thực Hành Tạo Model 1: User (Tài Khoản Người Dùng)</h3>
+
+      <p>Tạo file: <code>lib/models/user_model.dart</code></p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// lib/models/user_model.dart
+
+class UserModel {
+  final int? id;             // Khóa chính (Primary Key), tự tăng nên có thể null khi tạo mới
+  final String username;     // Tên đăng nhập (duy nhất)
+  final String email;        // Email người dùng
+  final String password;     // Mật khẩu
+  final String createdAt;    // Ngày tạo tài khoản (dạng chuỗi YYYY-MM-DD)
+
+  // 1. Constructor khởi tạo với named parameters
+  UserModel({
+    this.id,
+    required this.username,
+    required this.email,
+    required this.password,
+    required this.createdAt,
+  });
+
+  // 2. Chuyển từ Model thành Map để lưu vào SQLite (hoặc gửi lên API)
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'password': password,
+      'createdAt': createdAt,
+    };
+  }
+
+  // 3. Khởi tạo Model từ dữ liệu Map đọc từ SQLite lên (hoặc nhận về từ API)
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] as int?,
+      username: map['username'] ?? '',
+      email: map['email'] ?? '',
+      password: map['password'] ?? '',
+      createdAt: map['createdAt'] ?? '',
+    );
+  }
+
+  // 4. (Tùy chọn) copyWith để tạo bản sao khi cần cập nhật 1 vài trường dữ liệu
+  UserModel copyWith({
+    int? id,
+    String? username,
+    String? email,
+    String? password,
+    String? createdAt,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 5 ===================== -->
+      <h3 id="sec-5">5. Thực Hành Tạo Model 2: Artwork (Tác Phẩm Tranh / Thực Thể CRUD)</h3>
+
+      <p>Tạo file: <code>lib/models/artwork_model.dart</code></p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>// lib/models/artwork_model.dart
+
+class ArtworkModel {
+  final int? id;             // Khóa chính tự tăng (id tự sinh trong CSDL)
+  final String title;        // Tên bức tranh
+  final String artist;       // Tác giả
+  final int year;            // Năm sáng tác
+  final String category;     // Thể loại (ví dụ: Abstract, Modern, Landscape...)
+  final String description;  // Mô tả bức tranh
+  final int createdBy;       // ID người tạo (Khóa ngoại liên kết với User)
+
+  // 1. Constructor
+  ArtworkModel({
+    this.id,
+    required this.title,
+    required this.artist,
+    required this.year,
+    required this.category,
+    required this.description,
+    required this.createdBy,
+  });
+
+  // 2. Chuyển Model thành Map để INSERT / UPDATE vào CSDL SQLite
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'artist': artist,
+      'year': year,
+      'category': category,
+      'description': description,
+      'createdBy': createdBy,
+    };
+  }
+
+  // 3. Chuyển từ Map đọc từ CSDL thành Model hiển thị lên giao diện
+  // Lưu ý: Dùng `int.tryParse()` để phòng hờ trường hợp dữ liệu year bị trả về dạng chuỗi
+  factory ArtworkModel.fromMap(Map<String, dynamic> map) {
+    return ArtworkModel(
+      id: map['id'] as int?,
+      title: map['title'] ?? '',
+      artist: map['artist'] ?? '',
+      year: map['year'] is int ? map['year'] : (int.tryParse(map['year'].toString()) ?? 0),
+      category: map['category'] ?? '',
+      description: map['description'] ?? '',
+      createdBy: map['createdBy'] is int ? map['createdBy'] : (int.tryParse(map['createdBy'].toString()) ?? 0),
+    );
+  }
+
+  // 4. copyWith hỗ trợ cập nhật dữ liệu một cách an toàn
+  ArtworkModel copyWith({
+    int? id,
+    String? title,
+    String? artist,
+    int? year,
+    String? category,
+    String? description,
+    int? createdBy,
+  }) {
+    return ArtworkModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      artist: artist ?? this.artist,
+      year: year ?? this.year,
+      category: category ?? this.category,
+      description: description ?? this.description,
+      createdBy: createdBy ?? this.createdBy,
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ===================== PHẦN 6 ===================== -->
+      <h3 id="sec-6">6. Bảng Tra Cứu Kiểu Dữ Liệu: Dart vs SQLite vs JSON</h3>
+
+      <p>Lỗi phổ biến nhất của sinh viên khi làm bài thi là <strong>ép sai kiểu dữ liệu</strong> dẫn đến app bị sập màn hình đỏ (Crash) ngay khi vừa load CSDL. Hãy đối chiếu bảng sau:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Khái niệm / Loại dữ liệu</th>
+              <th>Kiểu dữ liệu trong Dart</th>
+              <th>Kiểu cột trong SQLite</th>
+              <th>Dạng giá trị trong JSON</th>
+              <th>Cách parse an toàn trong <code>fromMap</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Số nguyên (ID, Năm, Số lượng)</td>
+              <td><code>int</code> hoặc <code>int?</code></td>
+              <td><code>INTEGER</code></td>
+              <td><code>1889</code> (số)</td>
+              <td><code>int.tryParse(map['year'].toString()) ?? 0</code></td>
+            </tr>
+            <tr>
+              <td>Số thực (Giá tiền, Rating)</td>
+              <td><code>double</code> hoặc <code>double?</code></td>
+              <td><code>REAL</code></td>
+              <td><code>99.99</code> (số thực)</td>
+              <td><code>double.tryParse(map['price'].toString()) ?? 0.0</code></td>
+            </tr>
+            <tr>
+              <td>Văn bản, Ngày tháng, URL ảnh</td>
+              <td><code>String</code></td>
+              <td><code>TEXT</code></td>
+              <td><code>"2026-01-10"</code> (chuỗi)</td>
+              <td><code>map['title']?.toString() ?? ''</code></td>
+            </tr>
+            <tr>
+              <td>Đúng / Sai (Boolean)</td>
+              <td><code>bool</code></td>
+              <td><code>INTEGER</code> (0 hoặc 1)</td>
+              <td><code>true / false</code> hoặc <code>1 / 0</code></td>
+              <td><code>map['isCompleted'] == 1 || map['isCompleted'] == true</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout success">
+        <strong>✅ KẾT QUẢ BƯỚC 2:</strong>
+        <p>Bạn đã hoàn thành 2 file Model nền tảng trong <code>lib/models/</code>: <code>user_model.dart</code> và <code>artwork_model.dart</code>. Bạn đã hiểu rõ bản chất tại sao phải có <code>toMap()</code> (để chuẩn bị ghi vào SQLite) và <code>fromMap()</code> (để đọc từ SQLite ra). Giờ đây, việc tạo DatabaseHelper ở bước tiếp theo sẽ cực kỳ trơn tru!</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+</html>
+
