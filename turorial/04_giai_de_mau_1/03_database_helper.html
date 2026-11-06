@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 8 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích lược đồ CSDL & Mối quan hệ bảng (User 1 - n Artwork)</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khởi tạo Singleton & Hàm mở kết nối <code>_initDB()</code> (Mobile + Web)</a></li>
@@ -135,7 +135,7 @@
       <h3 id="sec-2">2. Khởi Tạo Singleton & Hàm Mở Kết Nối <code>_initDB()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Khởi tạo Singleton & Getter mở Database</div>
+        <div class="card-title" style="color:var(--accent-blue);">Khởi tạo Singleton & Getter mở Database</div>
         <p><strong>Mục đích:</strong> Đảm bảo toàn bộ ứng dụng chỉ có duy nhất 1 kết nối SQLite, tránh xung đột khóa file (Database Locked). Hỗ trợ chạy mượt trên cả <strong>Android Emulator</strong> lẫn <strong>Web Browser</strong> (Chrome/Edge khi máy ảo lag).</p>
       </div>
 
@@ -187,7 +187,7 @@
       <h3 id="sec-3">3. Hàm Tạo Bảng & Nạp Dữ Liệu Mẫu Ban Đầu <code>_createDB()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Hàm tạo bảng & Chèn dữ liệu mẫu (Data Seeding)</div>
+        <div class="card-title" style="color:var(--accent-purple);">Hàm tạo bảng & Chèn dữ liệu mẫu (Data Seeding)</div>
         <p><strong>Mục đích:</strong> Tự động chạy khi ứng dụng được cài đặt lần đầu tiên. Tạo 2 bảng <code>users</code> và <code>artworks</code>, đồng thời nạp sẵn tài khoản <code>admin</code> và 3 bức tranh mẫu từ <code>dataSample.txt</code> của đề thi để tiện đăng nhập và test ngay.</p>
       </div>
 
@@ -268,7 +268,7 @@
       <h3 id="sec-4">4. Hàm Kiểm Tra Trùng Username <code>checkUsernameExists()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-orange);">
-        <div class="card-title" style="color:var(--accent-orange);">🟠 Hàm kiểm tra trùng tài khoản (Phục vụ Task 1: Register)</div>
+        <div class="card-title" style="color:var(--accent-orange);">Hàm kiểm tra trùng tài khoản (Phục vụ Task 1: Register)</div>
         <p><strong>Nhiệm vụ:</strong> Nhận vào một chuỗi <code>username</code>, tìm trong bảng <code>users</code> xem có ai đã sử dụng tên này chưa. Trả về <code>true</code> nếu đã bị trùng (không cho đăng ký), <code>false</code> nếu hợp lệ.</p>
       </div>
 
@@ -290,7 +290,7 @@
       <h3 id="sec-5">5. Hàm Đăng Ký Người Dùng Mới <code>registerUser()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 Hàm thêm User vào Database (Phục vụ Task 1: Register)</div>
+        <div class="card-title" style="color:var(--accent-green);">Hàm thêm User vào Database (Phục vụ Task 1: Register)</div>
         <p><strong>Nhiệm vụ:</strong> Nhận vào đối tượng <code>UserModel</code> từ Form đăng ký, gọi hàm <code>user.toMap()</code> và thực hiện câu lệnh <code>INSERT INTO users</code>. SQLite sẽ tự động cấp một số <code>id</code> tự tăng.</p>
       </div>
 
@@ -307,7 +307,7 @@
       <h3 id="sec-6">6. Hàm Xác Thực Đăng Nhập <code>loginUser()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-        <div class="card-title" style="color:var(--accent-cyan);">🌐 Hàm xác thực tài khoản & mật khẩu (Phục vụ Task 2: Login)</div>
+        <div class="card-title" style="color:var(--accent-cyan);">Hàm xác thực tài khoản & mật khẩu (Phục vụ Task 2: Login)</div>
         <p><strong>Nhiệm vụ:</strong> Kiểm tra cặp <code>username</code> và <code>password</code> trong bảng <code>users</code>. Nếu đúng, trả về đầy đủ đối tượng <code>UserModel</code> (có chứa ID của user). Nếu sai, trả về <code>null</code>.</p>
       </div>
 
@@ -334,7 +334,7 @@
       <h3 id="sec-7">7. Các Hàm CRUD Artwork (Danh Sách, Thêm Mới, Xóa)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-red);">
-        <div class="card-title" style="color:var(--accent-red);">🔴 Bộ 3 hàm xử lý Artwork (Phục vụ Task 4, 5, 7)</div>
+        <div class="card-title" style="color:var(--accent-red);">Bộ 3 hàm xử lý Artwork (Phục vụ Task 4, 5, 7)</div>
         <p><strong>Nhiệm vụ:</strong> Lấy toàn bộ danh sách tranh để hiển thị lên Home Screen, chèn tranh mới khi submit Add Artwork Screen, và xoá tranh theo ID khi nhấn nút Delete.</p>
       </div>
 
@@ -543,7 +543,7 @@ class DatabaseHelper {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT THÚC BƯỚC 3:</strong>
+        <strong>KẾT THÚC BƯỚC 3:</strong>
         <p>Tầng Database đã được phân tích từng hàm cực kỳ rõ ràng, trực quan. Bây giờ mời bạn chuyển sang <a href="04_register_screen.html" style="color:var(--accent-blue); font-weight:bold;">Bước 4: Màn hình Đăng ký (Register Screen)</a> để gọi các hàm này vào giao diện nhé!</p>
       </div>
 

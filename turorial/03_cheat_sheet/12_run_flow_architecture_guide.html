@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 12: Hướng Dẫn Chạy Cố Định Port & Sơ Đồ Luồng Hoạt Động - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 12: Cố Định Port & Luồng Component</span>
+        <span class="pill pill-purple">Kiến Trúc & Debug Sống Còn</span>
+      </div>
+      <div>
+        <a href="11_common_widgets_reference.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 11: Tra Cứu
+          Widgets</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Trang chủ &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 12: Hướng Dẫn Chạy Cố Định Cổng Web Port & Sơ Đồ Luồng Hoạt Động Các Component</h2>
+        <p>Tài liệu này giải thích <strong>cơ chế lưu trữ SQLite đặc thù trên trình duyệt Web (IndexedDB theo
+            Origin)</strong>, cung cấp lệnh Terminal chạy cố định một cổng để không bị mất dữ liệu giữa các lần test, và
+          trực quan hóa toàn bộ luồng hoạt động giữa các Component (main, Session, DatabaseHelper, Riverpod Notifier,
+          Screens và Widgets).</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-web-port" style="color:var(--accent-blue);">1. Vấn đề SQLite trên Web Browser & Lệnh chạy cố
+              định Port (Sống còn)</a></li>
+          <li><a href="#sec-vscode-launch" style="color:var(--accent-blue);">2. Cấu hình VS Code launch.json để bấm F5
+              tự chạy đúng port</a></li>
+          <li><a href="#sec-system-architecture" style="color:var(--accent-blue);">3. Sơ đồ kiến trúc tổng thể & sự kết
+              nối giữa các Component</a></li>
+          <li><a href="#sec-detail-flows" style="color:var(--accent-blue);">4. Phân tích chi tiết 6 luồng hoạt động
+              chính trong bài thi</a></li>
+          <li><a href="#sec-component-matrix" style="color:var(--accent-blue);">5. Bảng ma trận trách nhiệm từng
+              Component (Component Responsibility)</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. VẤN ĐỀ SQLITE TRÊN BROWSER & LỆNH CỐ ĐỊNH PORT -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-web-port">1. Cơ Chế SQLite Trên Web Browser & Lệnh Chạy Cố Định Port (Cực Kỳ Quan Trọng)</h3>
+
+      <div class="callout danger" style="margin-bottom: 20px;">
+        <strong>HIỆN TƯỢNG "MẤT DỮ LIỆU BÍ ẨN" TRÊN TRÌNH DUYỆT CHROME:</strong>
+        <p style="margin-top: 6px;">
+          Nhiều sinh viên vào phòng thi chạy lệnh <code>flutter run -d chrome</code>, đăng ký tài khoản thành công, thêm
+          được 3 tác phẩm. Nhưng khi tắt app đi rồi chạy lại, <strong>toàn bộ dữ liệu vừa tạo biến mất hoàn
+            toàn</strong>! Nguyên nhân không phải do code sai, mà là do <strong>cơ chế phân tách cổng của trình
+            duyệt</strong>.
+        </p>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h4 style="color:var(--accent-blue);">Bản chất cơ chế lưu trữ SQLite trên Browser (sqflite_common_ffi_web):</h4>
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Trên điện thoại di động (Android / iOS):</strong> SQLite lưu trữ tập trung vào một file vật lý cố
+            định trên ổ cứng (ví dụ: <code>/data/data/com.example/databases/exam_app.db</code>). Bất kể mở app lúc nào,
+            hệ điều hành đều trỏ về đúng 1 file này.</li>
+          <li><strong>Trên trình duyệt Web (Chrome / Edge):</strong> Trình duyệt không cho phép ứng dụng Web can thiệp
+            trực tiếp vào file hệ thống máy tính. Thư viện <code>sqflite_common_ffi_web</code> sử dụng WebAssembly
+            (Wasm) để biên dịch nhân SQLite C sang mã nhị phân chạy trên RAM, sau đó lưu các trang dữ liệu vào cơ sở dữ
+            liệu <strong>IndexedDB</strong> của trình duyệt.</li>
+          <li><strong>Quy tắc bảo mật Same-Origin Policy của trình duyệt:</strong> IndexedDB phân chia kho lưu trữ tuyệt
+            đối theo từng <strong>Origin</strong> (gồm: <code>Protocol + Domain + Port</code>).
+            <br />Ví dụ: <code>http://localhost:51234</code> và <code>http://localhost:54321</code> là <strong>hai
+              website hoàn toàn tách biệt</strong>, dữ liệu bên cổng này không bao giờ nhìn thấy dữ liệu bên cổng kia!
+          </li>
+          <li><strong>Nguyên nhân gây mất dữ liệu:</strong> Lệnh <code>flutter run -d chrome</code> mặc định sẽ tự động
+            chọn một cổng ngẫu nhiên chưa sử dụng (lần 1 port 50201, lần 2 port 53892, lần 3 port 61240...). Mỗi lần
+            chạy là một kho SQLite rỗng mới toanh!</li>
+        </ul>
+      </div>
+
+      <h4>LỆNH CHẠY BẮT BUỘC CỐ ĐỊNH 1 CỔNG (COPY & DÙNG TRONG SUỐT BUỔI THI):</h4>
+      <p>Mở Terminal tại thư mục dự án và chạy duy nhất lệnh sau để cố định cổng <code>8080</code> (hoặc
+        <code>3000</code>):</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Chạy cố định trên Google Chrome tại cổng 8080 (Dữ liệu SQLite luôn được giữ nguyên vẹn)
+flutter run -d chrome --web-port=8080</code></pre>
+      </div>
+
+      <p style="margin-top: 10px;">Nếu máy thi yêu cầu vô hiệu hóa chính sách bảo mật web (CORS / web security) để đọc
+        file hình ảnh hoặc nạp dữ liệu ngoài, dùng thêm cờ sau:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>flutter run -d chrome --web-port=8080 --web-browser-flag "--disable-web-security"</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. CẤU HÌNH VS CODE LAUNCH.JSON -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-vscode-launch">2. Cấu Hình VS Code launch.json Để Mỗi Lần Bấm F5 Tự Chạy Đúng Cổng 8080</h3>
+      <p>Nếu bạn muốn bấm phím <code>F5</code> hoặc nút Run trên VS Code mà không cần gõ lệnh Terminal mỗi lần, hãy tạo
+        file <code>.vscode/launch.json</code> ở thư mục gốc của project với cấu hình chuẩn sau:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-json">{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Exam Chrome (Port 8080)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "-d",
+        "chrome",
+        "--web-port=8080",
+        "--web-browser-flag",
+        "--disable-web-security"
+      ]
+    }
+  ]
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. SƠ ĐỒ LUỒNG HOẠT ĐỘNG TỔNG THỂ -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-system-architecture">3. Sơ Đồ Kiến Trúc Tổng Thể &amp; Mối Quan Hệ Giữa Các Component</h3>
+      <p>Sơ đồ dưới đây trực quan hóa cách 14 file mã nguồn trong dự án kết nối và trao đổi dữ liệu xuyên suốt toàn bộ
+        ứng dụng:</p>
+
+      <div class="card"
+        style="padding: 20px; background: #0d1117; border: 1px solid var(--border-color); border-radius: 8px; margin: 20px 0;">
+        <pre
+          style="color: #58a6ff; font-family: monospace; font-size: 13px; line-height: 1.6; margin: 0; overflow-x: auto;">
++-----------------------------------------------------------------------------------------+
+|                                    MAIN ENTRYPOINT                                      |
+|                                       main.dart                                         |
+|                 WidgetsFlutterBinding.ensureInitialized()                               |
+|                 final bool isLoggedIn = await SessionService.isLoggedIn()               |
+|                 runApp(ProviderScope(child: MyApp(startAtHome: isLoggedIn)))            |
++--------------------------------------------+--------------------------------------------+
+                                             |
+                         +-------------------+-------------------+
+                         | Điều hướng ban đầu                    |
+                         v                                       v
+        +---------------------------------+     +---------------------------------+
+        | [CHƯA ĐĂNG NHẬP]                |     | [ĐÃ ĐĂNG NHẬP]                  |
+        | RegisterScreen &lt;--&gt; LoginScreen |     |           HomeScreen            |
+        +----------------+----------------+     +----------------+----------------+
+                         |                                       |
+                         | 1. Kiểm tra Form                      | 1. ref.watch(itemProvider)
+                         | 2. Ghi/Đọc User                       | 2. ref.read(itemProvider)
+                         v                                       v
+        +---------------------------------+     +---------------------------------+
+        |           AppValidator          |     |    ItemNotifier (Riverpod)      |
+        |     (static validation rules)   |     |    (item_provider.dart)         |
+        +----------------+----------------+     +----------------+----------------+
+                         |                                       |
+                         | Query / Insert User                   | Query / Insert / Update / Delete
+                         +-------------------+-------------------+
+                                             |
+                                             v
+                        +-----------------------------------------+
+                        |             DatabaseHelper              |
+                        | (Singleton SQLite: Mobile + Web Chrome) |
+                        +--------------------+--------------------+
+                                             |
+                       +---------------------+---------------------+
+                       | kIsWeb == true                            | kIsWeb == false
+                       v                                           v
+        +-----------------------------+             +-----------------------------+
+        |   sqflite_common_ffi_web    |             |      sqflite (Native)       |
+        | IndexedDB (Origin: port 8080) |             | exam_app.db (Storage Path)  |
+        +-----------------------------+             +-----------------------------+
+        </pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. PHÂN TÍCH 6 LUỒNG HOẠT ĐỘNG CHÍNH -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-detail-flows">4. Phân Tích Chi Tiết 6 Luồng Hoạt Động (Data Flows) Trong Bài Thi</h3>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h4 style="color:var(--accent-green);">Luồng 1: Khởi động ứng dụng (Session Gatekeeper Flow)</h4>
+        <ol style="line-height: 1.8; margin-left: 20px;">
+          <li><code>main()</code> chạy đầu tiên, gọi <code>WidgetsFlutterBinding.ensureInitialized()</code> để mở kết
+            nối nhị phân với engine.</li>
+          <li>Gọi <code>await SessionService.isLoggedIn()</code> để kiểm tra key <code>isLoggedIn</code> trong
+            <code>SharedPreferences</code>.</li>
+          <li>Bọc ứng dụng trong <code>ProviderScope</code> để Riverpod sẵn sàng hoạt động.</li>
+          <li><code>MyApp</code> kiểm tra cờ: Nếu <code>isLoggedIn == true</code> &rarr; mở thẳng
+            <code>HomeScreen</code>; nếu <code>false</code> &rarr; mở <code>RegisterScreen</code> hoặc
+            <code>LoginScreen</code>.</li>
+        </ol>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h4 style="color:var(--accent-blue);">Luồng 2: Đăng ký &amp; Đăng nhập (Authentication Flow)</h4>
+        <ol style="line-height: 1.8; margin-left: 20px;">
+          <li>Người dùng điền Form &rarr; <code>AppValidator</code> kiểm tra tính hợp lệ từng trường (độ dài, ký tự,
+            định dạng email, khớp mật khẩu).</li>
+          <li><strong>Khi Đăng ký:</strong> Gọi <code>DatabaseHelper.instance.isUsernameExists()</code>. Nếu chưa trùng
+            &rarr; gọi <code>registerUser()</code> chèn vào bảng <code>users</code> &rarr;
+            <code>Navigator.pushReplacement</code> sang <code>LoginScreen</code>.</li>
+          <li><strong>Khi Đăng nhập:</strong> Gọi <code>DatabaseHelper.instance.loginUser(username, password)</code>.
+            Nếu hợp lệ &rarr; gọi <code>SessionService.saveSession(username)</code> &rarr;
+            <code>Navigator.pushReplacement</code> sang <code>HomeScreen</code>.</li>
+        </ol>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h4 style="color:var(--accent-purple);">Luồng 3: Đọc dữ liệu &amp; Hiển thị danh sách (Read &amp; Render Flow)
+        </h4>
+        <ol style="line-height: 1.8; margin-left: 20px;">
+          <li><code>HomeScreen</code> (kế thừa <code>ConsumerWidget</code>) gọi <code>ref.watch(itemProvider)</code> để
+            đăng ký theo dõi trạng thái.</li>
+          <li><code>ItemNotifier.build()</code> truy vấn <code>DatabaseHelper.instance.getAllItems()</code> lấy danh
+            sách bản ghi và chuyển đổi thành <code>List&lt;ItemModel&gt;</code>.</li>
+          <li>Trạng thái dữ liệu được xử lý mượt mà qua <code>asyncItems.when(...)</code>:
+            <br />- <code>loading:</code> Hiện vòng xoay <code>CircularProgressIndicator</code>.
+            <br />- <code>error:</code> Hiện dòng báo lỗi đỏ.
+            <br />- <code>data:</code> Nếu rỗng &rarr; Hiện Empty State; nếu có dữ liệu &rarr; Render
+            <code>ListView.builder</code> với từng dòng là một <code>ItemCardWidget</code>.
+          </li>
+        </ol>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h4 style="color:#d29922;">Luồng 4: Thêm mới &amp; Cập nhật (Create / Update Flow)</h4>
+        <ol style="line-height: 1.8; margin-left: 20px;">
+          <li>Người dùng bấm nút <code>FloatingActionButton (+)</code> &rarr; mở <code>AddItemScreen</code>; hoặc bấm
+            icon Sửa (bút xanh) &rarr; mở <code>EditItemScreen(item: item)</code>.</li>
+          <li><code>EditItemScreen</code> tự động nạp sẵn dữ liệu cũ vào các ô nhập trong hàm <code>initState()</code>.
+          </li>
+          <li>Khi bấm LƯU &rarr; gọi <code>ref.read(itemProvider.notifier).addItem()</code> hoặc
+            <code>updateItem()</code>.</li>
+          <li>Notifier cập nhật SQLite qua <code>DatabaseHelper</code>, sau đó gọi
+            <code>ref.invalidateSelf(); await future;</code>.</li>
+          <li>Lệnh <code>Navigator.pop(context)</code> đóng màn hình Form quay lại <code>HomeScreen</code>. Do
+            <code>HomeScreen</code> đang <code>ref.watch</code>, giao diện lập tức tự động render lại danh sách mới mà
+            không cần F5 hay load lại trang.</li>
+        </ol>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <h4 style="color:var(--accent-red);">Luồng 5: Xóa phần tử &amp; Xác nhận SnackBar (Delete Flow)</h4>
+        <ol style="line-height: 1.8; margin-left: 20px;">
+          <li>Người dùng nhấn biểu tượng Xóa (thùng rác đỏ) trên <code>ItemCardWidget</code>.</li>
+          <li><code>HomeScreen</code> gọi <code>final bool confirm = await DeleteDialog.show(context, item.title)</code>
+            để mở popup xác nhận.</li>
+          <li>Nếu người dùng bấm HỦY &rarr; đóng dialog, không có gì xảy ra.</li>
+          <li>Nếu người dùng bấm XÓA &rarr; gọi <code>ref.read(itemProvider.notifier).deleteItem(item.id)</code>.</li>
+          <li>SQLite xóa dòng theo ID, Riverpod làm mới State, và màn hình hiển thị ngay <code>SnackBar</code> thông
+            báo: <em>"Đã xóa '[Tên item]' thành công!"</em> có nút <strong>ĐÓNG</strong> màu vàng.</li>
+        </ol>
+      </div>
+
+      <div class="card" style="margin-bottom: 30px;">
+        <h4 style="color:var(--text-secondary);">Luồng 6: Đăng xuất người dùng (Logout Flow)</h4>
+        <ol style="line-height: 1.8; margin-left: 20px;">
+          <li>Người dùng bấm icon Logout trên góc phải AppBar của <code>HomeScreen</code>.</li>
+          <li>Hàm <code>_logout()</code> gọi <code>await SessionService.clearSession()</code> xóa sạch cờ đăng nhập và
+            username trong <code>SharedPreferences</code>.</li>
+          <li>Gọi
+            <code>Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) =&gt; const LoginScreen()), (route) =&gt; false)</code>
+            xóa sạch toàn bộ lịch sử điều hướng, đưa người dùng về <code>LoginScreen</code> mà không thể bấm Back quay
+            lại.</li>
+        </ol>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 5. BẢNG MA TRẬN TRÁCH NHIỆM COMPONENT -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-component-matrix">5. Bảng Ma Trận Trách Nhiệm Từng Component (Quick Reference)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">File Component</th>
+              <th style="width: 20%;">Loại Component</th>
+              <th style="width: 35%;">Nhiệm vụ chính</th>
+              <th style="width: 20%;">Phụ thuộc vào</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>lib/main.dart</code></td>
+              <td>Entrypoint</td>
+              <td>Khởi tạo Engine, bọc ProviderScope, kiểm tra Session, định tuyến ban đầu.</td>
+              <td><code>SessionService</code>, <code>HomeScreen</code>, <code>RegisterScreen</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/models/user.dart</code></td>
+              <td>Data Model</td>
+              <td>Định nghĩa cấu trúc User, chuyển đổi <code>toMap</code> và <code>fromMap</code>.</td>
+              <td>Không phụ thuộc</td>
+            </tr>
+            <tr>
+              <td><code>lib/models/item_example.dart</code></td>
+              <td>Data Model</td>
+              <td>Định nghĩa cấu trúc Item, xử lý fallback description và ép kiểu <code>price</code>.</td>
+              <td>Không phụ thuộc</td>
+            </tr>
+            <tr>
+              <td><code>lib/utils/database_helper.dart</code></td>
+              <td>Database Utility</td>
+              <td>Mở kết nối SQLite đa nền tảng, tạo bảng, nạp JSON, cung cấp CRUD.</td>
+              <td><code>sqflite</code>, <code>sqflite_common_ffi_web</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/utils/app_validator.dart</code></td>
+              <td>Validation Utility</td>
+              <td>Bộ hàm static kiểm tra form (required, username, password, email, price).</td>
+              <td>Không phụ thuộc</td>
+            </tr>
+            <tr>
+              <td><code>lib/services/session_service.dart</code></td>
+              <td>Session Utility</td>
+              <td>Lưu, đọc và xóa cờ <code>isLoggedIn</code> và <code>username</code>.</td>
+              <td><code>shared_preferences</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/providers/item_provider.dart</code></td>
+              <td>Riverpod State</td>
+              <td>Quản lý State danh sách items, gọi DatabaseHelper, kích hoạt invalidate UI.</td>
+              <td><code>DatabaseHelper</code>, <code>ItemModel</code>, <code>riverpod</code></td>
+            </tr>
+            <tr>
+              <td>
+                <code>lib/widgets/item_list_widget.dart</code><br /><code>lib/widgets/item_list_card_widget.dart</code>
+              </td>
+              <td>UI Component</td>
+              <td>Hiển thị danh sách cuộn dọc ListView.builder và thẻ Card dòng item (avatar số thứ tự, nút Sửa & Xóa).
+              </td>
+              <td><code>ItemModel</code></td>
+            </tr>
+            <tr>
+              <td>
+                <code>lib/widgets/item_grid_widget.dart</code><br /><code>lib/widgets/item_grid_card_widget.dart</code>
+              </td>
+              <td>UI Component</td>
+              <td>Hiển thị danh sách dạng lưới GridView.builder (Responsive: dọc 2 cột, ngang 3 cột) và thẻ Card dạng
+                lưới chống overflow.</td>
+              <td><code>ItemModel</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/widgets/delete_dialog.dart</code></td>
+              <td>UI Component</td>
+              <td>Modal Dialog xác nhận xóa trả về <code>Future&lt;bool&gt;</code>.</td>
+              <td>Material Widgets</td>
+            </tr>
+            <tr>
+              <td><code>lib/screens/register_screen.dart</code></td>
+              <td>UI Screen</td>
+              <td>Form đăng ký 4 trường, kiểm tra trùng SQLite, chuyển sang Login.</td>
+              <td><code>DatabaseHelper</code>, <code>AppValidator</code>, <code>LoginScreen</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/screens/login_screen.dart</code></td>
+              <td>UI Screen</td>
+              <td>Form đăng nhập, xác thực SQLite, lưu Session, chuyển sang Home.</td>
+              <td><code>DatabaseHelper</code>, <code>SessionService</code>, <code>HomeScreen</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/screens/home_screen.dart</code></td>
+              <td>UI Screen</td>
+              <td>Lắng nghe Riverpod, hiển thị ListView/Empty, gọi DeleteDialog, Logout.</td>
+              <td><code>itemProvider</code>, <code>ItemCardWidget</code>, <code>DeleteDialog</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/screens/add_item_screen.dart</code></td>
+              <td>UI Screen</td>
+              <td>Form thêm mới, Dropdown Category, thêm vào Notifier, pop về Home.</td>
+              <td><code>itemProvider</code>, <code>AppValidator</code>, <code>ItemModel</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/screens/edit_item_screen.dart</code></td>
+              <td>UI Screen</td>
+              <td>Form chỉnh sửa điền sẵn dữ liệu, giữ nguyên ID, update Notifier.</td>
+              <td><code>itemProvider</code>, <code>AppValidator</code>, <code>ItemModel</code></td>
+            </tr>
+            <tr>
+              <td><code>lib/screens/detail_screen.dart</code></td>
+              <td>UI Screen</td>
+              <td>Xem thông tin chi tiết item dạng Card lớn, nút mở EditItemScreen.</td>
+              <td><code>ItemModel</code>, <code>EditItemScreen</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="11_common_widgets_reference.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 11: Tra Cứu
+          Widgets</a>
+        <a href="../index.html" class="copy-btn" style="text-decoration:none;">Về Trang Chủ Cheatsheet &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

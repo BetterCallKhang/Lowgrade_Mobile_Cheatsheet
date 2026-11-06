@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 6: Hộp Thoại Xác Nhận Xóa & Xử Lý Xóa Item (DeleteDialog) - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 6: DeleteDialog & Xử Lý Xóa</span>
+        <span class="pill pill-purple">1-Click Copy & Paste</span>
+      </div>
+      <div>
+        <a href="05_home_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 5: HomeScreen</a>
+        <a href="07_add_item_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 7:
+          AddItemScreen &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 6: Mẫu Hộp Thoại Xác Nhận Xóa (DeleteDialog) &amp; Xử Lý Xóa Item</h2>
+        <p>Để chống việc người dùng vô tình bấm nhầm nút thùng rác làm mất dữ liệu vĩnh viễn trong CSDL SQLite, việc
+          hiển thị <strong>hộp thoại xác nhận xóa (Confirmation Dialog)</strong> và <strong>SnackBar thông báo thành
+            công</strong> là tiêu chí chấm điểm bắt buộc trong kỳ thi PE. Module này được tách rời hoàn toàn thành file
+          riêng <code>lib/widgets/delete_dialog.dart</code> để tái sử dụng ở bất kỳ màn hình nào.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-delete-dialog-code" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class DeleteDialog
+              (lib/widgets/delete_dialog.dart)</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">2. Hình ảnh minh họa giao diện UI iPhone SE trên
+              trình duyệt (Dialog & SnackBar)</a></li>
+          <li><a href="#sec-handle-delete" style="color:var(--accent-blue);">3. Code hàm xử lý xóa _handleDelete() kết
+              nối Riverpod & SnackBar</a></li>
+          <li><a href="#sec-delete-explain" style="color:var(--accent-blue);">4. Giải thích chi tiết code: Dùng để làm
+              gì, dùng thế nào & vì sao?</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. DELETE DIALOG CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-delete-dialog-code">1. Toàn Bộ Mã Nguồn Class DeleteDialog (lib/widgets/delete_dialog.dart)</h3>
+      <p>Class tiện ích cung cấp hàm <code>static show()</code> hiển thị Modal AlertDialog, trả về <code>true</code> nếu
+        người dùng bấm XÓA và <code>false</code> nếu bấm HỦY:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+
+class DeleteDialog {
+  // Trả về true nếu người dùng bấm XÓA, false nếu bấm HỦY
+  static Future&lt;bool&gt; show(BuildContext context, String itemTitle) async {
+    final bool? result = await showDialog&lt;bool&gt;(
+      context: context,
+      builder: (ctx) =&gt; AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa "$itemTitle"?'),
+        actions: [
+          TextButton(
+            onPressed: () =&gt; Navigator.pop(ctx, false),
+            child: const Text('HỦY'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () =&gt; Navigator.pop(ctx, true),
+            child: const Text('XÓA', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. HÌNH ẢNH UI PREVIEW -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-preview">2. Hình Ảnh Minh Họa Giao Diện UI iPhone SE Trên Trình Duyệt</h3>
+      <p>Đối chiếu chuẩn xác giao diện hộp thoại xác nhận và thanh thông báo SnackBar nổi ở chân màn hình:</p>
+
+      <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin: 28px 0;">
+        <!-- Hình 1: Dialog Xóa -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-red, #f85149); font-size: 14px;">1. Popup AlertDialog xác
+            nhận xóa</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/listview_delete_dialog_ui.svg" alt="Delete Dialog UI"
+              style="display: block; width: 280px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 280px;">
+            Popup Modal làm tối nền xung quanh, hiển thị tên tác phẩm cần xóa, 2 nút HỦY và XÓA (màu đỏ).
+          </p>
+        </div>
+
+        <!-- Hình 2: SnackBar Đã xóa -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: #d29922; font-size: 14px;">2. SnackBar báo xóa thành công</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/listview_deleted_snackbar_ui.svg" alt="Deleted SnackBar UI"
+              style="display: block; width: 280px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 280px;">
+            Thanh SnackBar nổi dưới đáy màn hình trong 2 giây, có nút hành động "ĐÓNG" màu vàng.
+          </p>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. CODE HÀM XỬ LÝ XÓA -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-handle-delete">3. Code Hàm Xử Lý Xóa _handleDelete() Kết Nối Riverpod &amp; SnackBar</h3>
+      <p>Đặt hàm này trong class <code>HomeScreen</code> (hoặc <code>DetailScreen</code>) để kích hoạt Dialog và xử lý
+        xóa dữ liệu:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">// Hàm xử lý Xóa phần tử & Hiển thị SnackBar thông báo thành công
+Future&lt;void&gt; _handleDelete(BuildContext context, WidgetRef ref, ItemModel item) async {
+  // 1. Mở dialog xác nhận xóa đã tách riêng ở file DeleteDialog
+  final bool confirm = await DeleteDialog.show(context, item.title);
+
+  if (confirm && item.id != null) {
+    // 2. Gọi Riverpod xóa item khỏi CSDL SQLite
+    await ref.read(itemProvider.notifier).deleteItem(item.id!);
+
+    if (!context.mounted) return;
+    // 3. HIỆN SNACKBAR THÔNG BÁO XÓA THÀNH CÔNG
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Đã xóa "${item.title}" thành công!'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'ĐÓNG',
+          textColor: Colors.amber,
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. GIẢI THÍCH CHI TIẾT CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-delete-explain">4. Giải Thích Chi Tiết Code: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">1. Vì sao nên tách DeleteDialog thành một file độc lập trong
+          <code>lib/widgets/</code>?</h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> Biến logic hiển thị Dialog thành một hàm dùng chung duy nhất:
+            <code>await DeleteDialog.show(context, item.title)</code>.</li>
+          <li><strong>Vì sao:</strong>
+            <br />- Tránh viết lặp đi lặp lại khối code <code>showDialog(...)</code> cồng kềnh trong nhiều màn hình.
+            <br />- Cả <code>HomeScreen</code> (xóa từ danh sách) và <code>DetailScreen</code> (xóa khi đang xem chi
+            tiết) đều có thể gọi chung 1 dialog này.
+            <br />- Giúp file giao diện <code>home_screen.dart</code> ngắn hơn, sạch hơn và giám thị chấm điểm cấu trúc
+            code OOP rất cao.
+          </li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">2. Cơ chế trả về kiểu boolean: <code>Future&lt;bool&gt;</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Khi bấm nút HỦY:</strong> Gọi <code>Navigator.pop(ctx, false)</code> &rarr; Hàm
+            <code>show()</code> trả về <code>false</code>.</li>
+          <li><strong>Khi bấm nút XÓA:</strong> Gọi <code>Navigator.pop(ctx, true)</code> &rarr; Hàm <code>show()</code>
+            trả về <code>true</code>.</li>
+          <li><strong>Khi người dùng bấm ra ngoài vùng popup (Barrier dismiss):</strong> <code>showDialog</code> trả về
+            <code>null</code>, toán tử <code>result ?? false</code> đảm bảo luôn trả về <code>false</code> an toàn,
+            không gây crash app.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 30px;">
+        <h4 style="color:var(--accent-blue);">3. Thiết kế SnackBar chuẩn UX</h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong><code>duration: const Duration(seconds: 2)</code>:</strong> Thời gian tự động ẩn là 2 giây (vừa đủ
+            đọc, không che khuất màn hình quá lâu).</li>
+          <li><strong><code>action: SnackBarAction(label: 'ĐÓNG', textColor: Colors.amber)</code>:</strong> Cho phép
+            người dùng bấm nút ĐÓNG để tắt thanh thông báo ngay lập tức.</li>
+          <li><strong>Kiểm tra <code>if (!context.mounted) return;</code>:</strong> Ngăn chặn việc gọi
+            <code>ScaffoldMessenger</code> khi màn hình đã bị hủy sau tác vụ async <code>await</code>.</li>
+        </ul>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="05_home_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 5: HomeScreen</a>
+        <a href="07_add_item_screen.html" class="copy-btn" style="text-decoration:none;">Mục 7: AddItemScreen &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

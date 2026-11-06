@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 10: App Drawer, Theme Custom & Chuyển Đổi Giao Diện Sáng / Tối - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 10: Drawer &amp; Theme Switch</span>
+        <span class="pill pill-purple">1-Click Copy &amp; Paste</span>
+      </div>
+      <div>
+        <a href="09_detail_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 9: Detail Screen</a>
+        <a href="11_common_widgets_reference.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục
+          11: Tra Cứu Widgets &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 10: Mẫu Thanh Menu Ngăn Kéo (AppDrawer), Theme Custom &amp; Chuyển Đổi Giao Diện Sáng / Tối</h2>
+        <p>
+          Trong các đề thi PE nâng cao, đề bài thường yêu cầu bổ sung <strong>thanh menu bên hông (Drawer)</strong> chứa
+          thông tin người dùng đang đăng nhập, kèm tính năng <strong>chuyển đổi qua lại giữa Giao diện Sáng (Light
+            Theme) và Giao diện Tối (Dark Theme)</strong>. Hơn nữa, giao diện được cấu hình theo bảng màu chuyên biệt:
+        </p>
+        <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
+          <li><strong>Theme Sáng:</strong> Tiêu đề AppBar &amp; Nút bấm màu <strong>CAM (DeepOrange)</strong>, nền màn
+            hình màu <strong>KEM (<code>#FFF8E7</code>)</strong>.</li>
+          <li><strong>Theme Tối:</strong> Tiêu đề AppBar &amp; Nút bấm màu <strong>XANH BIỂN (Blue)</strong>, nền màn
+            hình màu <strong>ĐEN (Black / <code>#121212</code>)</strong>.</li>
+          <li><strong>Lưu trữ bền vững:</strong> Ghi nhớ trạng thái sáng/tối vào <code>SharedPreferences</code> để khi
+            tắt app mở lại không bị mất.</li>
+          <li><strong>Riverpod State:</strong> Đổi theme tức thì toàn bộ ứng dụng mà không cần khởi động lại.</li>
+        </ul>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-drawer-code" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn Widget AppDrawer
+              (lib/widgets/app_drawer.dart)</a></li>
+          <li><a href="#sec-theme-code" style="color:var(--accent-blue);">2. Toàn bộ cấu hình AppTheme
+              (lib/utils/app_theme.dart)</a></li>
+          <li><a href="#sec-service-code" style="color:var(--accent-blue);">3. Quản lý lưu trữ ThemeService
+              SharedPreferences (lib/services/theme_service.dart)</a></li>
+          <li><a href="#sec-provider-code" style="color:var(--accent-blue);">4. Quản lý State ThemeNotifier Riverpod
+              Code Gen (lib/providers/theme_provider.dart)</a></li>
+          <li><a href="#sec-integrate-guide" style="color:var(--accent-blue);">5. Hướng dẫn kết nối vào main.dart và
+              HomeScreen</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">6. Hình ảnh minh họa trực quan giao diện Sáng /
+              Tối của AppDrawer</a></li>
+          <li><a href="#sec-explain" style="color:var(--accent-blue);">7. Giải thích chi tiết kiến trúc 4 tầng: Dùng để
+              làm gì, dùng thế nào &amp; vì sao?</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. APP DRAWER CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-drawer-code">1. Toàn Bộ Mã Nguồn Widget AppDrawer (lib/widgets/app_drawer.dart)</h3>
+      <p>
+        Thanh menu ngăn kéo chuẩn Material 3: Header hiển thị Avatar cùng tên tài khoản đăng nhập từ
+        <code>SessionService</code>, hàng <code>SwitchListTile</code> gạt đổi theme sáng/tối, menu Trang chủ và nút Đăng
+        xuất an toàn:
+      </p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/theme_provider.dart';
+import '../services/session_service.dart';
+import '../screens/login_screen.dart';
+
+class AppDrawer extends ConsumerWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Drawer(
+      child: Column(
+        children: [
+          // 1. Header của Drawer hiển thị Avatar & Tên tài khoản từ Session
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: colorScheme.primary,
+                    child: Icon(
+                      Icons.person,
+                      size: 36,
+                      color: colorScheme.onPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FutureBuilder&lt;String&gt;(
+                    future: SessionService.getUsername(),
+                    builder: (context, snapshot) {
+                      final username = snapshot.data ?? 'Người dùng';
+                      return Text(
+                        'Xin chào, $username!',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 2. Nút gạt (Switch) chuyển đổi Theme Sáng / Tối tức thì
+          SwitchListTile(
+            secondary: Icon(
+              isDark ? Icons.dark_mode : Icons.light_mode,
+              color: isDark ? Colors.blue : Colors.deepOrange,
+            ),
+            title: const Text(
+              'Chế độ tối',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              isDark ? 'Giao diện Đen - Xanh biển' : 'Giao diện Kem - Cam',
+              style: const TextStyle(fontSize: 12),
+            ),
+            value: isDark,
+            onChanged: (bool value) {
+              ref.read(themeProvider.notifier).toggleTheme(value);
+            },
+          ),
+
+          const Divider(),
+
+          // 3. Menu Trang chủ (Đóng ngăn kéo Drawer)
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Trang chủ'),
+            onTap: () {
+              Navigator.pop(context); // Đóng drawer
+            },
+          ),
+
+          const Spacer(),
+          const Divider(),
+
+          // 4. Nút Đăng xuất: Xóa Session và điều hướng về Login
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              'Đăng xuất',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            onTap: () async {
+              await SessionService.clearSession();
+              if (!context.mounted) return;
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
+                (route) =&gt; false,
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. APP THEME CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-theme-code">2. Toàn Bộ Cấu Hình Bộ Màu AppTheme (lib/utils/app_theme.dart)</h3>
+      <p>
+        Tập trung toàn bộ cấu hình giao diện Sáng / Tối vào một file duy nhất theo đúng yêu cầu đề bài:
+        <strong>Sáng = Nền kem + Tiêu đề cam</strong>, <strong>Tối = Nền đen + Tiêu đề xanh biển</strong>:
+      </p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+
+class AppTheme {
+  // Màu kem cho nền theme sáng (Cream color)
+  static const Color creamBackground = Color(0xFFFFF8E7);
+  // Màu cam cho tiêu đề theme sáng
+  static const Color orangePrimary = Colors.deepOrange;
+
+  // Màu đen cho nền theme tối
+  static const Color blackBackground = Colors.black;
+  // Màu xanh biển cho tiêu đề theme tối
+  static const Color bluePrimary = Colors.blue;
+
+  // =========================================================================
+  // 1. THEME SÁNG: Tiêu đề màu CAM, nền màu KEM
+  // =========================================================================
+  static final ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: creamBackground,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: orangePrimary,
+      brightness: Brightness.light,
+      surface: creamBackground,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: creamBackground,
+      foregroundColor: orangePrimary,
+      centerTitle: true,
+      elevation: 0,
+      titleTextStyle: TextStyle(
+        color: orangePrimary,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      iconTheme: IconThemeData(color: orangePrimary),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: orangePrimary,
+      foregroundColor: Colors.white,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: creamBackground,
+    ),
+  );
+
+  // =========================================================================
+  // 2. THEME TỐI: Tiêu đề màu XANH BIỂN, nền màu ĐEN
+  // =========================================================================
+  static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: blackBackground,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: bluePrimary,
+      brightness: Brightness.dark,
+      surface: const Color(0xFF1E1E1E),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: blackBackground,
+      foregroundColor: bluePrimary,
+      centerTitle: true,
+      elevation: 0,
+      titleTextStyle: TextStyle(
+        color: bluePrimary,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      iconTheme: IconThemeData(color: bluePrimary),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: bluePrimary,
+      foregroundColor: Colors.white,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color(0xFF121212),
+    ),
+  );
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. THEME SERVICE CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-service-code">3. Dịch Vụ Lưu Trữ Theme Bền Vững (lib/services/theme_service.dart)</h3>
+      <p>
+        Sử dụng <code>SharedPreferences</code> để lưu cờ boolean <code>is_dark_mode</code>. Giúp app ghi nhớ trạng thái
+        sáng/tối ngay cả khi người dùng tắt hẳn ứng dụng:
+      </p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:shared_preferences/shared_preferences.dart';
+
+class ThemeService {
+  static const String keyIsDarkMode = 'is_dark_mode';
+
+  // Lưu trạng thái theme (true: dark, false: light)
+  static Future&lt;void&gt; saveThemeMode(bool isDark) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(keyIsDarkMode, isDark);
+  }
+
+  // Đọc trạng thái theme từ SharedPreferences
+  static Future&lt;bool&gt; isDarkMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(keyIsDarkMode) ?? false;
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. THEME PROVIDER CODE GEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-provider-code">4. Quản Lý Trạng Thái ThemeNotifier Riverpod Code Gen
+        (lib/providers/theme_provider.dart)</h3>
+      <p>
+        Notifier quản lý trạng thái <code>ThemeMode</code> hiện tại với cú pháp Riverpod Code Generation
+        (<code>@riverpod</code>). Tự động nạp theme đã lưu khi khởi tạo và cung cấp hàm <code>toggleTheme</code>:
+      </p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../services/theme_service.dart';
+
+// 1. DÒNG BẮT BUỘC: Liên kết file sinh mã tự động
+part 'theme_provider.g.dart';
+
+// 2. Annotation @riverpod: Tự động sinh ra themeProvider
+@riverpod
+class ThemeNotifier extends _$ThemeNotifier {
+  @override
+  ThemeMode build() {
+    // Khởi tạo và đọc theme đã lưu từ SharedPreferences
+    _loadTheme();
+    return ThemeMode.light;
+  }
+
+  // Đọc theme đã lưu từ SharedPreferences
+  Future&lt;void&gt; _loadTheme() async {
+    final isDark = await ThemeService.isDarkMode();
+    state = isDark ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  // Đổi qua lại giữa theme sáng và tối, đồng thời lưu vào SharedPreferences
+  Future&lt;void&gt; toggleTheme(bool isDark) async {
+    state = isDark ? ThemeMode.dark : ThemeMode.light;
+    await ThemeService.saveThemeMode(isDark);
+  }
+}</code></pre>
+      </div>
+
+      <!-- Box lệnh sinh mã -->
+      <div class="card" style="margin-top: 15px; border-left: 4px solid var(--accent-green, #238636);">
+        <div class="card-title" style="color:#3fb950;">Lệnh sinh file theme_provider.g.dart tự động:</div>
+        <p>Mở Terminal trong thư mục dự án và chạy lệnh sau:</p>
+        <pre
+          style="margin-top:8px; background:#0d1117; padding:8px 12px; border-radius:6px;"><code>dart run build_runner build --delete-conflicting-outputs</code></pre>
+        <p style="margin-top:8px; font-size:13px; color:var(--text-secondary);">
+          File <code>theme_provider.g.dart</code> sẽ tự sinh ra chứa <code>themeProvider</code> và
+          <code>_$ThemeNotifier</code> chỉ trong vài giây.
+        </p>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 5. HƯỚNG DẪN KẾT NỐI -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-integrate-guide">5. Hướng Dẫn Kết Nối Vào main.dart &amp; HomeScreen</h3>
+
+      <h4>5.1. Kết nối tại <code>lib/main.dart</code></h4>
+      <p>Bọc ứng dụng bằng <code>ConsumerWidget</code>, lắng nghe <code>themeProvider</code> và truyền vào
+        <code>MaterialApp</code>:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'screens/register_screen.dart';
+import 'services/session_service.dart';
+import 'screens/home_screen.dart';
+import 'providers/theme_provider.dart'; // Import themeProvider
+import 'utils/app_theme.dart';           // Import cấu hình AppTheme
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final bool isLoggedIn = await SessionService.isLoggedIn();
+
+  runApp(
+    ProviderScope(
+      child: MyApp(startAtHome: isLoggedIn),
+    ),
+  );
+}
+
+class MyApp extends ConsumerWidget { // Dùng ConsumerWidget để đọc ref
+  final bool startAtHome;
+  const MyApp({super.key, required this.startAtHome});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 1. Lắng nghe trạng thái Theme hiện tại
+    final themeMode = ref.watch(themeProvider);
+
+    return MaterialApp(
+      title: 'Exam Practical App',
+      debugShowCheckedModeBanner: false,
+      // 2. Gán cấu hình Theme động
+      themeMode: themeMode,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      home: startAtHome ? const HomeScreen() : const RegisterScreen(),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <h4 style="margin-top: 24px;">5.2. Kết nối Drawer tại <code>lib/screens/home_screen.dart</code></h4>
+      <p>Chỉ cần thêm 1 dòng thuộc tính <code>drawer: const AppDrawer()</code> vào <code>Scaffold</code>:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import '../widgets/app_drawer.dart'; // Import widget AppDrawer
+
+// Trong hàm build() của HomeScreen:
+return Scaffold(
+  drawer: const AppDrawer(), // &lt;-- TỰ ĐỘNG HIỆN ICON MENU 3 GẠCH VÀ MỞ DRAWER
+  appBar: AppBar(
+    title: const Text('Danh sách'),
+    centerTitle: true,
+    ...
+  ),
+  ...
+);</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 6. HÌNH ẢNH MINH HỌA -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-preview">6. Hình Ảnh Minh Họa Giao Diện Sáng / Tối Của AppDrawer</h3>
+      <p>So sánh trực quan hai trạng thái giao diện khi mở ngăn kéo <code>AppDrawer</code>:</p>
+
+      <div style="display: flex; justify-content: center; margin: 25px 0;">
+        <div
+          style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.5); max-width: 760px; width: 100%;">
+          <img src="images/drawer_theme_ui.svg" alt="AppDrawer Light & Dark Theme UI"
+            style="display: block; width: 100%; height: auto;" />
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 7. GIẢI THÍCH CHI TIẾT -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-explain">7. Giải Thích Chi Tiết Kiến Trúc 4 Tầng: Dùng Để Làm Gì, Dùng Thế Nào &amp; Vì Sao?</h3>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">1. Tầng Giao Diện: <code>AppTheme (ThemeData)</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> Gom toàn bộ thông số màu sắc vào hai đối tượng <code>ThemeData</code>
+            (Sáng: Nền kem + Tiêu đề cam; Tối: Nền đen + Tiêu đề xanh biển).</li>
+          <li><strong>Dùng thế nào:</strong> Định nghĩa các thuộc tính <code>scaffoldBackgroundColor</code>,
+            <code>colorScheme</code>, <code>appBarTheme</code>, <code>floatingActionButtonTheme</code> và
+            <code>drawerTheme</code>.</li>
+          <li><strong>Vì sao cần tách riêng:</strong> Khi đề thi yêu cầu đổi màu chủ đạo (ví dụ sang Xanh lá hoặc Tím),
+            bạn chỉ cần đổi đúng 1 file <code>app_theme.dart</code>, toàn bộ các màn hình Register, Login, Home, Add,
+            Edit, Detail sẽ tự động đổi màu theo mà không cần sửa code từng màn hình.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">2. Tầng Lưu Trữ: <code>ThemeService (SharedPreferences)</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> Lưu và đọc cờ boolean <code>is_dark_mode</code> xuống bộ nhớ máy
+            tính/trình duyệt.</li>
+          <li><strong>Dùng thế nào:</strong> Cung cấp 2 hàm static: <code>saveThemeMode(bool isDark)</code> và
+            <code>isDarkMode()</code>.</li>
+          <li><strong>Vì sao cần tách riêng:</strong> Độc lập hoàn toàn với giao diện. Khi chạy ứng dụng, dù người dùng
+            đóng app hay refresh lại trình duyệt web Chrome, thiết lập theme vẫn được giữ nguyên.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">3. Tầng Quản Lý State: <code>ThemeNotifier (@riverpod)</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> Giữ trạng thái phản ứng (reactive state) của <code>ThemeMode</code> trong
+            bộ nhớ RAM khi app đang chạy.</li>
+          <li><strong>Dùng thế nào:</strong> Gọi <code>ref.read(themeProvider.notifier).toggleTheme(value)</code> khi
+            người dùng gạt công tắc Switch.</li>
+          <li><strong>Vì sao cần dùng Riverpod:</strong> Không cần truyền callback hay bọc <code>InheritedWidget</code>
+            phức tạp. <code>main.dart</code> lắng nghe qua <code>ref.watch(themeProvider)</code> sẽ tự rebuild
+            <code>MaterialApp</code> tức thì, chuyển màu toàn bộ ứng dụng mượt mà trong 1 frame hình ảnh.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 25px;">
+        <h4 style="color:var(--accent-blue);">4. Tầng Thành Phần UI: <code>AppDrawer (Widget)</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> Hiển thị ngăn kéo menu bên hông chuẩn Material Design khi gắn vào
+            <code>Scaffold(drawer: const AppDrawer())</code>.</li>
+          <li><strong>Dùng thế nào:</strong> Dùng <code>DrawerHeader</code> + <code>FutureBuilder</code> nạp tên tài
+            khoản từ <code>SessionService.getUsername()</code>, kết hợp <code>SwitchListTile</code> và
+            <code>ListTile</code> Đăng xuất.</li>
+          <li><strong>Vì sao cần tách thành widget riêng:</strong> Có thể gắn vào bất kỳ màn hình nào (HomeScreen,
+            DetailScreen, ProfileScreen...) mà không lặp lại code, giúp file <code>home_screen.dart</code> luôn tinh gọn
+            và dễ chấm điểm.</li>
+        </ul>
+      </div>
+
+      <!-- Bảng tóm tắt nhiệm vụ -->
+      <div class="table-wrap" style="margin-bottom: 30px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Thành phần</th>
+              <th style="width: 25%;">File nguồn</th>
+              <th style="width: 50%;">Nhiệm vụ chính</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>AppTheme</code></td>
+              <td><code>lib/utils/app_theme.dart</code></td>
+              <td>Định nghĩa ThemeData (Sáng: Kem-Cam, Tối: Đen-Xanh biển).</td>
+            </tr>
+            <tr>
+              <td><code>ThemeService</code></td>
+              <td><code>lib/services/theme_service.dart</code></td>
+              <td>Ghi/đọc cờ <code>is_dark_mode</code> bền vững qua SharedPreferences.</td>
+            </tr>
+            <tr>
+              <td><code>ThemeNotifier</code></td>
+              <td><code>lib/providers/theme_provider.dart</code></td>
+              <td>Quản lý State và thông báo đổi theme tức thì qua Riverpod.</td>
+            </tr>
+            <tr>
+              <td><code>AppDrawer</code></td>
+              <td><code>lib/widgets/app_drawer.dart</code></td>
+              <td>Menu trượt: Lời chào username, công tắc Switch đổi theme, Đăng xuất.</td>
+            </tr>
+            <tr>
+              <td><code>MyApp (main.dart)</code></td>
+              <td><code>lib/main.dart</code></td>
+              <td>Lắng nghe <code>themeProvider</code> và áp dụng vào <code>MaterialApp</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="09_detail_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 9: Detail Screen</a>
+        <a href="11_common_widgets_reference.html" class="copy-btn" style="text-decoration:none;">Mục 11: Tra Cứu
+          Widgets &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

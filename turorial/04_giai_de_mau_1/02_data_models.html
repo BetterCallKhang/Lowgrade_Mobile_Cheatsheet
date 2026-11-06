@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung hướng dẫn Bước 2 gồm 6 phần chi tiết:</div>
+        <div class="card-title">Nội dung hướng dẫn Bước 2 gồm 6 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Data Model là gì? Vì sao phải tạo Model trước tiên?</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Phương pháp suy luận: Cách đọc đề bài & đối chiếu file dataSample.txt</a></li>
@@ -50,9 +50,9 @@
         <p><strong>Model (Lớp mô hình dữ liệu)</strong> là một <code>class</code> trong Dart đại diện cho một đối tượng trong đời thực được số hóa (ví dụ: một người dùng <code>User</code>, một bức tranh <code>Artwork</code>, một sản phẩm <code>Product</code>).</p>
         <p>Khi làm việc với CSDL SQLite hoặc REST API, dữ liệu thô luôn ở dạng <code>Map&lt;String, dynamic&gt;</code> (các cặp key - value như <code>{"id": 1, "title": "Mona Lisa"}</code>). Nếu cứ dùng trực tiếp biến Map:</p>
         <ul style="margin-left: 20px; margin-top: 8px; line-height: 1.8;">
-          <li>❌ Rất dễ gõ sai chính tả tên key: <code>item['titel']</code> thay vì <code>item['title']</code> dẫn đến lỗi <code>null</code> hoặc sập app khi chạy.</li>
-          <li>❌ Không có gợi ý code (IntelliSense) từ Android Studio / VS Code.</li>
-          <li>✅ Khi có <strong>Model</strong>: Bạn chỉ cần chấm <code>artwork.title</code>, máy sẽ gợi ý code tức thì và kiểm tra lỗi sai kiểu dữ liệu ngay lúc gõ phím!</li>
+          <li>Rất dễ gõ sai chính tả tên key: <code>item['titel']</code> thay vì <code>item['title']</code> dẫn đến lỗi <code>null</code> hoặc sập app khi chạy.</li>
+          <li>Không có gợi ý code (IntelliSense) từ Android Studio / VS Code.</li>
+          <li>Khi có <strong>Model</strong>: Bạn chỉ cần chấm <code>artwork.title</code>, máy sẽ gợi ý code tức thì và kiểm tra lỗi sai kiểu dữ liệu ngay lúc gõ phím!</li>
         </ul>
       </div>
 
@@ -120,7 +120,7 @@
       </div>
 
       <div class="callout warning">
-        <strong>💡 ĐÚC KẾT SUY LUẬN TỐI QUAN TRỌNG:</strong>
+        <strong>ĐÚC KẾT SUY LUẬN TỐI QUAN TRỌNG:</strong>
         <ol style="margin-top: 8px; margin-left: 18px; line-height: 1.8;">
           <li><strong>Trường <code>id</code>:</strong> Khi tạo mới (Insert) vào SQLite thì <code>id</code> sẽ do cơ sở dữ liệu <strong>tự tăng (AUTOINCREMENT)</strong> nên lúc khởi tạo đối tượng mới để thêm, <code>id</code> có thể là <code>null</code>. Do đó kiểu dữ liệu của <code>id</code> nên là <code>int?</code> (nullable).</li>
           <li><strong>Trường <code>createdBy</code>:</strong> Đây là khoá ngoại (Foreign Key) liên kết 1-nhiều (User 1 &rarr; N Artwork). Khi thêm tranh, giá trị này sẽ lấy từ ID của tài khoản đang đăng nhập!</li>
@@ -345,7 +345,7 @@ class ArtworkModel {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT QUẢ BƯỚC 2:</strong>
+        <strong>KẾT QUẢ BƯỚC 2:</strong>
         <p>Bạn đã hoàn thành 2 file Model nền tảng trong <code>lib/models/</code>: <code>user_model.dart</code> và <code>artwork_model.dart</code>. Bạn đã hiểu rõ bản chất tại sao phải có <code>toMap()</code> (để chuẩn bị ghi vào SQLite) và <code>fromMap()</code> (để đọc từ SQLite ra). Giờ đây, việc tạo DatabaseHelper ở bước tiếp theo sẽ cực kỳ trơn tru!</p>
       </div>
 

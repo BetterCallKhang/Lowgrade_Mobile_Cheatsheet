@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 9 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 9 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu Task 4 (Home List) & Task 7 (Delete Artwork)</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo State & Hàm tải dữ liệu <code>_loadData()</code> từ SQLite và Session</a></li>
@@ -52,20 +52,20 @@
         <div class="card">
           <div class="card-title">Task 4 &mdash; Home Screen (Artwork List)</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>🖼️ <strong>Header Banner / Logo:</strong> Hiển thị ảnh banner đề thi cấp kèm lời chào: <em>"Welcome &lt;username&gt;"</em> lấy từ Session.</li>
-            <li>📋 <strong>Load Artwork Data:</strong> Đọc toàn bộ danh sách từ SQLite.</li>
-            <li>📜 <strong>ListView.builder:</strong> Hiển thị mỗi bức tranh gồm: <code>Title</code>, <code>Artist</code>, <code>Year</code>.</li>
-            <li>🔍 <strong>Trường hợp rỗng:</strong> Nếu chưa có tranh thì hiện chữ <em>"No artworks found"</em>.</li>
-            <li>👉 <strong>Tương tác:</strong> Chạm vào item để mở <strong>Artwork Detail Screen</strong>; bấm nút nổi phía dưới để mở <strong>Add Artwork Screen</strong>.</li>
+            <li><strong>Header Banner / Logo:</strong> Hiển thị ảnh banner đề thi cấp kèm lời chào: <em>"Welcome &lt;username&gt;"</em> lấy từ Session.</li>
+            <li><strong>Load Artwork Data:</strong> Đọc toàn bộ danh sách từ SQLite.</li>
+            <li><strong>ListView.builder:</strong> Hiển thị mỗi bức tranh gồm: <code>Title</code>, <code>Artist</code>, <code>Year</code>.</li>
+            <li><strong>Trường hợp rỗng:</strong> Nếu chưa có tranh thì hiện chữ <em>"No artworks found"</em>.</li>
+            <li><strong>Tương tác:</strong> Chạm vào item để mở <strong>Artwork Detail Screen</strong>; bấm nút nổi phía dưới để mở <strong>Add Artwork Screen</strong>.</li>
           </ul>
         </div>
 
         <div class="card">
           <div class="card-title">Task 7 &mdash; Delete Artwork</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>🗑️ <strong>Nút Delete:</strong> Đặt icon thùng rác bên phải mỗi item trong danh sách.</li>
-            <li>❓ <strong>Show Confirmation Dialog:</strong> Tiêu đề <em>"Delete Artwork"</em>, nội dung: <em>"Are you sure you want to delete this artwork?"</em>, có 2 nút: <code>Cancel</code> và <code>Delete</code>.</li>
-            <li>⚡ <strong>Khi xác nhận xóa:</strong>
+            <li><strong>Nút Delete:</strong> Đặt icon thùng rác bên phải mỗi item trong danh sách.</li>
+            <li><strong>Show Confirmation Dialog:</strong> Tiêu đề <em>"Delete Artwork"</em>, nội dung: <em>"Are you sure you want to delete this artwork?"</em>, có 2 nút: <code>Cancel</code> và <code>Delete</code>.</li>
+            <li><strong>Khi xác nhận xóa:</strong>
               <br />• Xóa tranh khỏi CSDL SQLite qua <code>DatabaseHelper.instance.deleteArtwork(id)</code>.
               <br />• Cập nhật lại danh sách trên Home tức thì.
               <br />• Bắn thông báo: <code>Artwork deleted successfully</code> bằng SnackBar.</li>
@@ -77,7 +77,7 @@
       <h3 id="sec-2">2. Khai Báo State & Hàm Tải Dữ Liệu <code>_loadData()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Khai báo biến State & Hàm tải dữ liệu ban đầu</div>
+        <div class="card-title" style="color:var(--accent-blue);">Khai báo biến State & Hàm tải dữ liệu ban đầu</div>
         <p><strong>Nhiệm vụ:</strong> Trong <code>initState()</code>, gọi hàm tải đồng thời 2 nguồn: (1) Tên người dùng từ <code>SessionService.getUsername()</code> và (2) Danh sách tác phẩm từ <code>DatabaseHelper.instance.getAllArtworks()</code>.</p>
       </div>
 
@@ -119,7 +119,7 @@
       <h3 id="sec-3">3. Widget Banner Hình Ảnh & Lời Chào Username</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Header Banner đề thi & Chữ chào đón Session</div>
+        <div class="card-title" style="color:var(--accent-purple);">Header Banner đề thi & Chữ chào đón Session</div>
         <p><strong>Thiết kế:</strong> Sử dụng ảnh <code>assets/images/banner.jpg</code> (đã cấu hình ở Bước 1). Dùng widget <code>Stack</code> để đặt lời chào <em>"Welcome &lt;username&gt;"</em> và icon ngôi nhà bảo tàng đè lên trên nền ảnh như đúng mẫu đề thi.</p>
       </div>
 
@@ -172,7 +172,7 @@
       <h3 id="sec-4">4. Xử Lý Trạng Thái Danh Sách Rỗng ("No artworks found")</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-orange);">
-        <div class="card-title" style="color:var(--accent-orange);">🟠 Giao diện khi chưa có dữ liệu tranh</div>
+        <div class="card-title" style="color:var(--accent-orange);">Giao diện khi chưa có dữ liệu tranh</div>
         <p><strong>Yêu cầu đề:</strong> Nếu CSDL chưa có bức tranh nào hoặc đã bị xóa hết, hiển thị dòng chữ <strong>"No artworks found"</strong> ở giữa màn hình.</p>
       </div>
 
@@ -195,7 +195,7 @@
       <h3 id="sec-5">5. Dựng Danh Sách Tác Phẩm Bằng <code>ListView.builder</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-        <div class="card-title" style="color:var(--accent-cyan);">🌐 Danh sách thẻ Card bo góc & Sự kiện chạm xem Chi tiết</div>
+        <div class="card-title" style="color:var(--accent-cyan);">Danh sách thẻ Card bo góc & Sự kiện chạm xem Chi tiết</div>
         <p><strong>Bản chất:</strong> Mỗi item là 1 <code>Card</code> bo tròn nhẹ màu trắng, bên trong có <code>ListTile</code>: icon bên trái, tiêu đề tranh <code>Title</code>, nghệ sĩ <code>Artist</code> kèm năm <code>Year</code> (ví dụ: <em>Salvador Dali - 1931</em>). Bấm vào item thì mở <code>ArtworkDetailScreen</code> (Task 6).</p>
       </div>
 
@@ -250,7 +250,7 @@
       <h3 id="sec-6">6. Hàm Xác Nhận & Xóa Tác Phẩm <code>_confirmDelete()</code> (Task 7)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-red);">
-        <div class="card-title" style="color:var(--accent-red);">🔴 Hộp thoại xác nhận xóa & Bắn SnackBar thông báo (Task 7)</div>
+        <div class="card-title" style="color:var(--accent-red);">Hộp thoại xác nhận xóa & Bắn SnackBar thông báo (Task 7)</div>
         <p><strong>Yêu cầu đề thi:</strong> Khi bấm vào icon thùng rác, hiển thị <code>AlertDialog</code> với câu hỏi <em>"Are you sure you want to delete this artwork?"</em>. Nếu chọn <strong>Delete</strong> thì xóa trong SQLite, reload lại danh sách và hiện SnackBar <code>Artwork deleted successfully</code>.</p>
       </div>
 
@@ -305,7 +305,7 @@
       <h3 id="sec-7">7. Nút Bấm "+ Add Artwork" & Xử Lý Reload Khi Quay Về</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 Nút thêm mới có cơ chế chờ Await tự động cập nhật</div>
+        <div class="card-title" style="color:var(--accent-green);">Nút thêm mới có cơ chế chờ Await tự động cập nhật</div>
         <p><strong>Mẹo quan trọng:</strong> Dùng <code>final result = await Navigator.push(...)</code>. Khi màn hình Thêm mới hoàn tất và trả về <code>true</code>, hàm sẽ lập tức gọi lại <code>_loadData()</code> để hiển thị bức tranh mới vừa thêm ngay lập tức!</p>
       </div>
 
@@ -638,7 +638,7 @@ class _HomeScreenState extends State<HomeScreen> {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT THÚC BƯỚC 7:</strong>
+        <strong>KẾT THÚC BƯỚC 7:</strong>
         <p>Màn hình Home (Task 4) và Tính năng Xóa (Task 7) đã xong hoàn hảo! Tiếp theo là <strong>Bước 8: Màn hình Thêm tác phẩm (Task 5: Add Artwork Screen)</strong>.</p>
       </div>
 

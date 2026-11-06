@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 8: Màn Hình Chỉnh Sửa (EditItemScreen) - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 8: EditItemScreen</span>
+        <span class="pill pill-purple">1-Click Copy & Paste</span>
+      </div>
+      <div>
+        <a href="07_add_item_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 7: AddItemScreen</a>
+        <a href="09_detail_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 9:
+          DetailScreen &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 8: Mẫu Màn Hình Chỉnh Sửa (lib/screens/edit_item_screen.dart)</h2>
+        <p>Màn hình đảm nhiệm Task <strong>Edit / Update Item</strong> của đề thi: Nhận đối tượng <code>ItemModel</code>
+          cũ qua Constructor, tự động nạp sẵn dữ liệu vào các ô nhập trong <code>initState()</code>, cập nhật thay đổi
+          vào CSDL SQLite và giữ nguyên ID cũ. Toàn bộ mã nguồn class được đưa <strong>lên trên cùng</strong>, kèm hình
+          ảnh minh họa iPhone SE trên trình duyệt và các mục giải thích chi tiết: <strong>Dùng để làm gì, dùng thế nào
+            và vì sao</strong>.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-edit-code" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class EditItemScreen
+              (lib/screens/edit_item_screen.dart)</a></li>
+          <li><a href="#sec-edit-preview" style="color:var(--accent-blue);">2. Hình ảnh minh họa giao diện UI
+              EditItemScreen (iPhone SE Trên Trình Duyệt)</a></li>
+          <li><a href="#sec-edit-explain" style="color:var(--accent-blue);">3. Giải thích chi tiết code EditItemScreen:
+              Dùng để làm gì, dùng thế nào & vì sao?</a></li>
+          <li><a href="#sec-how-to-open" style="color:var(--accent-blue);">4. Cách mở EditItemScreen từ HomeScreen hoặc
+              DetailScreen</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. EDIT ITEM SCREEN CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-edit-code">1. Toàn Bộ Mã Nguồn Class EditItemScreen (lib/screens/edit_item_screen.dart)</h3>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/item_example.dart';
+import '../providers/item_provider.dart';
+import '../utils/app_validator.dart';
+
+class EditItemScreen extends ConsumerStatefulWidget {
+  final ItemModel item;
+
+  const EditItemScreen({super.key, required this.item});
+
+  @override
+  ConsumerState&lt;EditItemScreen&gt; createState() =&gt; _EditItemScreenState();
+}
+
+class _EditItemScreenState extends ConsumerState&lt;EditItemScreen&gt; {
+  final _formKey = GlobalKey&lt;FormState&gt;();
+  final _titleController = TextEditingController();
+  final _subtitleController = TextEditingController();
+  final _priceController = TextEditingController();
+
+  String _selectedCategory = 'Loại A';
+  final List&lt;String&gt; _categories = ['Loại A', 'Loại B', 'Loại C'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Nạp sẵn dữ liệu cũ vào các ô nhập
+    _titleController.text = widget.item.title;
+    _subtitleController.text = widget.item.subtitle;
+    _priceController.text = widget.item.price?.toString() ?? '';
+    if (_categories.contains(widget.item.category)) {
+      _selectedCategory = widget.item.category!;
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _subtitleController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  Future&lt;void&gt; _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final title = _titleController.text.trim();
+    final subtitle = _subtitleController.text.trim();
+    final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
+
+    // CẬP NHẬT (EDIT): Giữ nguyên ID cũ
+    final updatedItem = ItemModel(
+      id: widget.item.id,
+      title: title,
+      subtitle: subtitle,
+      category: _selectedCategory,
+      price: price,
+    );
+
+    await ref.read(itemProvider.notifier).updateItem(updatedItem);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Cập nhật thành công!')),
+    );
+
+    // Quay trở về màn hình trước (HomeScreen/DetailScreen tự động cập nhật)
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chỉnh sửa'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Field 1: Title
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) =&gt; AppValidator.required(val, 'Tiêu đề'),
+              ),
+              const SizedBox(height: 16),
+
+              // Field 2: Description / Subtitle
+              TextFormField(
+                controller: _subtitleController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) =&gt; AppValidator.required(val, 'Mô tả'),
+              ),
+              const SizedBox(height: 16),
+
+              // Field 3: Category Dropdown
+              DropdownButtonFormField&lt;String&gt;(
+                value: _selectedCategory,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+                items: _categories.map((cat) {
+                  return DropdownMenuItem(value: cat, child: Text(cat));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() =&gt; _selectedCategory = val);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Field 4: Price (Số thực dương)
+              TextFormField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Price',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) =&gt; AppValidator.positiveDouble(val, 'Giá tiền'),
+              ),
+              const SizedBox(height: 24),
+
+              // Nút Lưu thay đổi
+              ElevatedButton(
+                onPressed: _save,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text(
+                  'LƯU THAY ĐỔI',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. HÌNH ẢNH UI EDIT SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-edit-preview">2. Hình Ảnh Minh Họa Giao Diện UI EditItemScreen (iPhone SE Trên Trình Duyệt)</h3>
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-blue, #58a6ff); font-size: 15px;">Màn hình Chỉnh sửa
+            (EditItemScreen)</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/edit_screen_ui.svg" alt="Flutter Edit Screen UI"
+              style="display: block; width: 320px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            AppBar "Chỉnh sửa", các ô nhập được tự động điền sẵn dữ liệu cũ từ đối tượng truyền vào, nút "LƯU THAY ĐỔI".
+          </p>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. GIẢI THÍCH CHI TIẾT EDIT SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-edit-explain">3. Giải Thích Chi Tiết Code EditItemScreen: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
+      <div class="card" style="margin-bottom: 25px;">
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Truyền đối tượng qua Constructor: <code>final ItemModel item;</code></strong>
+            <br /><em>Dùng để làm gì:</em> Nhận toàn bộ thông tin của item cần chỉnh sửa từ màn hình gọi nó.
+          </li>
+          <li><strong>Hàm <code>initState()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Chạy 1 lần duy nhất khi widget được chèn vào cây widget. Gán các giá trị cũ
+            của <code>widget.item</code> vào các ô controller để người dùng nhìn thấy thông tin cũ và chỉnh sửa.
+          </li>
+          <li><strong>Giữ nguyên ID cũ khi cập nhật: <code>id: widget.item.id</code></strong>
+            <br /><em>Vì sao bắt buộc:</em> SQLite cần ID trong mệnh đề <code>where: 'id = ?'</code> để xác định chính
+            xác dòng nào trong bảng <code>items</code> cần được update. Nếu ID bị null, lệnh cập nhật sẽ không có tác
+            dụng.
+          </li>
+          <li><strong>Lưu thay đổi qua Riverpod:</strong>
+            <br />Gọi <code>await ref.read(itemProvider.notifier).updateItem(updatedItem);</code>. Notifier cập nhật
+            SQLite và gọi <code>ref.invalidateSelf()</code>, khi <code>Navigator.pop(context)</code> thì cả HomeScreen
+            lẫn DetailScreen đều tự động có dữ liệu mới.
+          </li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. CÁCH MỞ MÀN HÌNH -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-how-to-open">4. Cách Mở EditItemScreen Từ HomeScreen Hoặc DetailScreen</h3>
+      <p>Tại <code>HomeScreen</code> (trong nút icon Sửa màu xanh) hoặc <code>DetailScreen</code> (trong icon Sửa trên
+        AppBar):</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) =&gt; EditItemScreen(item: item),
+  ),
+);</code></pre>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="07_add_item_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 7: AddItemScreen</a>
+        <a href="09_detail_screen.html" class="copy-btn" style="text-decoration:none;">Mục 9: DetailScreen &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,2454 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 11: Cheat Sheet Các Widget Thường Dùng, Constructor & Tham Số</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 11: Common Widgets & Resources</span>
+        <span class="pill pill-purple">Constructors, Colors & Icons Tra Cứu Nhanh</span>
+      </div>
+      <div>
+        <a href="10_drawer_theme_service.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 10: Drawer
+          &amp; Theme</a>
+        <a href="12_run_flow_architecture_guide.html" class="copy-btn"
+          style="text-decoration:none; margin-left:8px;">Mục 12: Port & Luồng &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 11: Tra Cứu Toàn Diện Colors, Icons & Các Widget Thường Dùng Trong Flutter</h2>
+        <p>Bảng tổng hợp nhanh <strong>bảng màu Colors</strong>, <strong>các Icon thông dụng</strong>, cùng toàn bộ
+          <strong>các Widget phổ biến nhất</strong> trong lập trình Flutter. Mỗi widget đều liệt kê <strong>tất cả các
+            Constructor (mặc định, .builder, .count, .separated, .extent...)</strong>, giải thích chi tiết các tham số
+          quan trọng và ví dụ áp dụng cho từng trường hợp yêu cầu đề bài khác nhau.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục tra cứu nhanh:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-colors" style="color:var(--accent-purple); font-weight: bold;">Bảng Màu Thường Dùng (Colors
+              Palette & Opacity)</a></li>
+          <li><a href="#sec-icons" style="color:var(--accent-purple); font-weight: bold;">Danh Sách Icons Thường Dùng
+              Trong Đề Thi & Đồ Án</a></li>
+          <li><a href="#sec-lists-grids" style="color:var(--accent-blue); font-weight: bold;">1. Nhóm Danh Sách Cuộn &
+              Lưới: ListView & GridView (Đầy Đủ Constructors & Bảng Thuộc Tính)</a></li>
+          <li><a href="#sec-structural" style="color:var(--accent-blue);">2. Nhóm Khung Sườn & Cấu Trúc Trang
+              (MaterialApp, Scaffold, AppBar)</a></li>
+          <li><a href="#sec-layout" style="color:var(--accent-blue);">3. Nhóm Bố Cục & Tạo Kiểu Khung Hình (Container,
+              BoxDecoration, SizedBox, Padding, Center)</a></li>
+          <li><a href="#sec-multi-child" style="color:var(--accent-blue);">4. Nhóm Tuyến Tính & Xếp Lớp (Column, Row,
+              Stack, Positioned, Expanded, Flexible, Spacer)</a></li>
+          <li><a href="#sec-text-image-icon" style="color:var(--accent-blue); font-weight: bold;">5. Nhóm Định Dạng Chữ
+              & Hiển Thị (Text, TextStyle, RichText, TextTheme, Image, ClipRRect)</a></li>
+          <li><a href="#sec-inputs-forms" style="color:var(--accent-blue); font-weight: bold;">6. Nhóm Form & Nhập Liệu
+              Toàn Diện (Form, TextFormField, Dropdown, Checkbox, Radio, Switch, DatePicker)</a></li>
+          <li><a href="#sec-buttons" style="color:var(--accent-blue);">7. Nhóm Nút Bấm & Thao Tác (ElevatedButton,
+              OutlinedButton, TextButton, IconButton, FloatingActionButton)</a></li>
+          <li><a href="#sec-cards-tiles" style="color:var(--accent-blue);">8. Nhóm Thẻ & Dòng Chi Tiết (Card, ListTile,
+              Divider)</a></li>
+          <li><a href="#sec-feedback-dialogs" style="color:var(--accent-blue);">9. Nhóm Tương Tác & Thông Báo (InkWell,
+              GestureDetector, AlertDialog, SnackBar, CircularProgressIndicator)</a></li>
+        </ul>
+      </div>
+
+      <!-- ===================== TỔNG HỢP 1: BẢNG MÀU ===================== -->
+      <h3 id="sec-colors">Tổng Hợp Bảng Màu Thường Dùng (Colors & Color Manipulation)</h3>
+      <p>Trong Flutter, màu sắc được gọi thông qua class <code>Colors</code> hoặc tạo từ mã Hex/RGB.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Nhóm Màu</th>
+              <th style="width: 40%;">Mã Flutter (Colors.*)</th>
+              <th style="width: 35%;">Ứng dụng phổ biến</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Màu Chủ Đạo (Primary / Brand)</strong></td>
+              <td>
+                <code>Colors.blue</code>, <code>Colors.indigo</code>, <code>Colors.teal</code>,
+                <code>Colors.deepPurple</code>, <code>Colors.cyan</code>
+              </td>
+              <td>AppBar, Nút chính (ElevatedButton), Tab Bar đang chọn, link.</td>
+            </tr>
+            <tr>
+              <td><strong>Màu Trạng Thái (Status / Feedback)</strong></td>
+              <td>
+                <code>Colors.green</code> / <code>Colors.lightGreen</code> (Thành công)<br />
+                <code>Colors.red</code> / <code>Colors.redAccent</code> (Lỗi, Nút Xóa / Danger)<br />
+                <code>Colors.amber</code> / <code>Colors.orange</code> (Cảnh báo / Warning / Đánh giá sao)
+              </td>
+              <td>SnackBar thông báo, viền báo lỗi Form, nút Delete trong Confirm Dialog.</td>
+            </tr>
+            <tr>
+              <td><strong>Màu Trung Tính (Neutral & Text)</strong></td>
+              <td>
+                <code>Colors.white</code>, <code>Colors.black</code>, <code>Colors.black87</code>,
+                <code>Colors.black54</code>, <code>Colors.grey</code>, <code>Colors.grey[200]</code> (nền thẻ),
+                <code>Colors.transparent</code>
+              </td>
+              <td>Nền trang (Scaffold), chữ tiêu đề, phụ đề mờ, nền Card xám nhẹ, đường kẻ ngang Divider.</td>
+            </tr>
+            <tr>
+              <td><strong>Màu Độ Đậm Nhạt (Shades)</strong></td>
+              <td>
+                <code>Colors.blue[50]</code> (rất nhạt) &rarr; <code>Colors.blue[900]</code> (rất đậm). Chuẩn:
+                <code>100, 200, 300, 400, 500, 600, 700, 800, 900</code>
+              </td>
+              <td>Làm màu nền highlight nhẹ phía sau icon hoặc nền thẻ item được chọn.</td>
+            </tr>
+            <tr>
+              <td><strong>Mã Hex Tùy Chỉnh</strong></td>
+              <td>
+                <code>Color(0xFF2196F3)</code> (Thay <code>#</code> bằng <code>0xFF</code> để chỉ định độ mờ 100%)<br />
+                <code>Colors.blue.withValues(alpha: 0.2)</code> hoặc <code>color.withOpacity(0.5)</code>
+              </td>
+              <td>Dùng khi đề bài cho mã màu hex cố định hoặc cần làm mờ lớp nền overlay.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== TỔNG HỢP 2: ICONS THƯỜNG DÙNG ===================== -->
+      <h3 id="sec-icons">Danh Sách Icons Thường Dùng (Icons.*)</h3>
+      <p>Flutter tích hợp sẵn toàn bộ kho biểu tượng Google Material Icons. Dưới đây là các icon xuất hiện nhiều nhất
+        trong đề thi:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Chuyên mục</th>
+              <th style="width: 45%;">Tên Icon (Icons.*)</th>
+              <th style="width: 30%;">Vị trí hay dùng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hành động CRUD</strong></td>
+              <td>
+                <code>Icons.add</code> (thêm mới)<br />
+                <code>Icons.edit</code> / <code>Icons.create</code> (chỉnh sửa)<br />
+                <code>Icons.delete</code> / <code>Icons.delete_outline</code> (xóa item)<br />
+                <code>Icons.save</code> / <code>Icons.check</code> (lưu dữ liệu)<br />
+                <code>Icons.refresh</code> (tải lại danh sách)
+              </td>
+              <td>FloatingActionButton, actions trên AppBar, trailing của ListTile.</td>
+            </tr>
+            <tr>
+              <td><strong>Điều hướng (Navigation)</strong></td>
+              <td>
+                <code>Icons.arrow_back</code> / <code>Icons.arrow_back_ios</code> (quay lại)<br />
+                <code>Icons.chevron_right</code> / <code>Icons.arrow_forward_ios</code> (xem tiếp)<br />
+                <code>Icons.close</code> (đóng dialog / màn hình modal)<br />
+                <code>Icons.menu</code> (mở Drawer)<br />
+                <code>Icons.home</code>, <code>Icons.search</code>, <code>Icons.notifications</code>
+              </td>
+              <td>leading AppBar, BottomNavigationBar, trailing ListTile.</td>
+            </tr>
+            <tr>
+              <td><strong>Tài khoản & Xác thực</strong></td>
+              <td>
+                <code>Icons.person</code> / <code>Icons.person_outline</code> / <code>Icons.account_circle</code><br />
+                <code>Icons.email</code> / <code>Icons.email_outlined</code><br />
+                <code>Icons.lock</code> / <code>Icons.lock_outline</code><br />
+                <code>Icons.visibility</code> / <code>Icons.visibility_off</code> (ẩn/hiện pass)<br />
+                <code>Icons.login</code> / <code>Icons.logout</code>
+              </td>
+              <td>prefixIcon của TextFormField đăng nhập/đăng ký, avatar hồ sơ.</td>
+            </tr>
+            <tr>
+              <td><strong>Dữ liệu & Mô tả đồ vật</strong></td>
+              <td>
+                <code>Icons.shopping_cart</code>, <code>Icons.book</code>, <code>Icons.palette</code> (Art
+                Gallery),<br />
+                <code>Icons.attach_money</code> (giá tiền), <code>Icons.calendar_today</code> (ngày tháng/năm),<br />
+                <code>Icons.category</code> (phân loại), <code>Icons.description</code>, <code>Icons.star</code>,
+                <code>Icons.favorite</code>
+              </td>
+              <td>prefixIcon trong Form thêm/sửa, leading trong danh sách sản phẩm.</td>
+            </tr>
+            <tr>
+              <td><strong>Thông báo & Trạng thái</strong></td>
+              <td>
+                <code>Icons.warning</code> / <code>Icons.warning_amber_rounded</code> (cảnh báo)<br />
+                <code>Icons.error</code> / <code>Icons.error_outline</code><br />
+                <code>Icons.check_circle</code> (thành công)<br />
+                <code>Icons.info</code> / <code>Icons.info_outline</code>
+              </td>
+              <td>Tiêu đề AlertDialog, icon dẫn đầu trong SnackBar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================== PHẦN 1: LISTVIEW & GRIDVIEW ===================== -->
+      <h3 id="sec-lists-grids">1. Nhóm Danh Sách Cuộn & Lưới (ListView & GridView Đầy Đủ Constructors)</h3>
+      <p>Đây là 2 widget then chốt của hầu hết các bài thi di động. Mỗi loại cung cấp nhiều <strong>Named
+          Constructors</strong> cho từng kịch bản cụ thể, kèm theo các thuộc tính cấu hình bố cục, hiệu năng và hành vi
+        cuộn.</p>
+
+      <!-- LISTVIEW PHÂN TÍCH TOÀN BỘ CONSTRUCTORS -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">A. Phân Tích Toàn Bộ Constructors Của ListView</div>
+        <p>Hiển thị danh sách phần tử cuộn theo 1 chiều (mặc định là cuộn dọc theo chiều cao màn hình).</p>
+
+        <!-- Constructor 1: Default -->
+        <h4 style="color:var(--accent-blue); margin-top:15px;">1. Constructor Mặc Định: <code>ListView(...)</code></h4>
+        <p><em>Dùng khi:</em> Danh sách có số lượng phần tử <strong>ít, cố định</strong> đã biết trước (ví dụ: màn hình
+          Cài đặt Settings, danh sách vài dòng tĩnh). Toàn bộ widget con trong <code>children</code> được khởi tạo ngay
+          lập tức (eager loading).</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">ListView({
+  Key? key,
+  Axis scrollDirection = Axis.vertical, // Chiều cuộn: Axis.vertical hoặc Axis.horizontal
+  bool reverse = false,                 // Đảo ngược thứ tự cuộn từ dưới lên trên
+  ScrollController? controller,         // Điều khiển vị trí cuộn / bắt sự kiện cuộn
+  bool? primary,                        // Có liên kết với PrimaryScrollController của Scaffold không
+  ScrollPhysics? physics,               // Quy định hiệu ứng cuộn (Bouncing, Clamping, NeverScrollable...)
+  bool shrinkWrap = false,              // Thu gọn chiều cao bằng đúng nội dung con (Cực quan trọng)
+  EdgeInsetsGeometry? padding,          // Khoảng đệm bao quanh danh sách
+  double? itemExtent,                   // Chiều cao cố định của mỗi item (tối ưu hiệu năng cực lớn)
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[], // Mảng danh sách các widget con
+})</code></pre>
+        </div>
+
+        <!-- Constructor 2: .builder -->
+        <h4 style="color:var(--accent-blue); margin-top:20px;">2. Constructor Tối Ưu: <code>ListView.builder(...)</code>
+          (Thường Dùng Nhất Trong Đề Thi)</h4>
+        <p><em>Dùng khi:</em> Danh sách <strong>động lấy từ SQLite / REST API</strong> có số lượng lớn hoặc chưa biết
+          trước. Áp dụng cơ chế tái sử dụng widget (Lazy Loading / Virtualization) - chỉ vẽ các dòng đang nằm trên màn
+          hình, giúp app mượt mà và không tốn RAM.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">ListView.builder({
+  Key? key,
+  Axis scrollDirection = Axis.vertical,
+  bool reverse = false,
+  ScrollController? controller,
+  ScrollPhysics? physics,
+  bool shrinkWrap = false,
+  EdgeInsetsGeometry? padding,
+  double? itemExtent,
+  required int itemCount,                        // BẮT BUỘC: Tổng số lượng phần tử
+  required NullableIndexedWidgetBuilder itemBuilder, // BẮT BUỘC: Hàm dựng từng dòng (context, index) =&gt; Widget
+})
+
+// Ví dụ thực tế lấy từ List danh sách:
+ListView.builder(
+  itemCount: items.length,
+  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  itemBuilder: (context, index) {
+    final item = items[index];
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(child: Text('${index + 1}')),
+        title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('Giá: \$${item.price} - Thể loại: ${item.category}'),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          // Xử lý chuyển sang màn hình xem chi tiết
+        },
+      ),
+    );
+  },
+)</code></pre>
+        </div>
+
+        <!-- Constructor 3: .separated -->
+        <h4 style="color:var(--accent-blue); margin-top:20px;">3. Constructor Có Đường Kẻ Ngăn Cách:
+          <code>ListView.separated(...)</code></h4>
+        <p><em>Dùng khi:</em> Đề bài yêu cầu hiển thị <strong>đường kẻ phân cách (Divider)</strong> hoặc khoảng cách đều
+          đặn giữa các item mà không cần tự chèn thủ công.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">ListView.separated({
+  Key? key,
+  required int itemCount,
+  required NullableIndexedWidgetBuilder itemBuilder,    // Dựng item chính theo index
+  required NullableIndexedWidgetBuilder separatorBuilder,// Dựng đường ngăn cách (chạy itemCount - 1 lần)
+  EdgeInsetsGeometry? padding,
+  bool shrinkWrap = false,
+  ScrollPhysics? physics,
+  ScrollController? controller,
+})
+
+// Ví dụ thực tế:
+ListView.separated(
+  itemCount: items.length,
+  padding: const EdgeInsets.all(8),
+  separatorBuilder: (context, index) =&gt; const Divider(height: 1, thickness: 1, color: Colors.grey),
+  itemBuilder: (context, index) =&gt; ListTile(
+    title: Text(items[index].name),
+    subtitle: Text(items[index].email),
+    trailing: IconButton(
+      icon: const Icon(Icons.delete, color: Colors.red),
+      onPressed: () =&gt; _deleteItem(items[index].id),
+    ),
+  ),
+)</code></pre>
+        </div>
+
+        <!-- Constructor 4: .custom -->
+        <h4 style="color:var(--accent-blue); margin-top:20px;">4. Constructor Tùy Biến Chuyên Sâu:
+          <code>ListView.custom(...)</code></h4>
+        <p><em>Dùng khi:</em> Cần kiểm soát thuật toán quản lý bộ nhớ đệm chi tiết thông qua
+          <code>SliverChildDelegate</code> (rất ít khi dùng trong phòng thi).</p>
+
+        <!-- BẢNG GIẢI THÍCH CHI TIẾT THUỘC TÍNH LISTVIEW -->
+        <h4 style="color:var(--accent-green); margin-top:25px;">Bảng Tra Cứu Toàn Bộ Thuộc Tính & Tham Số Của ListView
+        </h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Thuộc tính</th>
+                <th style="width: 25%;">Kiểu dữ liệu & Mặc định</th>
+                <th style="width: 53%;">Giải thích ý nghĩa & Ngữ cảnh sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>itemCount</code></td>
+                <td><code>int</code> (bắt buộc trong <code>.builder</code>)</td>
+                <td>Tổng số lượng phần tử cần hiển thị (thường truyền <code>list.length</code>). Nếu quên truyền, danh
+                  sách có thể chạy vô tận và gây lỗi <code>IndexOutOfRange</code>.</td>
+              </tr>
+              <tr>
+                <td><code>itemBuilder</code></td>
+                <td><code>Widget Function(BuildContext, int)</code></td>
+                <td>Hàm callback nhận vào <code>context</code> và chỉ mục <code>index</code> chạy từ <code>0</code> đến
+                  <code>itemCount - 1</code> để trả về widget hiển thị cho dòng đó. Chỉ các dòng đang hiển thị trên màn
+                  hình mới được gọi hàm này.</td>
+              </tr>
+              <tr>
+                <td><code>separatorBuilder</code></td>
+                <td><code>Widget Function(BuildContext, int)</code></td>
+                <td>Chỉ có trong <code>ListView.separated</code>. Dựng widget ngăn cách giữa 2 item liền kề (ví dụ:
+                  <code>const Divider()</code> hoặc <code>const SizedBox(height: 10)</code>). Chạy đúng
+                  <code>itemCount - 1</code> lần.</td>
+              </tr>
+              <tr>
+                <td><code>scrollDirection</code></td>
+                <td><code>Axis</code> (mặc định: <code>Axis.vertical</code>)</td>
+                <td>Chiều cuộn danh sách:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>Axis.vertical</code>: Cuộn dọc từ trên xuống dưới.</li>
+                    <li><code>Axis.horizontal</code>: Cuộn ngang từ trái sang phải (rất hay dùng làm danh sách Story,
+                      banner sản phẩm hot nằm ngang). <em>Lưu ý:</em> Khi cuộn ngang, các item con phải có kích thước
+                      chiều ngang xác định.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>reverse</code></td>
+                <td><code>bool</code> (mặc định: <code>false</code>)</td>
+                <td>Nếu đặt <code>true</code>, danh sách sẽ đảo ngược hướng: phần tử đầu tiên nằm ở dưới cùng và thanh
+                  cuộn bắt đầu từ đáy (chuẩn cho màn hình Chat tin nhắn).</td>
+              </tr>
+              <tr>
+                <td><code>shrinkWrap</code></td>
+                <td><code>bool</code> (mặc định: <code>false</code>)</td>
+                <td><strong>Cực kỳ quan trọng:</strong> Mặc định ListView luôn cố gắng chiếm tối đa chiều cao vô tận
+                  (infinity height). Khi đặt <code>shrinkWrap: true</code>, ListView sẽ co chiều cao lại bằng đúng tổng
+                  chiều cao các widget con bên trong.<br />
+                  <em>Bắt buộc bật <code>shrinkWrap: true</code> khi đặt ListView bên trong <code>Column</code> hoặc
+                    <code>SingleChildScrollView</code>!</em>
+                </td>
+              </tr>
+              <tr>
+                <td><code>physics</code></td>
+                <td><code>ScrollPhysics?</code></td>
+                <td>Điều khiển quy tắc và hiệu ứng vật lý khi cuộn màn hình:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>NeverScrollableScrollPhysics()</code>: <strong>Khóa cuộn hoàn toàn</strong>. Dùng khi
+                      ListView nằm lồng trong 1 ScrollView cha để tránh xung đột thao tác cuộn.</li>
+                    <li><code>BouncingScrollPhysics()</code>: Hiệu ứng kéo nảy đàn hồi lò xo (phong cách iOS).</li>
+                    <li><code>ClampingScrollPhysics()</code>: Hiệu ứng chặn cứng có quầng sáng glow ở hai mép (phong
+                      cách mặc định của Android).</li>
+                    <li><code>AlwaysScrollableScrollPhysics()</code>: Luôn cho phép kéo cuộn kể cả khi danh sách quá
+                      ngắn không đầy màn hình (<strong>Bắt buộc</strong> khi bọc ListView trong
+                      <code>RefreshIndicator</code> để tính năng vuốt kéo reload hoạt động).</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>padding</code></td>
+                <td><code>EdgeInsetsGeometry?</code></td>
+                <td>Khoảng đệm bao bọc xung quanh toàn bộ danh sách (ví dụ: <code>EdgeInsets.all(12)</code> hoặc
+                  <code>EdgeInsets.symmetric(horizontal: 16, vertical: 8)</code>).</td>
+              </tr>
+              <tr>
+                <td><code>itemExtent</code></td>
+                <td><code>double?</code></td>
+                <td>Ép chiều cao cố định (nếu cuộn dọc) hoặc chiều rộng cố định (nếu cuộn ngang) cho tất cả các item con
+                  (ví dụ: <code>itemExtent: 60.0</code>).<br />
+                  <em>Lợi ích:</em> Tăng tốc độ cuộn cực cao cho danh sách hàng nghìn item vì Flutter không cần tự đo
+                  đạc chiều cao từng phần tử.
+                </td>
+              </tr>
+              <tr>
+                <td><code>controller</code></td>
+                <td><code>ScrollController?</code></td>
+                <td>Lắng nghe và điều khiển hành vi cuộn:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>Cuộn mượt về đầu trang:
+                      <code>_controller.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut)</code>.
+                    </li>
+                    <li>Làm tính năng Load More (phân trang vô tận): bắt sự kiện
+                      <code>_controller.position.pixels == _controller.position.maxScrollExtent</code>.</li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CẢNH BÁO LỖI PHỔ BIẾN KHI DÙNG LISTVIEW -->
+        <div class="callout danger" style="margin-top: 20px;">
+          <div class="callout-title">Lỗi kinh điển trong phòng thi: "Vertical viewport was given unbounded height"</div>
+          <p>Lỗi này xảy ra khi bạn đặt <code>ListView</code> hoặc <code>ListView.builder</code> trực tiếp bên trong
+            <code>Column</code> mà không có ràng buộc kích thước (vì Column cho phép chiều cao vô tận, còn ListView cũng
+            đòi chiều cao vô tận).</p>
+          <p><strong>Cách khắc phục (Chọn 1 trong 2):</strong></p>
+          <ul style="margin-left: 20px;">
+            <li><strong>Cách 1 (Ưu tiên):</strong> Bọc <code>ListView</code> bằng widget <code>Expanded(...)</code> nếu
+              muốn ListView chiếm trọn toàn bộ khoảng trống còn lại của màn hình.</li>
+            <li><strong>Cách 2:</strong> Nếu toàn bộ trang đã bọc trong <code>SingleChildScrollView</code>, thêm vào
+              ListView 2 thuộc tính: <code>shrinkWrap: true</code> và
+              <code>physics: const NeverScrollableScrollPhysics()</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- GRIDVIEW PHÂN TÍCH TOÀN BỘ CONSTRUCTORS -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">B. Phân Tích Toàn Bộ Constructors Của GridView</div>
+        <p>Hiển thị tập dữ liệu theo dạng <strong>Lưới 2 chiều (cột và hàng)</strong>, thích hợp cho thư viện ảnh, danh
+          sách sản phẩm mua sắm (E-commerce grid), bảng màu, danh mục thể loại...</p>
+
+        <!-- GridView.count -->
+        <h4 style="color:var(--accent-blue); margin-top:15px;">1. Constructor Cố Định Số Cột:
+          <code>GridView.count(...)</code> (Rất Phổ Biến)</h4>
+        <p><em>Dùng khi:</em> Bạn muốn chỉ định <strong>chính xác số cột hiển thị</strong> trên màn hình (ví dụ: luôn
+          luôn chia làm 2 cột hoặc 3 cột), không phụ thuộc vào độ rộng màn hình.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">GridView.count({
+  Key? key,
+  required int crossAxisCount,         // BẮT BUỘC: SỐ LƯỢNG CỘT (ví dụ: 2)
+  double mainAxisSpacing = 0.0,        // Khoảng cách giữa các HÀNG dọc
+  double crossAxisSpacing = 0.0,       // Khoảng cách giữa các CỘT ngang
+  double childAspectRatio = 1.0,       // Tỉ lệ chiều rộng / chiều cao của mỗi ô (1.0 = hình vuông)
+  EdgeInsetsGeometry? padding,         // Đệm lề xung quanh lưới
+  bool shrinkWrap = false,             // Thu gọn chiều cao nếu nằm trong ScrollView/Column
+  ScrollPhysics? physics,
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[], // Danh sách item cố định
+})
+
+// Ví dụ thực tế:
+GridView.count(
+  crossAxisCount: 2,           // Luôn chia làm 2 cột
+  crossAxisSpacing: 10,        // Khoảng cách ngang giữa 2 cột là 10px
+  mainAxisSpacing: 10,         // Khoảng cách dọc giữa các hàng là 10px
+  childAspectRatio: 0.75,      // Chiều cao lớn hơn chiều rộng (chuẩn cho thẻ Card sản phẩm)
+  padding: const EdgeInsets.all(12),
+  children: items.map((item) =&gt; ItemCard(item: item)).toList(),
+)</code></pre>
+        </div>
+
+        <!-- GridView.extent -->
+        <h4 style="color:var(--accent-blue); margin-top:20px;">2. Constructor Tự Động Theo Kích Thước Tối Đa:
+          <code>GridView.extent(...)</code></h4>
+        <p><em>Dùng khi:</em> Hỗ trợ thiết kế <strong>Responsive tự động co giãn</strong>: Bạn chỉ định chiều rộng tối
+          đa của mỗi ô (ví dụ: tối đa 180px), điện thoại nhỏ sẽ tự chia 2 cột, còn màn hình máy tính bảng hoặc xoay
+          ngang sẽ tự bung thành 3-4 cột.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">GridView.extent({
+  Key? key,
+  required double maxCrossAxisExtent,  // Chiều rộng tối đa của 1 ô (ví dụ: 180.0)
+  double mainAxisSpacing = 0.0,
+  double crossAxisSpacing = 0.0,
+  double childAspectRatio = 1.0,
+  EdgeInsetsGeometry? padding,
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[],
+})</code></pre>
+        </div>
+
+        <!-- GridView.builder -->
+        <h4 style="color:var(--accent-blue); margin-top:20px;">3. Constructor Tối Ưu Tải Động:
+          <code>GridView.builder(...)</code> (Chuẩn Phòng Thi & SQLite / API)</h4>
+        <p><em>Dùng khi:</em> Dữ liệu dạng lưới <strong>lấy từ Database / REST API</strong> với số lượng lớn, yêu cầu cơ
+          chế Lazy Loading để cuộn mượt mà không bị giật lag bộ nhớ.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">GridView.builder({
+  Key? key,
+  required SliverGridDelegate gridDelegate,         // BẮT BUỘC: Bộ định nghĩa cấu hình chia lưới
+  required NullableIndexedWidgetBuilder itemBuilder,// BẮT BUỘC: Hàm render từng ô (context, index)
+  int? itemCount,                                   // Tổng số lượng phần tử
+  EdgeInsetsGeometry? padding,
+  bool shrinkWrap = false,
+  ScrollPhysics? physics,
+  ScrollController? controller,
+})
+
+// Cách 1: SliverGridDelegateWithFixedCrossAxisCount (Cố định số cột - THƯỜNG DÙNG NHẤT)
+GridView.builder(
+  itemCount: products.length,
+  padding: const EdgeInsets.all(10),
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,           // 2 cột trên 1 hàng
+    crossAxisSpacing: 10,        // Cách ngang giữa các cột
+    mainAxisSpacing: 10,         // Cách dọc giữa các hàng
+    childAspectRatio: 0.72,      // Chiều rộng / Chiều cao (0.72 giúp thẻ đủ chiều cao chứa ảnh + text + giá)
+  ),
+  itemBuilder: (context, index) {
+    final product = products[index];
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+              child: Image.network(product.imageUrl, width: double.infinity, fit: BoxFit.cover),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text('\$${product.price}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  },
+)
+
+// Cách 2: SliverGridDelegateWithMaxCrossAxisExtent (Tự bung số cột theo chiều rộng tối đa)
+gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+  maxCrossAxisExtent: 200,      // Mỗi ô rộng tối đa 200px
+  crossAxisSpacing: 10,
+  mainAxisSpacing: 10,
+  childAspectRatio: 0.8,
+)</code></pre>
+        </div>
+
+        <!-- BẢNG GIẢI THÍCH CHI TIẾT THUỘC TÍNH GRIDVIEW -->
+        <h4 style="color:var(--accent-green); margin-top:25px;">Bảng Tra Cứu Toàn Bộ Thuộc Tính & Tham Số Của GridView
+        </h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 24%;">Thuộc tính</th>
+                <th style="width: 24%;">Kiểu dữ liệu & Mặc định</th>
+                <th style="width: 52%;">Giải thích ý nghĩa & Cách sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>crossAxisCount</code></td>
+                <td><code>int</code> (bắt buộc trong <code>.count</code>)</td>
+                <td>Số lượng cột hiển thị cố định trên một hàng ngang (ví dụ: <code>2</code> cột cho màn hình mua sắm,
+                  <code>3</code> hoặc <code>4</code> cột cho thư viện ảnh).</td>
+              </tr>
+              <tr>
+                <td><code>childAspectRatio</code></td>
+                <td><code>double</code> (mặc định: <code>1.0</code>)</td>
+                <td><strong>Tham số quan trọng nhất của GridView!</strong> Là tỉ lệ giữa <strong>Chiều rộng / Chiều
+                    cao</strong> (<code>Width / Height</code>) của mỗi ô lưới:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>1.0</code>: Chiều rộng bằng chiều cao &rarr; Ô vuông hoàn hảo.</li>
+                    <li><code>&lt; 1.0</code> (ví dụ: <code>0.7</code>, <code>0.75</code>): Chiều cao lớn hơn chiều
+                      rộng. <strong>Đây là chuẩn thẻ Card sản phẩm</strong> (ảnh bên trên, tên và giá tiền bên dưới).
+                    </li>
+                    <li><code>&gt; 1.0</code> (ví dụ: <code>1.5</code>, <code>2.0</code>): Chiều rộng dài hơn chiều cao
+                      (phù hợp làm danh mục ngắn, nút chọn bộ lọc).</li>
+                  </ul>
+                  <em>Mẹo sửa lỗi:</em> Nếu các ô trong lưới bị lỗi chữ đỏ vạch vàng
+                  <code>A RenderFlex overflowed by ... pixels</code> ở đáy thẻ, hãy <strong>giảm giá trị
+                    <code>childAspectRatio</code> xuống</strong> (ví dụ từ <code>0.85</code> giảm về <code>0.7</code>)
+                  để tăng thêm chiều cao cho ô!
+                </td>
+              </tr>
+              <tr>
+                <td><code>mainAxisSpacing</code></td>
+                <td><code>double</code> (mặc định: <code>0.0</code>)</td>
+                <td>Khoảng cách tính bằng pixel giữa các <strong>HÀNG</strong> theo trục cuộn chính (nếu cuộn dọc thì
+                  đây là khoảng cách dọc giữa hàng trên và hàng dưới).</td>
+              </tr>
+              <tr>
+                <td><code>crossAxisSpacing</code></td>
+                <td><code>double</code> (mặc định: <code>0.0</code>)</td>
+                <td>Khoảng cách tính bằng pixel giữa các <strong>CỘT</strong> ngang liền kề nhau trên cùng một hàng.
+                </td>
+              </tr>
+              <tr>
+                <td><code>maxCrossAxisExtent</code></td>
+                <td><code>double</code> (trong <code>.extent</code>)</td>
+                <td>Chiều rộng tối đa cho phép của một ô lưới. Flutter sẽ tự động lấy bề rộng màn hình chia cho giá trị
+                  này để suy ra số lượng cột tối ưu (giúp giao diện tự tương thích tốt trên cả Mobile và Tablet).</td>
+              </tr>
+              <tr>
+                <td><code>gridDelegate</code></td>
+                <td><code>SliverGridDelegate</code></td>
+                <td>Bộ điều phối phân bổ lưới trong <code>GridView.builder</code>. Thường dùng 2 class con:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>SliverGridDelegateWithFixedCrossAxisCount(...)</code>: Khi biết chắc số cột cố định.</li>
+                    <li><code>SliverGridDelegateWithMaxCrossAxisExtent(...)</code>: Khi muốn tự động co giãn theo chiều
+                      rộng ô tối đa.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>itemCount</code></td>
+                <td><code>int?</code></td>
+                <td>Tổng số lượng phần tử cần dựng trong lưới (trong <code>GridView.builder</code>).</td>
+              </tr>
+              <tr>
+                <td><code>itemBuilder</code></td>
+                <td><code>Widget Function(BuildContext, int)</code></td>
+                <td>Hàm callback nhận <code>context</code> và <code>index</code> từ <code>0</code> đến
+                  <code>itemCount - 1</code> để trả về widget của ô đó.</td>
+              </tr>
+              <tr>
+                <td><code>shrinkWrap</code></td>
+                <td><code>bool</code> (mặc định: <code>false</code>)</td>
+                <td>Thu gọn chiều cao của lưới theo đúng kích thước các ô con. Bắt buộc đặt <code>true</code> khi đặt
+                  GridView bên trong <code>Column</code> hoặc <code>SingleChildScrollView</code>.</td>
+              </tr>
+              <tr>
+                <td><code>physics</code></td>
+                <td><code>ScrollPhysics?</code></td>
+                <td>Cơ chế cuộn (tương tự ListView). Khi lồng trong trang đã có cuộn thì dùng
+                  <code>physics: const NeverScrollableScrollPhysics()</code>.</td>
+              </tr>
+              <tr>
+                <td><code>padding</code></td>
+                <td><code>EdgeInsetsGeometry?</code></td>
+                <td>Khoảng đệm bao quanh 4 phía của toàn bộ khung lưới.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout tip" style="margin-top: 15px;">
+          <div class="callout-title">Mẹo phòng thi: Khi nào dùng ListView, khi nào dùng GridView?</div>
+          <ul style="margin-left: 20px;">
+            <li><strong>Dùng ListView:</strong> Khi dữ liệu hiển thị dạng 1 cột từ trên xuống dưới (danh sách tin nhắn,
+              danh sách sinh viên, danh sách cài đặt, danh sách liên hệ).</li>
+            <li><strong>Dùng GridView:</strong> Khi đề bài yêu cầu giao diện dạng lưới 2 cột trở lên (danh sách sản phẩm
+              e-commerce, thư viện hình ảnh, bảng phân loại danh mục, bảng chọn màu sắc).</li>
+            <li><strong>Cặp bài trùng lồng ScrollView:</strong> Khi đặt ListView hoặc GridView bên trong
+              <code>SingleChildScrollView</code> + <code>Column</code>, <strong>luôn luôn</strong> kèm 2 dòng:
+              <code>shrinkWrap: true</code> và <code>physics: const NeverScrollableScrollPhysics()</code>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 2: CẤU TRÚC TRANG ===================== -->
+      <h3 id="sec-structural">2. Nhóm Khung Sườn & Cấu Trúc Trang</h3>
+
+      <!-- MaterialApp -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">MaterialApp</div>
+        <p>Widget gốc bao bọc toàn bộ ứng dụng Material Design, quản trị Theme, Title và Route điều hướng.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">MaterialApp({
+  Key? key,
+  String title = '',
+  ThemeData? theme,
+  ThemeData? darkTheme,
+  ThemeMode themeMode = ThemeMode.system,
+  Widget? home,
+  Map&lt;String, WidgetBuilder&gt; routes = const &lt;String, WidgetBuilder&gt;{},
+  String? initialRoute,
+  RouteFactory? onGenerateRoute,
+  bool debugShowCheckedModeBanner = true,
+})</code></pre>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tham số</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Mô tả & Công dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>home</code></td>
+                <td><code>Widget?</code></td>
+                <td>Màn hình chính hiển thị đầu tiên khi mở ứng dụng.</td>
+              </tr>
+              <tr>
+                <td><code>title</code></td>
+                <td><code>String</code></td>
+                <td>Tên app trên thanh Task Switcher của hệ điều hành.</td>
+              </tr>
+              <tr>
+                <td><code>theme</code></td>
+                <td><code>ThemeData?</code></td>
+                <td>Bộ chủ đề màu sắc, phông chữ toàn app (Light mode).</td>
+              </tr>
+              <tr>
+                <td><code>routes</code></td>
+                <td><code>Map&lt;String, WidgetBuilder&gt;</code></td>
+                <td>Bảng điều hướng theo tên định sẵn (Named Routes).</td>
+              </tr>
+              <tr>
+                <td><code>debugShowCheckedModeBanner</code></td>
+                <td><code>bool</code></td>
+                <td>Đặt <code>false</code> để ẩn dải băng chữ 'DEBUG' ở góc phải trên.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Scaffold -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Scaffold</div>
+        <p>Khung sườn trực quan của 1 màn hình chuẩn Material Design (AppBar, Body, Drawer, FloatingActionButton...).
+        </p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">Scaffold({
+  Key? key,
+  PreferredSizeWidget? appBar,
+  Widget? body,
+  Widget? floatingActionButton,
+  FloatingActionButtonLocation? floatingActionButtonLocation,
+  Widget? drawer,
+  Widget? endDrawer,
+  Widget? bottomNavigationBar,
+  Color? backgroundColor,
+  bool resizeToAvoidBottomInset = true,
+})</code></pre>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tham số</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Mô tả & Công dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>appBar</code></td>
+                <td><code>PreferredSizeWidget?</code></td>
+                <td>Thanh tiêu đề trên cùng (thường truyền <code>AppBar(...)</code>).</td>
+              </tr>
+              <tr>
+                <td><code>body</code></td>
+                <td><code>Widget?</code></td>
+                <td>Vùng nội dung chính chiếm toàn bộ thân màn hình.</td>
+              </tr>
+              <tr>
+                <td><code>floatingActionButton</code></td>
+                <td><code>Widget?</code></td>
+                <td>Nút tròn nổi góc dưới để thực hiện hành động chính (thêm mới...).</td>
+              </tr>
+              <tr>
+                <td><code>drawer</code></td>
+                <td><code>Widget?</code></td>
+                <td>Menu trượt ra từ mép trái màn hình.</td>
+              </tr>
+              <tr>
+                <td><code>bottomNavigationBar</code></td>
+                <td><code>Widget?</code></td>
+                <td>Thanh điều hướng chuyển tab ở đáy màn hình.</td>
+              </tr>
+              <tr>
+                <td><code>resizeToAvoidBottomInset</code></td>
+                <td><code>bool</code></td>
+                <td>Tự động đẩy giao diện lên khi bàn phím ảo bật lên (tránh che ô nhập).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AppBar -->
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">AppBar</div>
+        <p>Thanh tiêu đề ở đỉnh màn hình, chứa nút Back/Menu, Tiêu đề và các icon thao tác nhanh.</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">AppBar({
+  Key? key,
+  Widget? leading,
+  Widget? title,
+  List&lt;Widget&gt;? actions,
+  bool centerTitle = false,
+  Color? backgroundColor,
+  Color? foregroundColor,
+  double? elevation,
+})</code></pre>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tham số</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Mô tả & Công dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>title</code></td>
+                <td><code>Widget?</code></td>
+                <td>Thường là <code>Text('Tiêu đề')</code>.</td>
+              </tr>
+              <tr>
+                <td><code>leading</code></td>
+                <td><code>Widget?</code></td>
+                <td>Widget góc trái ngoài cùng (mặc định là nút Back hoặc icon Drawer).</td>
+              </tr>
+              <tr>
+                <td><code>actions</code></td>
+                <td><code>List&lt;Widget&gt;?</code></td>
+                <td>Danh sách các icon nút bấm bên phải (search, edit, logout...).</td>
+              </tr>
+              <tr>
+                <td><code>centerTitle</code></td>
+                <td><code>bool</code></td>
+                <td>Căn tiêu đề ra chính giữa (iOS mặc định true, Android mặc định false).</td>
+              </tr>
+              <tr>
+                <td><code>backgroundColor</code></td>
+                <td><code>Color?</code></td>
+                <td>Màu nền của thanh AppBar.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 3: BỐ CỤC ===================== -->
+      <h3 id="sec-layout">3. Nhóm Bố Cục & Tạo Kiểu Khung Hình (Layout & Box Styling)</h3>
+
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Container & BoxDecoration (Tạo Khung, Bo Góc, Gradient, Đổ Bóng 3D)</div>
+        <p>Widget đa năng số 1 trong Flutter để tạo hộp chứa, định kích thước, căn lề, viền bao quanh, bo tròn góc, tạo
+          màu chuyển sắc (Gradient) và đổ bóng nổi 3D (BoxShadow).</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">Container({
+  Key? key,
+  AlignmentGeometry? alignment,      // Căn vị trí widget con bên trong (Alignment.center...)
+  EdgeInsetsGeometry? padding,       // Khoảng đệm bên trong viền khối
+  EdgeInsetsGeometry? margin,        // Khoảng cách lề bên ngoài khối
+  Color? color,                      // Màu nền đơn giản (KHÔNG dùng chung với decoration)
+  Decoration? decoration,            // Trang trí nâng cao: màu nền, bo góc, viền, gradient, bóng đổ
+  double? width,                     // Chiều rộng
+  double? height,                    // Chiều cao
+  BoxConstraints? constraints,       // Ràng buộc min/max width/height
+  Widget? child,                     // Widget con bên trong
+})
+
+// Mẫu Container có BoxDecoration đầy đủ hiệu ứng đẹp:
+Container(
+  width: double.infinity,
+  padding: const EdgeInsets.all(16),
+  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    // 1. Bo góc tròn
+    borderRadius: BorderRadius.circular(16),
+    // 2. Viền bao quanh
+    border: Border.all(color: Colors.blue.shade100, width: 1.5),
+    // 3. Đổ bóng 3D nổi bật
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.08),
+        blurRadius: 12,                  // Độ nhòe của bóng
+        spreadRadius: 2,                  // Độ lan rộng của bóng
+        offset: const Offset(0, 4),      // Tọa độ lệch (x=0 ngang, y=4 dịch xuống dưới)
+      ),
+    ],
+  ),
+  child: const Text('Thẻ Card tùy biến cao cấp'),
+)
+
+// Mẫu Container nền dải màu chuyển sắc (Gradient Background):
+Container(
+  height: 120,
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(16),
+    gradient: const LinearGradient(
+      colors: [Color(0xFF2196F3), Color(0xFF9C27B0)], // Chuyển từ Xanh sang Tím
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  ),
+  child: const Center(
+    child: Text('Banner Gradient', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+  ),
+)</code></pre>
+        </div>
+
+        <h4 style="color:var(--accent-green); margin-top:20px;">Bảng Tra Cứu Thuộc Tính Của BoxDecoration</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Thuộc tính</th>
+                <th style="width: 25%;">Kiểu dữ liệu</th>
+                <th style="width: 50%;">Mô tả & Ví dụ cú pháp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>color</code></td>
+                <td><code>Color?</code></td>
+                <td>Màu nền của khối hộp (ví dụ: <code>Colors.white</code>, <code>Color(0xFFF5F5F5)</code>).</td>
+              </tr>
+              <tr>
+                <td><code>borderRadius</code></td>
+                <td><code>BorderRadiusGeometry?</code></td>
+                <td>Bo tròn góc khung:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>Bo đều 4 góc: <code>BorderRadius.circular(12)</code></li>
+                    <li>Bo riêng từng góc:
+                      <code>BorderRadius.only(topLeft: Radius.circular(16), bottomRight: Radius.circular(16))</code>
+                    </li>
+                    <li>Bo 2 góc trên (chuẩn ảnh trong Card):
+                      <code>BorderRadius.vertical(top: Radius.circular(12))</code></li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>border</code></td>
+                <td><code>BoxBorder?</code></td>
+                <td>Vẽ đường viền khung:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>Viền cả 4 phía: <code>Border.all(color: Colors.grey, width: 1.0)</code></li>
+                    <li>Chỉ viền mép dưới (gạch chân):
+                      <code>Border(bottom: BorderSide(color: Colors.blue, width: 2))</code></li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>boxShadow</code></td>
+                <td><code>List&lt;BoxShadow&gt;?</code></td>
+                <td>Danh sách các lớp bóng đổ:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>color</code>: Màu bóng (thường làm mờ bằng <code>Colors.black.withOpacity(0.1)</code>).
+                    </li>
+                    <li><code>blurRadius</code>: Độ mờ nhòe lan tỏa của bóng (càng lớn bóng càng mềm).</li>
+                    <li><code>offset</code>: Hướng lệch bóng <code>Offset(dx, dy)</code> (ví dụ:
+                      <code>Offset(0, 4)</code> đổ bóng xuống đáy).</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>gradient</code></td>
+                <td><code>Gradient?</code></td>
+                <td>Tạo màu chuyển sắc:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>
+                      <code>LinearGradient(colors: [Colors.blue, Colors.teal], begin: Alignment.centerLeft, end: Alignment.centerRight)</code>
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>shape</code></td>
+                <td><code>BoxShape</code> (mặc định: <code>rectangle</code>)</td>
+                <td>Hình dạng khối: <code>BoxShape.rectangle</code> (hình chữ nhật) hoặc <code>BoxShape.circle</code>
+                  (tự động biến thành hình tròn hoàn hảo không cần tính bán kính).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn" style="margin-top: 15px;">
+          <div class="callout-title">Lỗi ArgumentError kinh điển của Container</div>
+          <p>Không được vừa khai báo <code>color</code> ở <code>Container</code> vừa khai báo <code>color</code> ở trong
+            <code>BoxDecoration</code> cùng lúc. Nếu đã dùng <code>decoration: BoxDecoration(...)</code> thì thuộc tính
+            màu nền <strong>bắt buộc phải nằm bên trong BoxDecoration</strong>!</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">SizedBox, Padding, Center & Align</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Widget</th>
+                <th>Constructor & Tham số cốt lõi</th>
+                <th>Công dụng chính</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SizedBox</code></td>
+                <td><code>SizedBox({double? width, double? height, Widget? child})</code><br />Constructor phụ:
+                  <code>SizedBox.shrink()</code>, <code>SizedBox.expand()</code></td>
+                <td>Tạo khoảng trống cách giữa các widget trong Row/Column (ví dụ: <code>SizedBox(height: 16)</code>)
+                  hoặc ép kích thước con.</td>
+              </tr>
+              <tr>
+                <td><code>Padding</code></td>
+                <td><code>Padding({required EdgeInsetsGeometry padding, Widget? child})</code></td>
+                <td>Thêm khoảng đệm bao quanh một Widget bất kỳ (nhẹ hơn Container).</td>
+              </tr>
+              <tr>
+                <td><code>Center</code></td>
+                <td><code>Center({double? widthFactor, double? heightFactor, Widget? child})</code></td>
+                <td>Căn chính giữa không gian cha mẹ cung cấp.</td>
+              </tr>
+              <tr>
+                <td><code>Align</code></td>
+                <td><code>Align({AlignmentGeometry alignment = Alignment.center, Widget? child})</code></td>
+                <td>Căn vị trí con theo hướng chỉ định: <code>Alignment.topRight</code>,
+                  <code>Alignment.bottomLeft</code>...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 4: ĐA CON TUYẾN TÍNH ===================== -->
+      <h3 id="sec-multi-child">4. Nhóm Tuyến Tính & Xếp Lớp (Row, Column, Stack)</h3>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Column & Row</div>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">Column({
+  Key? key,
+  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+  MainAxisSize mainAxisSize = MainAxisSize.max,
+  CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[],
+})
+
+Row({
+  Key? key,
+  MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+  MainAxisSize mainAxisSize = MainAxisSize.max,
+  CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+  List&lt;Widget&gt; children = const &lt;Widget&gt;[],
+})</code></pre>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tham số</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>children</code></td>
+                <td><code>List&lt;Widget&gt;</code></td>
+                <td>Mảng danh sách các phần tử con bên trong.</td>
+              </tr>
+              <tr>
+                <td><code>mainAxisAlignment</code></td>
+                <td><code>MainAxisAlignment</code></td>
+                <td>Căn trục chính (start, end, center, spaceBetween, spaceAround, spaceEvenly).</td>
+              </tr>
+              <tr>
+                <td><code>crossAxisAlignment</code></td>
+                <td><code>CrossAxisAlignment</code></td>
+                <td>Căn trục vuông góc (start, end, center, stretch).</td>
+              </tr>
+              <tr>
+                <td><code>mainAxisSize</code></td>
+                <td><code>MainAxisSize</code></td>
+                <td><code>max</code> (chiếm hết khoảng trống) hoặc <code>min</code> (chỉ ôm gọn con).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Stack, Positioned, Expanded & Flexible</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Widget</th>
+                <th>Constructor & Tham số</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Stack</code></td>
+                <td><code>Stack({AlignmentGeometry alignment, List&lt;Widget&gt; children})</code></td>
+                <td>Xếp chồng các widget lên nhau theo trục Z (lớp sau đè lên lớp trước).</td>
+              </tr>
+              <tr>
+                <td><code>Positioned</code></td>
+                <td>
+                  <code>Positioned({double? top, double? bottom, double? left, double? right, required Widget child})</code>
+                </td>
+                <td>Định vị tọa độ tuyệt đối của con bên trong <code>Stack</code>.</td>
+              </tr>
+              <tr>
+                <td><code>Expanded</code></td>
+                <td><code>Expanded({int flex = 1, required Widget child})</code></td>
+                <td>Bắt buộc con chiếm toàn bộ khoảng trống còn lại trong Row/Column theo tỉ lệ <code>flex</code>.</td>
+              </tr>
+              <tr>
+                <td><code>Flexible</code></td>
+                <td><code>Flexible({int flex = 1, FlexFit fit = FlexFit.loose, required Widget child})</code></td>
+                <td>Cho phép con co giãn linh hoạt nhưng không bắt buộc chiếm hết khoảng trống.</td>
+              </tr>
+              <tr>
+                <td><code>Spacer</code></td>
+                <td><code>Spacer({int flex = 1})</code></td>
+                <td>Tạo khoảng trống co giãn đẩy 2 cụm widget dạt về hai phía.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 5: ĐỊNH DẠNG CHỮ & HIỂN THỊ ===================== -->
+      <h3 id="sec-text-image-icon">5. Nhóm Định Dạng Chữ & Hiển Thị (Text, TextStyle, RichText, TextTheme, Image & Clip)
+      </h3>
+      <p>Tổng hợp toàn diện các kỹ thuật <strong>Style chữ</strong> (màu sắc, cỡ chữ, độ đậm, gạch ngang giá sale, giãn
+        cách chữ), tạo <strong>văn bản đa phong cách (RichText / TextSpan)</strong>, áp dụng bộ chuẩn phông chữ Material
+        3 (TextTheme) và kỹ thuật <strong>cắt bo tròn góc ảnh (ClipRRect)</strong>.</p>
+
+      <!-- CARD 1: TEXT & TEXTSTYLE -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">A. Widget Text & Bảng Tra Cứu Toàn Bộ Thuộc Tính Của TextStyle</div>
+        <p>Widget hiển thị văn bản cơ bản nhất trong Flutter kèm theo bộ tùy biến định dạng font chữ chi tiết.</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Constructor của Text:
+Text(
+  String data, {
+  Key? key,
+  TextStyle? style,            // Định dạng kiểu chữ (màu, cỡ, đậm nhạt...)
+  TextAlign? textAlign,        // Căn lề: TextAlign.center, left, right, justify
+  int? maxLines,               // Giới hạn số dòng hiển thị tối đa (chống tràn layout)
+  TextOverflow? overflow,      // Xử lý khi chữ quá dài: TextOverflow.ellipsis (dấu ...)
+  bool softWrap = true,        // Tự động ngắt xuống dòng khi hết chiều rộng
+})
+
+// 2. Constructor của TextStyle (Toàn bộ tham số style chữ):
+TextStyle({
+  Color? color,                          // Màu chữ
+  double? fontSize,                      // Cỡ chữ (pixels)
+  FontWeight? fontWeight,                // Độ đậm nhạt (w100 - w900, bold, normal)
+  FontStyle? fontStyle,                  // Kiểu chữ (FontStyle.italic: in nghiêng)
+  double? letterSpacing,                 // Khoảng cách giãn giữa các ký tự
+  double? wordSpacing,                   // Khoảng cách giữa các từ
+  double? height,                        // Chiều cao dòng (line-height, ví dụ 1.4 - 1.6)
+  TextDecoration? decoration,            // Đường kẻ gạch (underline, lineThrough)
+  Color? decorationColor,                // Màu của đường kẻ gạch
+  TextDecorationStyle? decorationStyle,  // Kiểu đường gạch (solid, dashed, dotted)
+  List&lt;Shadow&gt;? shadows,                 // Đổ bóng chữ nghệ thuật
+  String? fontFamily,                    // Tên font chữ tùy chỉnh
+})
+
+// Ví dụ thực tế: Tiêu đề sản phẩm chống tràn và giá tiền nổi bật
+Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    // Tiêu đề: tối đa 2 dòng, quá dài tự thêm dấu 3 chấm '...'
+    const Text(
+      'Điện thoại thông minh Xiaomi Redmi Note 13 Pro 8GB/256GB Chính Hãng',
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+        height: 1.3,
+      ),
+    ),
+    const SizedBox(height: 6),
+    // Giá sale hiện tại + Giá cũ gạch ngang:
+    Row(
+      children: const [
+        Text(
+          '5.490.000₫',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.red,
+          ),
+        ),
+        SizedBox(width: 8),
+        Text(
+          '6.990.000₫',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
+            decoration: TextDecoration.lineThrough, // GẠCH NGANG GIÁ CŨ
+          ),
+        ),
+      ],
+    ),
+  ],
+)</code></pre>
+        </div>
+
+        <h4 style="color:var(--accent-green); margin-top:20px;">Bảng Tra Cứu Toàn Bộ Thuộc Tính Của TextStyle</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Thuộc tính</th>
+                <th style="width: 26%;">Kiểu dữ liệu & Mặc định</th>
+                <th style="width: 52%;">Ý nghĩa & Hướng dẫn sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>color</code></td>
+                <td><code>Color?</code></td>
+                <td>Màu sắc của chữ: <code>Colors.blue</code>, <code>Colors.black87</code>,
+                  <code>Color(0xFFE53935)</code> hoặc <code>Colors.black.withOpacity(0.6)</code>.</td>
+              </tr>
+              <tr>
+                <td><code>fontSize</code></td>
+                <td><code>double?</code> (mặc định: <code>14.0</code>)</td>
+                <td>Kích thước phông chữ (pixels). Quy chuẩn thiết kế đề thi:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>11 - 12</code>: Ghi chú nhỏ, nhãn phụ, ngày giờ đăng.</li>
+                    <li><code>14</code>: Văn bản nội dung thông thường (Body text).</li>
+                    <li><code>16</code>: Phụ đề, chữ trên nút bấm, tên trường nhập liệu.</li>
+                    <li><code>18 - 20</code>: Tiêu đề thẻ Card, tên sản phẩm, AppBar title.</li>
+                    <li><code>24+</code>: Tiêu đề lớn màn hình chào, banner nổi bật.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>fontWeight</code></td>
+                <td><code>FontWeight?</code></td>
+                <td>Độ dày/đậm của nét chữ:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>FontWeight.w300</code> (Light): Nét chữ thanh mảnh.</li>
+                    <li><code>FontWeight.normal</code> / <code>w400</code>: Nét chữ bình thường.</li>
+                    <li><code>FontWeight.w500</code> / <code>w600</code>: Đậm vừa phải (Semi-bold, rất đẹp cho
+                      subtitle/tag).</li>
+                    <li><code>FontWeight.bold</code> / <code>w700</code>: <strong>In đậm rõ nét</strong> (dùng cho giá
+                      tiền, tiêu đề).</li>
+                    <li><code>FontWeight.w900</code>: Rất đậm (Black/Heavy).</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>fontStyle</code></td>
+                <td><code>FontStyle?</code></td>
+                <td>Kiểu dáng chữ: <code>FontStyle.italic</code> (in nghiêng) hoặc <code>FontStyle.normal</code> (thẳng
+                  đứng).</td>
+              </tr>
+              <tr>
+                <td><code>letterSpacing</code></td>
+                <td><code>double?</code></td>
+                <td>Khoảng cách giãn cách giữa các <strong>ký tự chữ cái</strong>:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>Đặt <code>letterSpacing: 1.5</code>: Giúp tiêu đề chữ IN HOA thoáng đãng và sang trọng.</li>
+                    <li>Đặt <code>letterSpacing: 4.0</code>: Dùng cho ô nhập mã OTP hoặc số thẻ ngân hàng.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>wordSpacing</code></td>
+                <td><code>double?</code></td>
+                <td>Khoảng cách giãn cách giữa các từ trong câu.</td>
+              </tr>
+              <tr>
+                <td><code>height</code></td>
+                <td><code>double?</code></td>
+                <td>Tỉ lệ chiều cao dòng (Line-height multiplier). Ví dụ: <code>height: 1.5</code> nghĩa là chiều cao
+                  dòng bằng 1.5 lần <code>fontSize</code>, giúp đoạn văn đọc không bị dính sát vào nhau.</td>
+              </tr>
+              <tr>
+                <td><code>decoration</code></td>
+                <td><code>TextDecoration?</code></td>
+                <td>Đường kẻ trang trí văn bản:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>TextDecoration.underline</code>: Gạch chân dưới chữ (đường dẫn liên kết, link "Xem thêm").
+                    </li>
+                    <li><code>TextDecoration.lineThrough</code>: <strong>Gạch ngang xuyên qua chữ</strong> (giá gốc
+                      trước khi giảm giá).</li>
+                    <li><code>TextDecoration.overline</code>: Gạch ngang trên đầu chữ.</li>
+                    <li><code>TextDecoration.none</code>: Bỏ mọi đường gạch.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>decorationColor</code></td>
+                <td><code>Color?</code></td>
+                <td>Màu của đường kẻ gạch (ví dụ: gạch đường màu đỏ hoặc xám).</td>
+              </tr>
+              <tr>
+                <td><code>decorationStyle</code></td>
+                <td><code>TextDecorationStyle?</code></td>
+                <td>Kiểu nét gạch: <code>solid</code> (nét liền), <code>dashed</code> (nét đứt gạch),
+                  <code>dotted</code> (chấm bi), <code>wavy</code> (lượn sóng).</td>
+              </tr>
+              <tr>
+                <td><code>shadows</code></td>
+                <td><code>List&lt;Shadow&gt;?</code></td>
+                <td>Đổ bóng cho chữ: <code>[Shadow(color: Colors.black38, offset: Offset(1, 2), blurRadius: 4)]</code>.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARD 2: RICHTEXT & TEXTSPAN -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">B. Văn Bản Đa Phong Cách: RichText & TextSpan (Nhiều Style Trên Cùng 1 Đoạn)</div>
+        <p><em>Dùng khi:</em> Một câu văn bản cần có <strong>nhiều kiểu dáng, kích cỡ hoặc màu sắc khác nhau</strong>
+          trong cùng một dòng mà không thể tách thành nhiều widget Text độc lập (vì tách ra sẽ bị vỡ dòng không tự
+          nhiên).</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// Ví dụ 1: Dòng chuyển hướng "Bạn chưa có tài khoản? Đăng ký ngay"
+RichText(
+  text: TextSpan(
+    style: const TextStyle(fontSize: 15, color: Colors.black87), // Style mặc định cho toàn câu
+    children: [
+      const TextSpan(text: 'Bạn chưa có tài khoản? '),
+      TextSpan(
+        text: 'Đăng ký ngay',
+        style: const TextStyle(
+          color: Colors.blue,
+          fontWeight: FontWeight.bold,
+          decoration: TextDecoration.underline,
+        ),
+        // recognizer: TapGestureRecognizer()..onTap = () => _goToRegisterScreen(),
+      ),
+    ],
+  ),
+)
+
+// Ví dụ 2: Dòng giá khuyến mãi kết hợp phần trăm giảm
+RichText(
+  text: TextSpan(
+    children: const [
+      TextSpan(
+        text: '199.000₫ ',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
+      ),
+      TextSpan(
+        text: '350.000₫ ',
+        style: TextStyle(fontSize: 14, color: Colors.grey, decoration: TextDecoration.lineThrough),
+      ),
+      TextSpan(
+        text: '(-43%)',
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.green),
+      ),
+    ],
+  ),
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- CARD 3: MATERIAL 3 TEXTTHEME -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">C. Bộ Chuẩn Phông Chữ Material 3: Theme.of(context).textTheme</div>
+        <p>Thay vì tự gán <code>fontSize</code> và <code>fontWeight</code> thủ công cho từng widget, chuẩn Material 3
+          của Flutter cung cấp hệ thống thang tỷ lệ phông chữ (Typography Hierarchy) đồng bộ, tự động hỗ trợ chế độ Tối
+          (Dark Mode) và Sáng (Light Mode).</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// Cách gọi style chuẩn hệ thống:
+Text('Tiêu đề chính', style: Theme.of(context).textTheme.headlineMedium)
+
+// Cách tùy biến đè thêm màu hoặc độ đậm bằng copyWith:
+Text(
+  'Tên sản phẩm',
+  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+    color: Colors.blue,
+    fontWeight: FontWeight.bold,
+  ),
+)</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Tên Style (textTheme.*)</th>
+                <th style="width: 25%;">Cỡ chữ chuẩn & Độ đậm</th>
+                <th style="width: 50%;">Vị trí sử dụng phổ biến</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>headlineLarge / Medium</code></td>
+                <td>32px / 28px - Bold</td>
+                <td>Tiêu đề màn hình đăng nhập, màn hình chào mừng (Welcome).</td>
+              </tr>
+              <tr>
+                <td><code>titleLarge</code></td>
+                <td>22px - SemiBold</td>
+                <td>Tiêu đề thanh AppBar, tiêu đề Dialog xác nhận.</td>
+              </tr>
+              <tr>
+                <td><code>titleMedium</code></td>
+                <td>16px - Medium/Bold</td>
+                <td>Tiêu đề chính của thẻ Card sản phẩm, dòng ListTile.</td>
+              </tr>
+              <tr>
+                <td><code>bodyLarge</code></td>
+                <td>16px - Normal</td>
+                <td>Đoạn văn mô tả chi tiết, nội dung bài viết.</td>
+              </tr>
+              <tr>
+                <td><code>bodyMedium</code></td>
+                <td>14px - Normal (Mặc định)</td>
+                <td>Văn bản hiển thị phổ thông nhất toàn ứng dụng.</td>
+              </tr>
+              <tr>
+                <td><code>bodySmall</code></td>
+                <td>12px - Normal</td>
+                <td>Ghi chú phụ đề, thời gian đăng (ví dụ: '2 giờ trước').</td>
+              </tr>
+              <tr>
+                <td><code>labelLarge</code></td>
+                <td>14px - SemiBold/Bold</td>
+                <td>Chữ in trên các nút bấm (ElevatedButton, OutlinedButton).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARD 4: IMAGE, CIRCLEAVATAR & CLIPRRECT -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">D. Hình Ảnh (Image), CircleAvatar & Cắt Bo Góc (ClipRRect, ClipOval)</div>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Tải ảnh từ Internet (Có bắt lỗi mất mạng / ảnh chết):
+Image.network(
+  'https://example.com/item.jpg',
+  width: double.infinity,
+  height: 180,
+  fit: BoxFit.cover, // Cắt cúp vừa khít khung mà không bị méo tỉ lệ
+  errorBuilder: (context, error, stackTrace) {
+    // Trả về widget thay thế khi link lỗi hoặc mất kết nối mạng
+    return Container(
+      height: 180,
+      color: Colors.grey[200],
+      child: const Center(child: Icon(Icons.broken_image, size: 48, color: Colors.grey)),
+    );
+  },
+)
+
+// 2. Tải ảnh từ thư mục assets nội bộ của project:
+Image.asset(
+  'assets/images/logo.png',
+  width: 120,
+  height: 120,
+  fit: BoxFit.contain,
+)
+
+// 3. Avatar tròn (Profile User):
+CircleAvatar(
+  radius: 28, // Bán kính vòng tròn (đường kính = 56px)
+  backgroundColor: Colors.blue.shade100,
+  backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=3'),
+  child: const Text('KH', style: TextStyle(fontWeight: FontWeight.bold)), // Hiện nếu ảnh chưa load
+)
+
+// 4. ClipRRect (Cắt bo góc tròn cho BẤT KỲ widget con nào, đặc biệt là ảnh):
+ClipRRect(
+  borderRadius: BorderRadius.circular(12), // Bo tròn 12px cả 4 góc
+  child: Image.network('https://example.com/banner.jpg', fit: BoxFit.cover),
+)
+
+// 5. ClipOval (Cắt widget thành hình Oval hoặc tròn xoe):
+ClipOval(
+  child: Image.asset('assets/avatar.png', width: 60, height: 60, fit: BoxFit.cover),
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 6: FORMS ===================== -->
+      <h3 id="sec-inputs-forms">6. Nhóm Form & Nhập Liệu Toàn Diện (Forms & Input Widgets)</h3>
+      <p>Nhóm widget cốt lõi cho mọi màn hình <strong>Đăng nhập, Đăng ký, Thêm mới & Chỉnh sửa dữ liệu (CRUD)</strong>
+        trong Flutter. Bao gồm cơ chế quản lý Form State, xác thực tính hợp lệ (Validation), các kiểu ô nhập văn bản,
+        menu chọn thả xuống và các nút lựa chọn chuyển đổi.</p>
+
+      <!-- CARD 1: FORM & GLOBALKEY -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">A. Khung Quản Lý Form & GlobalKey&lt;FormState&gt;</div>
+        <p><code>Form</code> là widget container bao ngoài để liên kết và điều phối toàn bộ các trường nhập liệu con
+          (TextFormField, DropdownButtonFormField...). Quản lý tập trung việc kiểm tra dữ liệu hợp lệ (Validate), lưu dữ
+          liệu (Save) và đặt lại dữ liệu (Reset).</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Khai báo Form Key trong State
+final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+
+// 2. Cấu trúc Form bọc ngoài
+Form({
+  Key? key,                               // BẮT BUỘC: Truyền _formKey vào đây
+  required Widget child,                  // Thường là Column hoặc ListView chứa các ô nhập
+  AutovalidateMode? autovalidateMode,     // Chế độ tự động kiểm tra lỗi
+  void Function()? onChanged,             // Lắng nghe khi có bất kỳ trường con nào thay đổi
+})
+
+// 3. Sử dụng 3 hàm cốt lõi của _formKey:
+void _submitForm() {
+  // A. Kiểm tra tính hợp lệ của toàn bộ ô nhập:
+  if (_formKey.currentState!.validate()) {
+    // B. Gọi onSaved của toàn bộ ô con (nếu có dùng):
+    _formKey.currentState!.save();
+    
+    // C. Tiến hành lưu dữ liệu vào SQLite / gọi API:
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dữ liệu hợp lệ, đang lưu...'), backgroundColor: Colors.green),
+    );
+  }
+}
+
+void _resetForm() {
+  // Đưa toàn bộ ô nhập về rỗng và xóa hết các thông báo lỗi đỏ:
+  _formKey.currentState!.reset();
+}</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Thuộc tính / Phương thức</th>
+                <th style="width: 25%;">Kiểu dữ liệu</th>
+                <th style="width: 50%;">Mô tả chi tiết & Công dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>key: _formKey</code></td>
+                <td><code>GlobalKey&lt;FormState&gt;</code></td>
+                <td>Chiếc chìa khóa định danh và điều khiển trạng thái của toàn bộ Form.</td>
+              </tr>
+              <tr>
+                <td><code>autovalidateMode</code></td>
+                <td><code>AutovalidateMode</code></td>
+                <td>Quy định thời điểm hiển thị thông báo lỗi:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>AutovalidateMode.disabled</code> (mặc định): Chỉ báo lỗi khi người dùng bấm nút Submit và
+                      gọi lệnh <code>validate()</code>.</li>
+                    <li><code>AutovalidateMode.onUserInteraction</code>: <strong>Rất hay dùng</strong>. Tự động kiểm tra
+                      và cập nhật lỗi ngay khi người dùng chạm vào gõ phím.</li>
+                    <li><code>AutovalidateMode.always</code>: Luôn kiểm tra lỗi ngay từ khi màn hình vừa mở lên.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>validate()</code></td>
+                <td><code>bool Function()</code></td>
+                <td>Kích hoạt hàm <code>validator</code> của tất cả widget con. Trả về <code>true</code> nếu toàn bộ đều
+                  hợp lệ (tất cả validator trả về <code>null</code>), trả về <code>false</code> nếu có ít nhất 1 ô sai.
+                </td>
+              </tr>
+              <tr>
+                <td><code>save()</code></td>
+                <td><code>void Function()</code></td>
+                <td>Kích hoạt hàm callback <code>onSaved</code> của tất cả các trường con trong Form.</td>
+              </tr>
+              <tr>
+                <td><code>reset()</code></td>
+                <td><code>void Function()</code></td>
+                <td>Xóa sạch thông báo lỗi đỏ và đưa các trường con về lại giá trị <code>initialValue</code> ban đầu.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARD 2: TEXTFORMFIELD VS TEXTFIELD -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">B. Phân Tích Toàn Bộ Thuộc Tính Của TextFormField (So Sánh Với TextField)</div>
+        <p><strong>So sánh nhanh:</strong></p>
+        <ul style="margin-left: 20px; margin-bottom: 15px;">
+          <li><code>TextField</code>: Dùng độc lập cho các ô tìm kiếm đơn giản, ô nhập tin nhắn chat nhanh không cần xác
+            thực tính hợp lệ.</li>
+          <li><code>TextFormField</code>: Kế thừa từ <code>FormField&lt;String&gt;</code>, bọc ngoài
+            <code>TextField</code> và tích hợp chặt chẽ với <code>Form</code>. Hỗ trợ thuộc tính <code>validator</code>,
+            <code>onSaved</code>, hiển thị viền đỏ báo lỗi tự động. <strong>Luôn dùng TextFormField trong đề thi và các
+              màn hình nhập liệu!</strong></li>
+        </ul>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">TextFormField({
+  Key? key,
+  TextEditingController? controller,       // Đọc/ghi dữ liệu chữ
+  String? initialValue,                    // Giá trị mặc định (không dùng chung với controller)
+  InputDecoration? decoration = const InputDecoration(), // Trang trí viền, nhãn, icon
+  TextInputType? keyboardType,             // Kiểu bàn phím ảo (text, number, email, phone...)
+  TextInputAction? textInputAction,         // Nút hành động góc dưới bàn phím (next, done, search)
+  bool obscureText = false,                // Ẩn mật khẩu (dấu tròn •)
+  String obscuringCharacter = '•',         // Ký tự che mật khẩu
+  FormFieldValidator&lt;String&gt;? validator,   // Hàm kiểm tra tính hợp lệ
+  void Function(String)? onChanged,        // Bắt sự kiện gõ phím theo thời gian thực
+  void Function(String?)? onSaved,         // Callback khi gọi _formKey.currentState!.save()
+  void Function(String)? onFieldSubmitted, // Bắt sự kiện khi bấm nút Done/Enter trên bàn phím
+  int? maxLines = 1,                       // Số dòng tối đa (nếu obscureText = true thì bắt buộc là 1)
+  int? minLines,                           // Số dòng tối thiểu
+  int? maxLength,                          // Giới hạn ký tự tối đa (tự hiện bộ đếm 0/100)
+  bool readOnly = false,                   // Chỉ đọc, không hiện bàn phím ảo (dùng cho DatePicker)
+  bool enabled = true,                     // Bật/tắt ô nhập
+  List&lt;TextInputFormatter&gt;? inputFormatters, // Bộ lọc định dạng nhập (ví dụ: chỉ nhập số)
+  VoidCallback? onTap,                     // Sự kiện chạm vào ô nhập
+})</code></pre>
+        </div>
+
+        <h4 style="color:var(--accent-green); margin-top:20px;">Bảng Tra Cứu Toàn Bộ Thuộc Tính Của TextFormField</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22%;">Thuộc tính</th>
+                <th style="width: 26%;">Kiểu dữ liệu</th>
+                <th style="width: 52%;">Ý nghĩa & Hướng dẫn sử dụng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>controller</code></td>
+                <td><code>TextEditingController?</code></td>
+                <td>Quản lý văn bản bên trong ô nhập:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>Lấy giá trị: <code>_controller.text</code></li>
+                    <li>Gán giá trị mới: <code>_controller.text = 'Flutter'</code></li>
+                    <li>Xóa trắng: <code>_controller.clear()</code></li>
+                    <li><em>Lưu ý:</em> Luôn gọi <code>_controller.dispose()</code> trong hàm <code>dispose()</code> của
+                      State để tránh rò rỉ bộ nhớ. Không truyền cả <code>controller</code> và <code>initialValue</code>
+                      cùng lúc!</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>validator</code></td>
+                <td><code>String? Function(String?)?</code></td>
+                <td><strong>Trọng tâm chấm thi:</strong> Hàm kiểm tra dữ liệu:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li>Nếu hợp lệ: <code>return null;</code></li>
+                    <li>Nếu không hợp lệ: <code>return 'Chuỗi thông báo lỗi';</code> (Flutter sẽ tự tô viền đỏ và in
+                      dòng chữ này bên dưới).</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>decoration</code></td>
+                <td><code>InputDecoration?</code></td>
+                <td>Bộ tùy biến giao diện toàn diện của ô nhập (xem chi tiết mục con ngay bên dưới).</td>
+              </tr>
+              <tr>
+                <td><code>keyboardType</code></td>
+                <td><code>TextInputType?</code></td>
+                <td>Loại bàn phím ảo bật lên khi người dùng chạm vào ô:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>TextInputType.text</code>: Bàn phím chữ tiêu chuẩn.</li>
+                    <li><code>TextInputType.number</code>: Bàn phím số (dành cho Tuổi, Giá tiền, Số lượng).</li>
+                    <li><code>TextInputType.emailAddress</code>: Bàn phím có sẵn phím <code>@</code> và
+                      <code>.com</code>.</li>
+                    <li><code>TextInputType.phone</code>: Bàn phím quay số điện thoại.</li>
+                    <li><code>TextInputType.multiline</code>: Bàn phím cho phép Enter xuống dòng (dùng cho Mô tả).</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>textInputAction</code></td>
+                <td><code>TextInputAction?</code></td>
+                <td>Quy định nút hành động ở góc phải dưới bàn phím:
+                  <ul style="margin-left: 16px; margin-top: 4px;">
+                    <li><code>TextInputAction.next</code>: Hiện icon mũi tên tiếp theo &rarr; chuyển focus sang ô tiếp
+                      theo.</li>
+                    <li><code>TextInputAction.done</code>: Hiện dấu tích hoàn thành &rarr; đóng bàn phím ảo.</li>
+                    <li><code>TextInputAction.search</code>: Hiện icon kính lúp tìm kiếm.</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <td><code>obscureText</code></td>
+                <td><code>bool</code> (mặc định: <code>false</code>)</td>
+                <td>Đặt <code>true</code> để che dấu nội dung bằng các chấm tròn (dùng cho Mật khẩu). <em>Lưu ý:</em>
+                  Khi đặt <code>true</code> thì <code>maxLines</code> bắt buộc phải bằng <code>1</code>.</td>
+              </tr>
+              <tr>
+                <td><code>readOnly</code></td>
+                <td><code>bool</code> (mặc định: <code>false</code>)</td>
+                <td>Đặt <code>true</code> thì người dùng không thể gõ phím và không hiện bàn phím ảo, nhưng vẫn kích
+                  hoạt được sự kiện <code>onTap</code>. <strong>Rất hay dùng để làm ô Ngày sinh chọn từ popup lịch
+                    DatePicker!</strong></td>
+              </tr>
+              <tr>
+                <td><code>maxLines</code></td>
+                <td><code>int?</code> (mặc định: <code>1</code>)</td>
+                <td>Số dòng tối đa hiển thị. Đặt <code>maxLines: 3</code> hoặc <code>maxLines: null</code> (tự động co
+                  giãn theo nội dung) cho ô ghi chú, mô tả sản phẩm.</td>
+              </tr>
+              <tr>
+                <td><code>maxLength</code></td>
+                <td><code>int?</code></td>
+                <td>Giới hạn số lượng ký tự tối đa được phép nhập và tự động hiển thị bộ đếm ký tự ở góc phải dưới (ví
+                  dụ: <code>12/50</code>).</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>void Function(String)?</code></td>
+                <td>Callback được gọi mỗi khi người dùng bấm gõ thêm hoặc xóa bớt 1 ký tự (dùng cho tính năng tìm kiếm
+                  realtime).</td>
+              </tr>
+              <tr>
+                <td><code>inputFormatters</code></td>
+                <td><code>List&lt;TextInputFormatter&gt;?</code></td>
+                <td>Bộ lọc dữ liệu đầu vào. Ví dụ ép chỉ cho phép gõ ký tự số:
+                  <code>[FilteringTextInputFormatter.digitsOnly]</code>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CHI TIẾT INPUTDECORATION -->
+        <h4 style="color:var(--accent-blue); margin-top:20px;">Bảng Tra Cứu Các Thuộc Tính Của InputDecoration (Trang
+          Trí Ô Nhập)</h4>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">InputDecoration(
+  labelText: 'Email đăng nhập',                 // Nhãn tiêu đề (nổi lên trên khi bấm vào ô)
+  hintText: 'example@gmail.com',                // Chữ gợi ý mờ (biến mất khi gõ phím)
+  helperText: 'Chúng tôi sẽ gửi mã OTP qua email này', // Hướng dẫn phụ nhỏ dưới ô nhập
+  prefixIcon: const Icon(Icons.email_outlined), // Icon nằm ở ĐẦU ô nhập
+  suffixIcon: IconButton(                       // Widget/Icon nằm ở ĐUÔI ô nhập (thường dùng nút ẩn/hiện mật khẩu)
+    icon: Icon(_isObscure ? Icons.visibility_off : Icons.visibility),
+    onPressed: () =&gt; setState(() =&gt; _isObscure = !_isObscure),
+  ),
+  border: OutlineInputBorder(                   // Kiểu viền bao quanh (bo góc tròn)
+    borderRadius: BorderRadius.circular(10),
+  ),
+  enabledBorder: OutlineInputBorder(            // Viền khi ở trạng thái bình thường
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: Colors.grey),
+  ),
+  focusedBorder: OutlineInputBorder(            // Viền khi người dùng đang bấm vào nhập
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: Colors.blue, width: 2),
+  ),
+  errorBorder: OutlineInputBorder(              // Viền khi bị lỗi
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: Colors.red),
+  ),
+  filled: true,                                 // Bật màu nền ô nhập
+  fillColor: Colors.grey[100],                  // Màu nền ô nhập
+  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14), // Đệm chữ bên trong
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- CARD 3: DROPDOWNBUTTONFORMFIELD -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">C. Menu Chọn Thả Xuống: DropdownButtonFormField&lt;T&gt;</div>
+        <p>Widget chọn 1 giá trị trong danh sách cho trước, tích hợp sẵn với Form Validation và có giao diện viền bao
+          quanh tương tự TextFormField.</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// Khai báo biến lưu giá trị được chọn trong State
+String? _selectedCategory;
+final List&lt;String&gt; _categories = ['Công nghệ', 'Thời trang', 'Đồ gia dụng', 'Sách'];
+
+DropdownButtonFormField&lt;String&gt;({
+  Key? key,
+  String? value,                                     // Giá trị hiện tại đang được chọn (phải nằm trong items)
+  required List&lt;DropdownMenuItem&lt;String&gt;&gt;? items,    // Danh sách các lựa chọn trong menu
+  required void Function(String?)? onChanged,        // Callback khi người dùng chọn mục khác
+  FormFieldValidator&lt;String&gt;? validator,             // Hàm kiểm tra đã chọn chưa
+  Widget? hint,                                      // Chữ gợi ý khi chưa chọn
+  InputDecoration? decoration,                       // Trang trí viền, labelText, prefixIcon
+  bool isExpanded = true,                            // Mở rộng hết chiều ngang (tránh tràn chữ)
+  Color? dropdownColor,                              // Màu nền bảng danh sách xổ xuống
+  int elevation = 8,
+})
+
+// Code mẫu thực tế hoàn chỉnh:
+DropdownButtonFormField&lt;String&gt;(
+  value: _selectedCategory,
+  isExpanded: true,
+  decoration: InputDecoration(
+    labelText: 'Thể loại sản phẩm',
+    prefixIcon: const Icon(Icons.category),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+  ),
+  hint: const Text('Vui lòng chọn danh mục'),
+  items: _categories.map((cat) {
+    return DropdownMenuItem&lt;String&gt;(
+      value: cat,
+      child: Text(cat),
+    );
+  }).toList(),
+  onChanged: (newValue) {
+    setState(() {
+      _selectedCategory = newValue;
+    });
+  },
+  validator: (val) {
+    if (val == null || val.isEmpty) {
+      return 'Vui lòng chọn một thể loại!';
+    }
+    return null;
+  },
+)</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Giải thích & Lưu ý</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>value</code></td>
+                <td><code>T?</code></td>
+                <td>Giá trị được chọn. <em>Lưu ý sống còn:</em> Nếu <code>value</code> khác null thì giá trị của nó
+                  <strong>bắt buộc phải trùng khớp</strong> với <code>value</code> của một trong các phần tử trong danh
+                  sách <code>items</code>, nếu không Flutter sẽ ném Exception crash app!</td>
+              </tr>
+              <tr>
+                <td><code>items</code></td>
+                <td><code>List&lt;DropdownMenuItem&lt;T&gt;&gt;</code></td>
+                <td>Danh sách các item hiển thị trong menu thả xuống.</td>
+              </tr>
+              <tr>
+                <td><code>isExpanded</code></td>
+                <td><code>bool</code></td>
+                <td>Nên luôn đặt <code>true</code> để menu giãn hết chiều ngang của ô nhập, chống lỗi tràn chữ
+                  (Overflow) khi tên mục quá dài.</td>
+              </tr>
+              <tr>
+                <td><code>validator</code></td>
+                <td><code>FormFieldValidator&lt;T&gt;?</code></td>
+                <td>Kiểm tra xem người dùng đã chọn hay chưa (ví dụ:
+                  <code>if (value == null) return 'Hãy chọn một mục';</code>).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARD 4: CHECKBOX & CHECKBOXLISTTILE -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">D. Hộp Kiểm: Checkbox & CheckboxListTile</div>
+        <p>Dùng cho các lựa chọn bật/tắt độc lập hoặc chọn nhiều mục cùng lúc (ví dụ: "Đồng ý với điều khoản sử dụng",
+          "Sở thích").</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Khai báo State:
+bool _agreeTerms = false;
+
+// 2. CheckboxListTile (KHUYẾN NGHỊ: Có sẵn title, bấm cả dòng đều tích được):
+CheckboxListTile(
+  title: const Text('Tôi đồng ý với các điều khoản & dịch vụ'),
+  subtitle: const Text('Bắt buộc chấp thuận trước khi tạo tài khoản'),
+  value: _agreeTerms,
+  activeColor: Colors.blue,          // Màu nền khi được tích
+  checkColor: Colors.white,          // Màu dấu v tích
+  controlAffinity: ListTileControlAffinity.leading, // Đặt ô checkbox ở BÊN TRÁI tiêu đề
+  contentPadding: EdgeInsets.zero,
+  onChanged: (bool? newValue) {
+    setState(() {
+      _agreeTerms = newValue ?? false;
+    });
+  },
+)
+
+// 3. Checkbox (Đơn lẻ - chỉ có ô vuông nhỏ):
+Checkbox(
+  value: _agreeTerms,
+  activeColor: Colors.blue,
+  onChanged: (bool? val) =&gt; setState(() =&gt; _agreeTerms = val ?? false),
+)</code></pre>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thuộc tính</th>
+                <th>Kiểu dữ liệu</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>value</code></td>
+                <td><code>bool?</code></td>
+                <td>Trạng thái hiện tại: <code>true</code> (được tích) hoặc <code>false</code> (bỏ tích).</td>
+              </tr>
+              <tr>
+                <td><code>onChanged</code></td>
+                <td><code>ValueChanged&lt;bool?&gt;?</code></td>
+                <td>Callback nhận giá trị mới khi bấm chọn. Nếu truyền <code>null</code> thì checkbox sẽ bị vô hiệu hóa
+                  (disabled).</td>
+              </tr>
+              <tr>
+                <td><code>controlAffinity</code></td>
+                <td><code>ListTileControlAffinity</code></td>
+                <td>Vị trí của ô checkbox: <code>ListTileControlAffinity.leading</code> (ở bên trái) hoặc
+                  <code>trailing</code> (ở bên phải).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARD 5: RADIO & RADIOLISTTILE -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">E. Nút Chọn 1 Trong Nhiều: Radio&lt;T&gt; & RadioListTile&lt;T&gt;</div>
+        <p>Dùng khi người dùng chỉ được phép chọn <strong>duy nhất 1 lựa chọn</strong> trong một nhóm (ví dụ: Giới tính
+          [Nam / Nữ / Khác], Phương thức thanh toán [Tiền mặt / Thẻ ATM / Ví điện tử]).</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Khai báo biến lưu giá trị được chọn chung cho cả nhóm:
+String _selectedGender = 'Nam';
+
+// 2. Sử dụng RadioListTile:
+Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    const Text('Giới tính:', style: TextStyle(fontWeight: FontWeight.bold)),
+    RadioListTile&lt;String&gt;(
+      title: const Text('Nam'),
+      value: 'Nam',                  // Giá trị riêng của lựa chọn này
+      groupValue: _selectedGender,   // Biến chung của cả nhóm (Nếu value == groupValue thì nút này được chọn)
+      activeColor: Colors.blue,
+      onChanged: (String? val) {
+        setState(() =&gt; _selectedGender = val!);
+      },
+    ),
+    RadioListTile&lt;String&gt;(
+      title: const Text('Nữ'),
+      value: 'Nữ',
+      groupValue: _selectedGender,
+      activeColor: Colors.blue,
+      onChanged: (String? val) {
+        setState(() =&gt; _selectedGender = val!);
+      },
+    ),
+  ],
+)</code></pre>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">Hiểu đúng cơ chế Radio trong Flutter: value vs groupValue</div>
+          <ul style="margin-left: 20px;">
+            <li><code>value</code>: Là giá trị <strong>định danh riêng</strong> của chính nút radio đó (ví dụ nút này là
+              'Nam', nút kia là 'Nữ').</li>
+            <li><code>groupValue</code>: Là <strong>biến trạng thái chung</strong> lưu giá trị đang được chọn của cả
+              nhóm radio.</li>
+            <li><strong>Quy tắc hoạt động:</strong> Nút radio nào có <code>value == groupValue</code> thì nút đó sẽ tự
+              động hiển thị chấm tròn được chọn.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CARD 6: SWITCH & SWITCHLISTTILE -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">F. Công Tắc Gạt: Switch & SwitchListTile</div>
+        <p>Dùng cho các cài đặt nhị phân Bật / Tắt (On/Off) như: Chế độ ban đêm Dark Mode, Nhận thông báo, Nhớ thông tin
+          đăng nhập.</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">bool _enableNotifications = true;
+
+SwitchListTile(
+  title: const Text('Nhận thông báo đơn hàng'),
+  subtitle: const Text('Gửi email và tin nhắn khi trạng thái thay đổi'),
+  secondary: const Icon(Icons.notifications_active), // Icon ở đầu dòng
+  value: _enableNotifications,
+  activeColor: Colors.blue,
+  onChanged: (bool value) {
+    setState(() {
+      _enableNotifications = value;
+    });
+  },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- CARD 7: DATEPICKER & TIMEPICKER TRONG FORM -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">G. Bộ Chọn Ngày & Giờ (DatePicker & TimePicker Tích Hợp Vào Form)</div>
+        <p>Cách xử lý chuẩn nhất trong bài thi để người dùng chọn Ngày tháng (Ngày sinh, Ngày đặt vé...) mà không cần tự
+          gõ tay bằng chuỗi:</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Khai báo Controller lưu ngày đã chọn
+final TextEditingController _dobController = TextEditingController();
+
+// 2. Hàm mở popup lịch chọn ngày
+Future&lt;void&gt; _selectDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now().subtract(const Duration(days: 365 * 20)), // Mặc định mở ở 20 năm trước
+    firstDate: DateTime(1900),                                           // Ngày nhỏ nhất được chọn
+    lastDate: DateTime.now(),                                             // Ngày lớn nhất được chọn
+    helpText: 'CHỌN NGÀY SINH',
+    cancelText: 'HỦY',
+    confirmText: 'CHỌN',
+  );
+  
+  if (picked != null) {
+    // Định dạng ngày thành dạng YYYY-MM-DD và gán vào controller
+    final String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+    setState(() {
+      _dobController.text = formattedDate;
+    });
+  }
+}
+
+// 3. Gắn vào ô TextFormField với thuộc tính readOnly: true
+TextFormField(
+  controller: _dobController,
+  readOnly: true, // KHÔNG CHO GÕ TAY, CHỈ ĐƯỢC CHỌN QUA LỊCH
+  decoration: InputDecoration(
+    labelText: 'Ngày sinh (YYYY-MM-DD)',
+    hintText: 'Bấm để chọn ngày sinh',
+    prefixIcon: const Icon(Icons.calendar_today),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+  ),
+  onTap: () =&gt; _selectDate(context), // Bấm vào ô là bật popup lịch
+  validator: (val) {
+    if (val == null || val.trim().isEmpty) {
+      return 'Vui lòng chọn ngày sinh!';
+    }
+    return null;
+  },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- CARD 8: FULL FORM PATTERN CODE -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">H. Mẫu Form Đăng Ký / Nhập Liệu Hoàn Chỉnh Thực Chiến (Form Validation Pattern)</div>
+        <p>Đoạn mã mẫu hoàn chỉnh từ A-Z kết hợp toàn bộ các widget Form trên: Kiểm tra hợp lệ Tên, Email (RegExp), Mật
+          khẩu (ẩn/hiện mắt), Dropdown, Checkbox và nút Submit.</p>
+
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">import 'package:flutter/material.dart';
+
+class RegisterFormScreen extends StatefulWidget {
+  const RegisterFormScreen({super.key});
+
+  @override
+  State&lt;RegisterFormScreen&gt; createState() =&gt; _RegisterFormScreenState();
+}
+
+class _RegisterFormScreenState extends State&lt;RegisterFormScreen&gt; {
+  final GlobalKey&lt;FormState&gt; _formKey = GlobalKey&lt;FormState&gt;();
+
+  // Controllers
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPassController = TextEditingController();
+
+  // Trạng thái Form
+  bool _isObscure = true;
+  String? _selectedRole;
+  bool _agreeTerms = false;
+  final List&lt;String&gt; _roles = ['Học viên', 'Giảng viên', 'Quản trị viên'];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPassController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_agreeTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bạn phải đồng ý với điều khoản dịch vụ!'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (_formKey.currentState!.validate()) {
+      // Form hợp lệ 100% -&gt; Xử lý dữ liệu
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đăng ký thành công: ${_nameController.text} (${_selectedRole})'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Đăng Ký Tài Khoản')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction, // Tự động validate khi người dùng nhập
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Họ và tên
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Họ và tên',
+                  prefixIcon: const Icon(Icons.person),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Vui lòng nhập họ và tên';
+                  if (val.trim().length &lt; 3) return 'Họ tên phải từ 3 ký tự trở lên';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 2. Email (Có regex kiểm tra định dạng)
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Vui lòng nhập email';
+                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  if (!emailRegex.hasMatch(val.trim())) return 'Email không đúng định dạng';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 3. Mật khẩu
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _isObscure,
+                decoration: InputDecoration(
+                  labelText: 'Mật khẩu',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(_isObscure ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () =&gt; setState(() =&gt; _isObscure = !_isObscure),
+                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (val) {
+                  if (val == null || val.isEmpty) return 'Vui lòng nhập mật khẩu';
+                  if (val.length &lt; 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 4. Xác nhận mật khẩu
+              TextFormField(
+                controller: _confirmPassController,
+                obscureText: _isObscure,
+                decoration: InputDecoration(
+                  labelText: 'Nhập lại mật khẩu',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                validator: (val) {
+                  if (val != _passwordController.text) return 'Mật khẩu xác nhận không trùng khớp';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 5. Dropdown chọn vai trò
+              DropdownButtonFormField&lt;String&gt;(
+                value: _selectedRole,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Vai trò',
+                  prefixIcon: const Icon(Icons.badge),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                hint: const Text('Chọn vai trò người dùng'),
+                items: _roles.map((r) =&gt; DropdownMenuItem(value: r, child: Text(r))).toList(),
+                onChanged: (val) =&gt; setState(() =&gt; _selectedRole = val),
+                validator: (val) =&gt; val == null ? 'Vui lòng chọn vai trò' : null,
+              ),
+              const SizedBox(height: 12),
+
+              // 6. Checkbox đồng ý điều khoản
+              CheckboxListTile(
+                value: _agreeTerms,
+                title: const Text('Tôi đồng ý với điều khoản dịch vụ'),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                onChanged: (val) =&gt; setState(() =&gt; _agreeTerms = val ?? false),
+              ),
+              const SizedBox(height: 20),
+
+              // 7. Nút Đăng Ký
+              ElevatedButton.icon(
+                onPressed: _submit,
+                icon: const Icon(Icons.person_add),
+                label: const Text('ĐĂNG KÝ NGAY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 7: BUTTONS ===================== -->
+      <h3 id="sec-buttons">7. Nhóm Nút Bấm & Thao Tác (Buttons)</h3>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">ElevatedButton, OutlinedButton, TextButton & FloatingActionButton</div>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">// 1. Nút nổi có nền màu
+ElevatedButton({
+  required VoidCallback? onPressed, // null = vô hiệu hoá nút
+  ButtonStyle? style,
+  required Widget child,
+})
+// Custom style:
+ElevatedButton.styleFrom(
+  backgroundColor: Colors.blue,
+  foregroundColor: Colors.white,
+  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+)
+
+// 2. Nút có viền không nền
+OutlinedButton({
+  required VoidCallback? onPressed,
+  ButtonStyle? style,
+  required Widget child,
+})
+
+// 3. Nút chữ không viền
+TextButton({
+  required VoidCallback? onPressed,
+  ButtonStyle? style,
+  required Widget child,
+})
+
+// 4. Nút bấm hình tròn nổi góc màn hình
+FloatingActionButton({
+  required VoidCallback? onPressed,
+  Widget? child,
+  Color? backgroundColor,
+  Color? foregroundColor,
+})
+
+// 5. Nút Icon
+IconButton({
+  required VoidCallback? onPressed,
+  required Widget icon,
+  Color? color,
+  double? iconSize,
+})</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 8: CARDS & TILES ===================== -->
+      <h3 id="sec-cards-tiles">8. Nhóm Thẻ & Dòng Chi Tiết (Card & ListTile)</h3>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">Card & ListTile</div>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">Card({
+  Key? key,
+  Color? color,
+  double? elevation = 1.0,  // Độ đổ bóng nổi của thẻ
+  ShapeBorder? shape,       // Bo góc: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+  EdgeInsetsGeometry? margin,
+  Widget? child,
+})
+
+ListTile({
+  Key? key,
+  Widget? leading,          // Góc trái (Avatar/Icon)
+  Widget? title,            // Tiêu đề in đậm
+  Widget? subtitle,         // Phụ đề nhỏ hơn bên dưới
+  Widget? trailing,         // Góc phải (Icon Delete, mũi tên)
+  bool isThreeLine = false, // Cho phép dòng phụ đề dài 2 hàng
+  VoidCallback? onTap,      // Sự kiện bấm vào dòng
+  VoidCallback? onLongPress,// Sự kiện nhấn giữ lâu
+})
+
+Divider({
+  double? height,           // Chiều cao tổng thể của khoảng phân cách
+  double? thickness,        // Độ dày thực tế của vạch kẻ ngang
+  Color? color,             // Màu vạch kẻ
+})</code></pre>
+        </div>
+      </div>
+
+      <!-- ===================== PHẦN 9: FEEDBACK & DIALOGS ===================== -->
+      <h3 id="sec-feedback-dialogs">9. Nhóm Tương Tác & Thông Báo (Feedback & Dialogs)</h3>
+
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">AlertDialog, SnackBar, Progress & InkWell</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Thành phần</th>
+                <th>Mẫu code gọi trực tiếp</th>
+                <th>Mô tả</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>AlertDialog</strong></td>
+                <td>
+                  <pre><code class="language-dart">showDialog(
+  context: context,
+  builder: (ctx) =&gt; AlertDialog(
+    title: const Text('Xác nhận xóa'),
+    content: const Text('Bạn có chắc muốn xóa item này không?'),
+    actions: [
+      TextButton(onPressed: () =&gt; Navigator.pop(ctx), child: const Text('Hủy')),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+        onPressed: () {
+          Navigator.pop(ctx);
+          // Gọi hàm xoá dữ liệu
+        },
+        child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+      ),
+    ],
+  ),
+);</code></pre>
+                </td>
+                <td>Hộp thoại chặn màn hình xác nhận các thao tác nguy hiểm.</td>
+              </tr>
+              <tr>
+                <td><strong>SnackBar</strong></td>
+                <td>
+                  <pre><code class="language-dart">ScaffoldMessenger.of(context).showSnackBar(
+  const SnackBar(
+    content: Text('Thực hiện thành công!'),
+    backgroundColor: Colors.green,
+    duration: Duration(seconds: 2),
+  ),
+);</code></pre>
+                </td>
+                <td>Thanh thông báo nổi ở đáy màn hình sau khi lưu/sửa/xóa.</td>
+              </tr>
+              <tr>
+                <td><strong>CircularProgressIndicator</strong></td>
+                <td>
+                  <pre><code class="language-dart">const Center(child: CircularProgressIndicator())</code></pre>
+                </td>
+                <td>Vòng tròn xoay thể hiện trạng thái đang tải dữ liệu.</td>
+              </tr>
+              <tr>
+                <td><strong>InkWell</strong></td>
+                <td>
+                  <pre><code class="language-dart">InkWell(
+  borderRadius: BorderRadius.circular(8),
+  onTap: () { /* xử lý click */ },
+  child: Padding(
+    padding: const EdgeInsets.all(12),
+    child: Text('Bấm vào tôi'),
+  ),
+)</code></pre>
+                </td>
+                <td>Bọc bất kỳ widget nào để có hiệu ứng gợn sóng nước (Ripple Effect) khi click.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="10_drawer_theme_service.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 10: Drawer
+          &amp; Theme</a>
+        <a href="12_run_flow_architecture_guide.html" class="copy-btn" style="text-decoration:none;">Mục 12: Chạy Cố
+          Định Port & Luồng &rarr;</a>
+      </div>
+    </main>
+  </div>
+  <script src="../layout/sidebar.js"></script>
+  <script src="../common.js"></script>
+</body>
+
+</html>

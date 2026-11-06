@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mục 4: Mẫu Login & Logout Screen (Copy & Paste Cho Kỳ Thi)</title>
+  <title>Mục 4: Mẫu Login & Logout Screen (lib/screens/login_screen.dart) - Cheat Sheet Phòng Thi</title>
   <link rel="stylesheet" href="../style.css" />
 </head>
+
 <body>
   <aside class="sidebar"></aside>
 
@@ -17,31 +19,44 @@
         <span class="pill pill-purple">1-Click Copy & Paste</span>
       </div>
       <div>
-        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3: Register Screen</a>
-        <a href="05_item_list_screens.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 5: Mẫu List & Grid &rarr;</a>
+        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3: Register
+          Screen</a>
+        <a href="05_home_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 5: HomeScreen
+          &rarr;</a>
       </div>
     </header>
 
     <main class="content-container">
       <div class="section-header">
-        <h2>Mục 4: Mẫu Màn Hình Login & Xử Lý Logout (Tối Giản, Đủ Tiêu Chí Chấm Điểm)</h2>
-        <p>Mẫu code được thiết kế <strong>tối giản nhất có thể, không màu mè hay responsive rườm rà</strong>. Chỉ tập trung đúng và đủ các yêu cầu thi: <em>Tên field chuẩn (Username, Password), gọi trực tiếp <code>AppValidator</code> đã tạo ở Mục 2, xác thực SQLite, lưu cờ Session và nút Logout có Confirmation Dialog</em>.</p>
+        <h2>Mục 4: Mẫu Màn Hình Login, Quản Lý Session & Xử Lý Logout</h2>
+        <p>Cung cấp đầy đủ mã nguồn class <code>SessionService</code> và class <code>LoginScreen</code> <strong>lên trên
+            cùng</strong>, kèm hình ảnh minh họa giao diện iPhone SE trên trình duyệt và các mục giải thích chi tiết:
+          <strong>Dùng để làm gì, dùng thế nào và vì sao</strong>.</p>
       </div>
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 25px;">
-        <div class="card-title">⚡ Danh mục code mẫu cần copy:</div>
+        <div class="card-title">Danh mục nội dung:</div>
         <ul style="margin-left: 20px; line-height: 2;">
-          <li><a href="#sec-session" style="color:var(--accent-blue);">1. File dịch vụ Session (Lưu/Xoá cờ login) - lib/services/session_service.dart</a></li>
-          <li><a href="#sec-login" style="color:var(--accent-blue);">2. Màn hình LoginScreen tối giản chuẩn thi - lib/screens/login_screen.dart</a></li>
-          <li><a href="#sec-preview" style="color:var(--accent-blue);">3. Hình ảnh minh hoạ giao diện UI màn hình Login</a></li>
-          <li><a href="#sec-logout-btn" style="color:var(--accent-blue);">4. Nút Logout đặt trên AppBar / Drawer (Kèm Confirm Dialog)</a></li>
+          <li><a href="#sec-session" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class SessionService
+              (lib/services/session_service.dart)</a></li>
+          <li><a href="#sec-session-explain" style="color:var(--accent-blue);">2. Giải thích code SessionService: Dùng
+              để làm gì, dùng thế nào & vì sao?</a></li>
+          <li><a href="#sec-login" style="color:var(--accent-blue);">3. Toàn bộ mã nguồn class LoginScreen
+              (lib/screens/login_screen.dart)</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">4. Hình ảnh minh họa giao diện UI iPhone SE trên
+              trình duyệt (Khởi tạo & Sai thông tin)</a></li>
+          <li><a href="#sec-login-explain" style="color:var(--accent-blue);">5. Giải thích chi tiết code LoginScreen &
+              Xử lý Logout</a></li>
         </ul>
       </div>
 
-      <!-- ===================== PHẦN 1 ===================== -->
-      <h3 id="sec-session">1. File Quản Lý Session (lib/services/session_service.dart)</h3>
-      <p><strong>Dùng lúc nào?</strong> Lưu trạng thái đăng nhập để khi tắt app mở lại không bắt đăng nhập lại, và xoá cờ khi bấm Logout.</p>
+      <!-- ========================================================================= -->
+      <!-- 1. SESSION SERVICE CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-session">1. Toàn Bộ Mã Nguồn Class SessionService (lib/services/session_service.dart)</h3>
+      <p>Quản lý cờ trạng thái đăng nhập người dùng bằng SharedPreferences, lưu trữ thông tin phiên làm việc và xóa cờ
+        khi Logout:</p>
 
       <div class="code-wrapper">
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -78,23 +93,57 @@ class SessionService {
 }</code></pre>
       </div>
 
-      <!-- ===================== PHẦN 2 ===================== -->
-      <h3 id="sec-login">2. Màn Hình LoginScreen Tối Giản (lib/screens/login_screen.dart)</h3>
-      <p><strong>Dùng lúc nào?</strong> Đáp ứng Task <strong>User Login</strong>. Chỉ gồm đúng 2 ô nhập (Username, Password) dùng thẳng <code>AppValidator</code> của Mục 2, 1 nút Đăng nhập và 1 link Đăng ký nếu đề có.</p>
+      <!-- ========================================================================= -->
+      <!-- 2. GIẢI THÍCH SESSION SERVICE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-session-explain">2. Giải Thích Code SessionService: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
+      <div class="card" style="margin-bottom: 30px;">
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Hàm <code>saveSession(String username)</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Lưu cờ <code>isLoggedIn = true</code> và tên người dùng vào SharedPreferences
+            ngay sau khi xác thực mật khẩu thành công.
+            <br /><em>Dùng thế nào:</em> Gọi <code>await SessionService.saveSession(username)</code> trong hàm
+            <code>_login()</code>.
+          </li>
+          <li><strong>Hàm <code>isLoggedIn()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Kiểm tra xem người dùng đã từng đăng nhập trước đó hay chưa.
+            <br /><em>Dùng thế nào:</em> Gọi trong hàm <code>main()</code> trước khi khởi chạy <code>runApp()</code> để
+            phân luồng điều hướng màn hình đầu tiên.
+            <br /><em>Vì sao có <code>?? false</code>:</em> Nếu app mới cài lần đầu, key chưa tồn tại trong bộ nhớ sẽ
+            trả về <code>null</code>, fallback <code>?? false</code> đảm bảo luôn trả về boolean hợp lệ.
+          </li>
+          <li><strong>Hàm <code>getUsername()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Lấy tên người dùng hiện tại để hiển thị câu chào <em>"Welcome, admin"</em>
+            trên AppBar hoặc Drawer của HomeScreen.
+          </li>
+          <li><strong>Hàm <code>clearSession()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Xóa sạch toàn bộ key trong SharedPreferences khi người dùng bấm nút Đăng xuất
+            (Logout).
+          </li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. LOGIN SCREEN CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-login">3. Toàn Bộ Mã Nguồn Class LoginScreen (lib/screens/login_screen.dart)</h3>
+      <p>Màn hình đăng nhập chuẩn của đề thi: Xác thực với SQLite thông qua DatabaseHelper, lưu phiên và chuyển sang
+        HomeScreen:</p>
 
       <div class="code-wrapper">
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
         <pre><code class="language-dart">import 'package:flutter/material.dart';
-import '../database/database_helper.dart';
+import '../utils/database_helper.dart';
 import '../services/session_service.dart';
 import '../utils/app_validator.dart';
 import 'home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State&lt;LoginScreen&gt; createState() => _LoginScreenState();
+  State&lt;LoginScreen&gt; createState() =&gt; _LoginScreenState();
 }
 
 class _LoginScreenState extends State&lt;LoginScreen&gt; {
@@ -131,7 +180,7 @@ class _LoginScreenState extends State&lt;LoginScreen&gt; {
       // 4. Chuyển sang màn HomeScreen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) =&gt; const HomeScreen()),
       );
     } else {
       if (!mounted) return;
@@ -190,6 +239,17 @@ class _LoginScreenState extends State&lt;LoginScreen&gt; {
                 ),
                 child: const Text('LOGIN', style: TextStyle(fontSize: 16)),
               ),
+              const SizedBox(height: 12),
+              // Nút chuyển sang màn hình Đăng ký
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) =&gt; const RegisterScreen()),
+                  );
+                },
+                child: const Text('Chưa có tài khoản? Đăng ký ngay'),
+              ),
             ],
           ),
         ),
@@ -199,99 +259,106 @@ class _LoginScreenState extends State&lt;LoginScreen&gt; {
 }</code></pre>
       </div>
 
-      <!-- ===================== PHẦN 3: HÌNH ẢNH MINH HOẠ UI ===================== -->
-      <h3 id="sec-preview">3. Hình Ảnh Minh Hoạ Giao Diện UI Màn Hình Login Chuẩn Flutter</h3>
-      <p>Đối chiếu chính xác 100% với từng dòng code Flutter ở trên (AppBar <code>centerTitle: true</code>, 2 ô <code>OutlineInputBorder</code>, <code>ElevatedButton</code> và hiệu ứng viền đỏ báo lỗi của Form Validator):</p>
+      <!-- ========================================================================= -->
+      <!-- 4. HÌNH ẢNH MINH HỌA GIAO DIỆN (IPHONE SE TRÊN BROWSER) -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-preview">4. Hình Ảnh Minh Họa Giao Diện UI Chuẩn iPhone SE Trên Trình Duyệt</h3>
+      <p>Đối chiếu chuẩn xác 100% từng dòng code Flutter (AppBar có tiêu đề <code>Login</code>, 2 ô
+        <code>OutlineInputBorder</code> căn giữa màn hình và SnackBar đỏ báo lỗi khi sai thông tin):</p>
 
       <div style="display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin: 28px 0;">
-        <!-- Hình 1: Màn hình ban đầu chưa làm gì -->
+        <!-- Hình 1: Màn hình ban đầu -->
         <div style="display: flex; flex-direction: column; align-items: center;">
           <h4 style="margin-bottom: 10px; color: var(--accent-green, #3fb950); font-size: 15px;">
-            1. Màn hình ban đầu (Chưa nhập gì)
+            1. Màn hình ban đầu (Chưa nhập)
           </h4>
-          <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-            <img src="images/login_initial_ui.svg" alt="Flutter Login Initial UI" style="display: block; width: 320px; height: auto;" />
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/login_initial_ui.svg" alt="Flutter Login Initial UI"
+              style="display: block; width: 320px; height: auto;" />
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
-            Trạng thái nghỉ: Ô nhập viền xám mỏng, label nổi tự nhiên, nút LOGIN sẵn sàng.
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            Giao diện 2 trường Username &amp; Password căn giữa màn hình kèm nút LOGIN và TextButton chuyển sang Đăng
+            ký.
           </p>
         </div>
 
-        <!-- Hình 2: Màn hình khi bấm Login mà chưa nhập hoặc nhập sai -->
+        <!-- Hình 2: Màn hình khi sai mật khẩu -->
         <div style="display: flex; flex-direction: column; align-items: center;">
           <h4 style="margin-bottom: 10px; color: var(--accent-red, #f85149); font-size: 15px;">
-            2. Màn hình khi nhập sai / để trống
+            2. Màn hình khi sai tên đăng nhập / mật khẩu
           </h4>
-          <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-            <img src="images/login_error_ui.svg" alt="Flutter Login Error UI" style="display: block; width: 320px; height: auto;" />
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/login_error_ui.svg" alt="Flutter Login Error UI"
+              style="display: block; width: 320px; height: auto;" />
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
-            Trạng thái lỗi: Viền đỏ 2px, nhãn đỏ, text báo lỗi bên dưới ô và SnackBar đỏ dưới đáy.
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            Hiển thị SnackBar đỏ: "Sai tên đăng nhập hoặc mật khẩu!" chuẩn Flutter.
           </p>
         </div>
       </div>
 
-      <!-- ===================== PHẦN 4 ===================== -->
-      <h3 id="sec-logout-btn">4. Nút Đăng Xuất Logout (Kèm Hộp Thoại Xác Nhận)</h3>
-      <p><strong>Dùng lúc nào?</strong> Gắn vào nút Logout trên <code>AppBar</code> của màn hình <code>HomeScreen</code>:</p>
+      <!-- ========================================================================= -->
+      <!-- 5. GIẢI THÍCH CHI TIẾT CODE LOGIN & LOGOUT -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-login-explain">5. Giải Thích Chi Tiết Code LoginScreen &amp; Cơ Chế Xử Lý Logout: Dùng Để Làm Gì, Dùng
+        Thế Nào & Vì Sao?</h3>
 
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">// ========================================================
-// 1. HÀM XỬ LÝ LOGOUT KÈM CONFIRM DIALOG (Dán vào _HomeScreenState)
-// ========================================================
-Future&lt;void&gt; _confirmLogout(BuildContext context) async {
-  final bool? confirm = await showDialog&lt;bool&gt;(
-    context: context,
-    builder: (ctx) =&gt; AlertDialog(
-      title: const Text('Xác nhận đăng xuất'),
-      content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
-      actions: [
-        TextButton(
-          onPressed: () =&gt; Navigator.pop(ctx, false),
-          child: const Text('Hủy'),
-        ),
-        ElevatedButton(
-          onPressed: () =&gt; Navigator.pop(ctx, true),
-          child: const Text('Đăng xuất'),
-        ),
-      ],
-    ),
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">1. Luồng xử lý của hàm <code>_login()</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Kiểm tra validation:</strong> Gọi <code>if (!_formKey.currentState!.validate()) return;</code>
+            kích hoạt kiểm tra không được để trống của <code>AppValidator.loginUsername</code> và
+            <code>AppValidator.loginPassword</code>.</li>
+          <li><strong>Truy vấn xác thực SQLite:</strong> Gọi
+            <code>DatabaseHelper.instance.loginUser(username, password)</code>. Hàm này thực hiện câu lệnh SQL tìm user
+            có username và password trùng khớp.
+            <br /><em>Nếu tìm thấy (user != null):</em> Gọi <code>SessionService.saveSession(username)</code> để lưu
+            phiên, hiện SnackBar chào mừng và chuyển trang bằng <code>Navigator.pushReplacement</code> sang
+            <code>HomeScreen</code>.
+            <br /><em>Nếu không tìm thấy (user == null):</em> Hiện SnackBar màu đỏ cảnh báo sai thông tin.
+          </li>
+          <li><strong>Chống crash bằng <code>if (!mounted) return;</code>:</strong> Kiểm tra bắt buộc sau mọi tác vụ bất
+            đồng bộ <code>await</code> trước khi gọi <code>ScaffoldMessenger</code> hoặc <code>Navigator</code>.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">2. Cơ chế xử lý Đăng xuất (Logout) trên HomeScreen</h4>
+        <p>Trên thanh AppBar của HomeScreen có nút Icon Đăng xuất. Đoạn code xử lý Logout chuẩn như sau:</p>
+        <div class="code-wrapper">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code class="language-dart">Future&lt;void&gt; _logout(BuildContext context) async {
+  // 1. Xóa sạch cờ đăng nhập và username trong SharedPreferences
+  await SessionService.clearSession();
+
+  if (!context.mounted) return;
+
+  // 2. Chuyển về LoginScreen và XÓA SẠCH toàn bộ lịch sử điều hướng
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
+    (route) =&gt; false,
   );
-
-  if (confirm == true) {
-    // Xoá session đã lưu
-    await SessionService.clearSession();
-
-    if (!context.mounted) return;
-    // Quay về LoginScreen và xoá toàn bộ route cũ
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
-      (route) =&gt; false,
-    );
-  }
-}
-
-// ========================================================
-// 2. CÁCH GẮN VÀO APPBAR TRONG MÀN HÌNH HOMESCREEN
-// ========================================================
-AppBar(
-  title: const Text('Home'),
-  actions: [
-    IconButton(
-      icon: const Icon(Icons.logout),
-      tooltip: 'Đăng xuất',
-      onPressed: () =&gt; _confirmLogout(context),
-    ),
-  ],
-)</code></pre>
+}</code></pre>
+        </div>
+        <ul style="line-height: 1.8; margin-left: 20px; margin-top: 12px;">
+          <li><strong>Vì sao dùng <code>pushAndRemoveUntil</code> với điều kiện
+              <code>(route) =&gt; false</code>:</strong> Lệnh này xóa sạch toàn bộ ngăn xếp điều hướng (Navigation
+            Stack). Người dùng sau khi Logout sẽ không thể bấm phím Back để quay lại xem nội dung của HomeScreen nữa,
+            đảm bảo bảo mật và đúng chuẩn ứng dụng thương mại.</li>
+        </ul>
       </div>
 
       <!-- Điều hướng chân trang -->
-      <div style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
-        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3: Register Screen</a>
-        <a href="05_item_list_screens.html" class="copy-btn" style="text-decoration:none;">Mục 5: Mẫu List & GridView &rarr;</a>
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 3: Register
+          Screen</a>
+        <a href="05_home_screen.html" class="copy-btn" style="text-decoration:none;">Mục 5: HomeScreen &rarr;</a>
       </div>
     </main>
   </div>
@@ -299,4 +366,5 @@ AppBar(
   <script src="../common.js"></script>
   <script src="../layout/sidebar.js"></script>
 </body>
+
 </html>

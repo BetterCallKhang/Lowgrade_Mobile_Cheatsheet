@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 8 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu đề bài Task 1 & Các tiêu chí chấm điểm</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo Form Key, Controllers & Hàm <code>dispose()</code> giải phóng bộ nhớ</a></li>
@@ -51,21 +51,21 @@
         <div class="card">
           <div class="card-title">Các ô nhập liệu (Fields) bắt buộc</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>👤 <strong>Username:</strong> Tên tài khoản (icon: <code>Icons.person_outline</code>)</li>
-            <li>✉️ <strong>Email:</strong> Địa chỉ email (icon: <code>Icons.email_outlined</code>)</li>
-            <li>🔒 <strong>Password:</strong> Mật khẩu (ẩn ký tự: <code>obscureText: true</code>, icon: <code>Icons.lock_outline</code>)</li>
-            <li>🔑 <strong>Confirm Password:</strong> Nhập lại mật khẩu (icon: <code>Icons.lock_reset</code>)</li>
+            <li><strong>Username:</strong> Tên tài khoản (icon: <code>Icons.person_outline</code>)</li>
+            <li><strong>Email:</strong> Địa chỉ email (icon: <code>Icons.email_outlined</code>)</li>
+            <li><strong>Password:</strong> Mật khẩu (ẩn ký tự: <code>obscureText: true</code>, icon: <code>Icons.lock_outline</code>)</li>
+            <li><strong>Confirm Password:</strong> Nhập lại mật khẩu (icon: <code>Icons.lock_reset</code>)</li>
           </ul>
         </div>
 
         <div class="card">
           <div class="card-title">Các điều kiện bắt buộc (Requirements)</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>✅ <strong>Validate all fields are filled:</strong> Không để trống bất kỳ trường nào.</li>
-            <li>✅ <strong>Password and Confirm Password match:</strong> Hai mật khẩu phải trùng khớp 100%.</li>
-            <li>✅ <strong>Username must be unique:</strong> Username chưa từng có trong CSDL SQLite.</li>
-            <li>✅ <strong>Save user to database:</strong> Ghi vào bảng <code>users</code> kèm <code>createdAt</code>.</li>
-            <li>✅ <strong>Navigate to Login Screen:</strong> Đăng ký xong quay về màn hình Đăng nhập.</li>
+            <li><strong>Validate all fields are filled:</strong> Không để trống bất kỳ trường nào.</li>
+            <li><strong>Password and Confirm Password match:</strong> Hai mật khẩu phải trùng khớp 100%.</li>
+            <li><strong>Username must be unique:</strong> Username chưa từng có trong CSDL SQLite.</li>
+            <li><strong>Save user to database:</strong> Ghi vào bảng <code>users</code> kèm <code>createdAt</code>.</li>
+            <li><strong>Navigate to Login Screen:</strong> Đăng ký xong quay về màn hình Đăng nhập.</li>
           </ul>
         </div>
       </div>
@@ -74,7 +74,7 @@
       <h3 id="sec-2">2. Khai Báo Biến, Controllers & Hàm <code>dispose()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Khai báo Controllers & Hàm thu hồi bộ nhớ dispose()</div>
+        <div class="card-title" style="color:var(--accent-blue);">Khai báo Controllers & Hàm thu hồi bộ nhớ dispose()</div>
         <p><strong>Bản chất:</strong> Mỗi ô <code>TextFormField</code> cần một <code>TextEditingController</code> riêng để hứng giá trị người dùng gõ. Đồng thời bắt buộc phải ghi đè hàm <code>dispose()</code> để thu hồi bộ nhớ khi thoát màn hình, tránh lỗi Memory Leak.</p>
       </div>
 
@@ -109,7 +109,7 @@
       <h3 id="sec-3">3. Bộ 3 Quy Tắc Validation Phòng Thi</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-orange);">
-        <div class="card-title" style="color:var(--accent-orange);">🟠 Các hàm kiểm tra tính hợp lệ dữ liệu (Validators)</div>
+        <div class="card-title" style="color:var(--accent-orange);">Các hàm kiểm tra tính hợp lệ dữ liệu (Validators)</div>
         <p><strong>Bản chất:</strong> Các hàm này trả về một <code>String</code> báo lỗi màu đỏ nếu dữ liệu không đạt, hoặc trả về <code>null</code> nếu dữ liệu hợp lệ.</p>
       </div>
 
@@ -142,7 +142,7 @@ String? validateConfirmPassword(String? val) {
       <h3 id="sec-4">4. Hàm Xử Lý Sự Kiện Nhấn Nút <code>_handleRegister()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 Quy trình 6 bước xử lý đăng ký (Async / Await)</div>
+        <div class="card-title" style="color:var(--accent-green);">Quy trình 6 bước xử lý đăng ký (Async / Await)</div>
         <p><strong>Nhiệm vụ:</strong> Kích hoạt kiểm tra form &rarr; Soi CSDL xem có trùng tên không &rarr; Lưu User mới vào SQLite &rarr; Bắn SnackBar thông báo &rarr; Đóng màn hình quay về Login.</p>
       </div>
 
@@ -215,7 +215,7 @@ String? validateConfirmPassword(String? val) {
       <h3 id="sec-5">5. Chi Tiết Các Ô Nhập Liệu (TextFormField)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Cấu trúc các ô nhập liệu giao diện</div>
+        <div class="card-title" style="color:var(--accent-purple);">Cấu trúc các ô nhập liệu giao diện</div>
         <p><strong>Gồm:</strong> Ô Username (prefix icon person), Ô Email (keyboardType email), Ô Password & Confirm Password (có icon con mắt bật/tắt ẩn hiện mật khẩu).</p>
       </div>
 
@@ -301,7 +301,7 @@ TextFormField(
       <h3 id="sec-6">6. Widget Nút Bấm Đăng Ký (ElevatedButton)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-        <div class="card-title" style="color:var(--accent-cyan);">🌐 Nút bấm có hiệu ứng Loading xoay vòng</div>
+        <div class="card-title" style="color:var(--accent-cyan);">Nút bấm có hiệu ứng Loading xoay vòng</div>
         <p><strong>Mục đích:</strong> Dùng màu xanh Teal <code>Color(0xFF00695C)</code> chuẩn đề bài. Khi người dùng bấm nút và CSDL đang chạy, hiển thị <code>CircularProgressIndicator</code> để người dùng không bấm nhiều lần liên tiếp.</p>
       </div>
 
@@ -619,7 +619,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       </div>
 
       <div class="callout success">
-        <strong>✅ HOÀN THÀNH TASK 1:</strong>
+        <strong>HOÀN THÀNH TASK 1:</strong>
         <p>Màn hình Đăng ký đã sẵn sàng hoạt động hoàn hảo và lưu trữ dữ liệu vào SQLite. Giờ đây người dùng đã có thể tạo tài khoản để sẵn sàng cho bước tiếp theo!</p>
       </div>
 

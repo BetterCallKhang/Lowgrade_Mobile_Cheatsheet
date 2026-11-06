@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mục 2: Các Helper Xử Lý (DatabaseHelper & Validators Dùng Sẵn) - Cheat Sheet Phòng Thi</title>
+  <title>Mục 2: Models, DatabaseHelper & AppValidator - Cheat Sheet Phòng Thi</title>
   <link rel="stylesheet" href="../style.css" />
 </head>
+
 <body>
   <aside class="sidebar"></aside>
 
@@ -13,46 +15,210 @@
     <header class="topbar">
       <div class="topbar-info">
         <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
-        <span class="pill pill-green">Mục 2: Database & Validators Helper</span>
-        <span class="pill pill-purple">Module Tách Rời - Dễ Copy</span>
+        <span class="pill pill-green">Mục 2: Models, Database & Validators</span>
+        <span class="pill pill-purple">Toàn Bộ Code Class & Giải Thích</span>
       </div>
       <div>
-        <a href="01_setup_libraries_project_structure.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 1: Thư viện & Cấu trúc</a>
-        <a href="03_login_logout_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 3: Login & Logout &rarr;</a>
+        <a href="01_setup_libraries_project_structure.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 1:
+          Cấu hình & Thư mục</a>
+        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 3:
+          Register Screen &rarr;</a>
       </div>
     </header>
 
     <main class="content-container">
       <div class="section-header">
-        <h2>Mục 2: Bộ Helper Xử Lý Database & Bộ Hàm Static Validate Dùng Sẵn</h2>
-        <p>Trang này được cấu trúc theo phương châm <strong>"Cần gì copy nấy - Đọc là biết dùng khi nào"</strong>:</p>
-        <ul style="margin-top: 8px; margin-left: 20px; line-height: 1.8;">
-          <li><strong>Phần cốt lõi bắt buộc (Core):</strong> Đề nào cũng dùng, copy 1 lần là chạy xong khung sườn.</li>
-          <li><strong>Hàm nạp dữ liệu mẫu tự động từ JSON:</strong> Đọc file JSON trong <code>assets/</code> và chèn hàng loạt vào SQLite chỉ bằng 1 vòng lặp (không phải gõ tay từng dòng `insert` nữa).</li>
-          <li><strong>Các hàm tùy chọn theo điều kiện đề bài:</strong> Được tách riêng thành từng khối code độc lập, ghi rõ "Dùng khi đề yêu cầu X", bạn chỉ cần copy thêm hàm đó vào class khi đề thi có nhắc đến.</li>
-        </ul>
+        <h2>Mục 2: Bộ Class Models, DatabaseHelper (SQLite Mobile/Web) & AppValidator</h2>
+        <p>Tập hợp 4 class nền tảng cốt lõi của dự án mẫu. Mỗi class được đưa <strong>toàn bộ mã nguồn lên trên
+            cùng</strong> để copy 1 lần là chạy ngay, bên dưới chia thành từng mục nhỏ phân tích chi tiết: <strong>Dùng
+            để làm gì, dùng thế nào và vì sao</strong>.</p>
       </div>
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 25px;">
-        <div class="card-title">⚡ Danh mục phần code:</div>
+        <div class="card-title">Danh mục các class:</div>
         <ul style="margin-left: 20px; line-height: 2;">
-          <li><a href="#sec-db-core" style="color:var(--accent-blue);">1. DatabaseHelper - Khung Cốt Lõi Bắt Buộc (Mở DB, Tạo bảng, Tự Nạp JSON)</a></li>
-          <li><a href="#sec-db-optional" style="color:var(--accent-blue);">2. DatabaseHelper - Các Hàm Tùy Chọn Theo Từng Điều Kiện Của Đề Bài</a></li>
-          <li><a href="#sec-val-core" style="color:var(--accent-blue);">3. AppValidator - Khung Bắt Buộc (Required, Login, Register, Confirm Pass)</a></li>
-          <li><a href="#sec-val-optional" style="color:var(--accent-blue);">4. AppValidator - Các Hàm Tùy Chọn (Email, SĐT, Số thực/nguyên dương)</a></li>
+          <li><a href="#sec-user-model" style="color:var(--accent-blue);">1. Class UserModel (lib/models/user.dart)</a>
+          </li>
+          <li><a href="#sec-item-model" style="color:var(--accent-blue);">2. Class ItemModel
+              (lib/models/item_example.dart)</a></li>
+          <li><a href="#sec-database-helper" style="color:var(--accent-blue);">3. Class DatabaseHelper
+              (lib/utils/database_helper.dart)</a></li>
+          <li><a href="#sec-app-validator" style="color:var(--accent-blue);">4. Class AppValidator
+              (lib/utils/app_validator.dart)</a></li>
         </ul>
       </div>
 
-      <!-- ===================== PHẦN 1: DATABASE CORE ===================== -->
-      <h3 id="sec-db-core">1. DatabaseHelper - Khung Cốt Lõi Bắt Buộc (lib/database/database_helper.dart)</h3>
-      <p><strong>Dùng lúc nào?</strong> Copy file này đầu tiên cho mọi đề thi có SQLite. Khung này đã có sẵn:</p>
-      <ul style="margin-left: 20px; line-height: 1.8;">
-        <li>Singleton kết nối CSDL (chạy được cả trên điện thoại Android và Web Chrome).</li>
-        <li>Tạo sẵn 2 bảng: <code>users</code> và <code>items</code>.</li>
-        <li><strong>HÀM NẠP TỰ ĐỘNG TỪ JSON:</strong> Tự đọc file <code>assets/data.json</code> (hoặc đường dẫn đề cho) và chèn thẳng vào SQLite bằng 1 lệnh, không phải viết tay từng object.</li>
-        <li>Bộ CRUD cơ bản nhất (getAll, insert, delete).</li>
-      </ul>
+      <!-- ========================================================================= -->
+      <!-- 1. USER MODEL -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-user-model">1. Class UserModel (lib/models/user.dart)</h3>
+      <p>Khuôn mẫu dữ liệu tài khoản người dùng, phục vụ đăng ký, đăng nhập và lưu trữ thông tin tài khoản trong SQLite:
+      </p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">// lib/models/user_model.dart
+
+class UserModel {
+  final int? id;             // Khóa chính (Primary Key), tự tăng nên có thể null khi đăng ký
+  final String username;     // Tên đăng nhập (duy nhất)
+  final String email;        // Email người dùng
+  final String password;     // Mật khẩu
+  // final String? createdAt;   // Ngày tạo tài khoản (tùy chọn: DateTime.now().toIso8601String())
+
+  // 1. Constructor với Named Parameters
+  UserModel({
+    this.id,
+    required this.username,
+    required this.email,
+    required this.password,
+    // this.createdAt,
+  });
+
+  // 2. Chuyển Model thành Map để chèn vào SQLite (insert/update)
+  Map&lt;String, dynamic&gt; toMap() {
+    final map = &lt;String, dynamic&gt;{
+      'username': username,
+      'email': email,
+      'password': password,
+    };
+    if (id != null) map['id'] = id;
+    // if (createdAt != null) map['createdAt'] = createdAt;
+    return map;
+  }
+
+  // 3. Khởi tạo Model từ dữ liệu Map lấy từ SQLite hoặc API
+  factory UserModel.fromMap(Map&lt;String, dynamic&gt; map) {
+    return UserModel(
+      id: map['id'] as int?,
+      username: (map['username'] ?? '') as String,
+      email: (map['email'] ?? '') as String,
+      password: (map['password'] ?? '') as String,
+      // createdAt: map['createdAt'] as String?,
+    );
+  }
+
+  // 4. copyWith để sao chép đối tượng khi cần cập nhật
+  UserModel copyWith({
+    int? id,
+    String? username,
+    String? email,
+    String? password,
+    String? createdAt,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      // createdAt: createdAt ?? this.createdAt,
+    );
+  }
+}</code></pre>
+      </div>
+
+      <div class="card" style="margin-top: 15px; margin-bottom: 30px;">
+        <h4 style="color:var(--accent-green);">Chi tiết giải thích code UserModel:</h4>
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Thuộc tính <code>final int? id;</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Lưu khóa chính (Primary Key) của bảng <code>users</code>.
+            <br /><em>Vì sao dùng kiểu <code>int?</code> (nullable):</em> Khi đăng ký tài khoản mới, <code>id</code>
+            chưa tồn tại mà do SQLite tự sinh (<code>AUTOINCREMENT</code>), nên lúc khởi tạo sẽ truyền
+            <code>null</code>.
+          </li>
+          <li><strong>Phương thức <code>toMap()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Chuyển đổi đối tượng Dart sang kiểu <code>Map&lt;String, dynamic&gt;</code>.
+            <br /><em>Dùng thế nào:</em> Truyền trực tiếp vào lệnh <code>db.insert('users', user.toMap())</code>.
+            <br /><em>Vì sao:</em> Thư viện SQLite trong Flutter chỉ nhận dữ liệu dạng Map các cặp key-value tương ứng
+            tên cột trong bảng.
+          </li>
+          <li><strong>Hàm khởi tạo <code>factory UserModel.fromMap(Map&lt;String, dynamic&gt; map)</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Tái tạo đối tượng <code>UserModel</code> từ dữ liệu hàng kết quả trả về của
+            câu lệnh truy vấn SQLite <code>db.query()</code>.
+            <br /><em>Vì sao có fallback <code>?? ''</code>:</em> Chống lỗi crash ứng dụng khi một trường trong database
+            bị null ngoài ý muốn.
+          </li>
+          <li><strong>Phương thức <code>copyWith()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Tạo ra một bản sao mới với một vài thuộc tính thay đổi (ví dụ đổi mật khẩu)
+            mà vẫn giữ nguyên tính chất bất biến (immutability) của đối tượng.
+          </li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. ITEM MODEL -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-item-model">2. Class ItemModel (lib/models/item_example.dart)</h3>
+      <p>Khuôn mẫu dữ liệu cho thực thể chính của đề thi (Artwork, Book, Student, Product...):</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">class ItemModel {
+  final int? id;
+  final String title;
+  final String subtitle;
+  final String? category;
+  final double? price;
+
+  ItemModel({
+    this.id,
+    required this.title,
+    required this.subtitle,
+    this.category,
+    this.price,
+  });
+
+  factory ItemModel.fromMap(Map&lt;String, dynamic&gt; map) {
+    return ItemModel(
+      id: map['id'],
+      title: map['title'] ?? '',
+      subtitle: map['subtitle'] ?? map['description'] ?? '',
+      category: map['category'],
+      price: map['price'] != null ? (map['price'] as num).toDouble() : null,
+    );
+  }
+
+  Map&lt;String, dynamic&gt; toMap() {
+    final map = &lt;String, dynamic&gt;{
+      'title': title,
+      'subtitle': subtitle,
+      'category': category,
+      'price': price,
+    };
+    if (id != null) map['id'] = id;
+    return map;
+  }
+}</code></pre>
+      </div>
+
+      <div class="card" style="margin-top: 15px; margin-bottom: 30px;">
+        <h4 style="color:var(--accent-green);">Chi tiết giải thích code ItemModel:</h4>
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Xử lý linh hoạt trường mô tả:
+              <code>subtitle: map['subtitle'] ?? map['description'] ?? ''</code></strong>
+            <br /><em>Dùng để làm gì:</em> Tương thích với cả hai dạng tên trường phổ biến trong đề thi (có đề đặt là
+            <code>subtitle</code>, có đề đặt là <code>description</code>).
+            <br /><em>Vì sao:</em> Đảm bảo dù đề thi dùng tên nào thì model vẫn trích xuất được dữ liệu mô tả mà không
+            bị rỗng.
+          </li>
+          <li><strong>Ép kiểu số thực an toàn:
+              <code>price: map['price'] != null ? (map['price'] as num).toDouble() : null</code></strong>
+            <br /><em>Dùng để làm gì:</em> Ép giá trị số thành <code>double</code> an toàn.
+            <br /><em>Vì sao cần <code>as num</code>:</em> Trong Dart, nếu giá trị trong JSON hoặc SQLite là số nguyên
+            tròn chục (ví dụ <code>100</code>), Dart coi nó là <code>int</code>. Nếu ép thẳng <code>as double</code> sẽ
+            gây lỗi crash: <em>"type 'int' is not a subtype of type 'double'"</em>. Ép qua <code>as num</code> rồi gọi
+            <code>.toDouble()</code> sẽ chấp nhận cả <code>int</code> lẫn <code>double</code>.
+          </li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. DATABASE HELPER -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-database-helper">3. Class DatabaseHelper (lib/utils/database_helper.dart)</h3>
+      <p>Quản trị toàn bộ kết nối cơ sở dữ liệu SQLite, tự động nhận diện môi trường <strong>Mobile hoặc Web
+          Browser</strong>, nạp JSON tự động và cung cấp trọn bộ hàm CRUD:</p>
 
       <div class="code-wrapper">
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -83,10 +249,15 @@ class DatabaseHelper {
   }
 
   Future&lt;Database&gt; _initDatabase() async {
-    DatabaseFactory dbFactory;
     if (kIsWeb) {
-      dbFactory = databaseFactoryFfiWeb;
-      return await dbFactory.openDatabase(_dbName);
+      final dbFactory = databaseFactoryFfiWeb;
+      return await dbFactory.openDatabase(
+        _dbName,
+        options: OpenDatabaseOptions(
+          version: _dbVersion,
+          onCreate: _onCreate,
+        ),
+      );
     } else {
       final dbPath = await getDatabasesPath();
       final path = join(dbPath, _dbName);
@@ -104,6 +275,7 @@ class DatabaseHelper {
       CREATE TABLE $tableUsers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
+        email TEXT,
         password TEXT NOT NULL
       )
     ''');
@@ -124,6 +296,7 @@ class DatabaseHelper {
     await db.insert(tableUsers, {
       'username': 'admin',
       'password': '123456',
+      'email': 'admin@gmail.com',
     });
 
     // 4. TỰ ĐỘNG NẠP DỮ LIỆU TỪ FILE JSON TRONG ASSETS (Không cần gõ tay)
@@ -188,18 +361,8 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-}</code></pre>
-      </div>
 
-      <!-- ===================== PHẦN 2: DATABASE OPTIONAL ===================== -->
-      <h3 id="sec-db-optional">2. DatabaseHelper - Các Hàm Tùy Chọn Theo Điều Kiện Đề Bài</h3>
-      <p>Khi đọc đề thi, nếu thấy có yêu cầu cụ thể nào dưới đây thì bạn <strong>chỉ việc copy thêm đoạn hàm đó dán vào cuối class <code>DatabaseHelper</code></strong>:</p>
-
-      <h4>Trường hợp A: Đề yêu cầu Màn hình Đăng ký tài khoản (Register Screen)</h4>
-      <p>Cần hàm kiểm tra username có bị trùng không và hàm thêm user mới:</p>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề có Task User Registration (Đăng ký tài khoản)
+  // DÙNG KHI: Đề có Task User Registration (Đăng ký tài khoản)
   Future&lt;bool&gt; isUsernameExists(String username) async {
     final db = await database;
     final res = await db.query(
@@ -213,14 +376,9 @@ class DatabaseHelper {
   Future&lt;int&gt; registerUser(Map&lt;String, dynamic&gt; userMap) async {
     final db = await database;
     return await db.insert(tableUsers, userMap);
-  }</code></pre>
-      </div>
+  }
 
-      <h4>Trường hợp B: Đề yêu cầu Màn hình Cập nhật / Chỉnh sửa (Edit / Update Screen)</h4>
-      <p>Cần hàm cập nhật thông tin item theo ID:</p>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề có Task Edit / Update Item
+  // DÙNG KHI: Đề có Task Edit / Update Item
   Future&lt;int&gt; updateItem(int id, Map&lt;String, dynamic&gt; itemMap) async {
     final db = await database;
     return await db.update(
@@ -229,14 +387,9 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-  }</code></pre>
-      </div>
+  }
 
-      <h4>Trường hợp C: Đề yêu cầu Tìm kiếm hoặc Lọc theo Danh mục (Search / Filter Category)</h4>
-      <p>Cần hàm truy vấn có điều kiện <code>LIKE</code> hoặc <code>category = ?</code>:</p>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề có ô Search nhập từ khóa tìm kiếm theo tiêu đề
+  // DÙNG KHI: Đề có ô Search nhập từ khóa tìm kiếm theo tiêu đề
   Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; searchItems(String keyword) async {
     final db = await database;
     return await db.query(
@@ -256,12 +409,59 @@ class DatabaseHelper {
       whereArgs: [category],
       orderBy: 'id DESC',
     );
-  }</code></pre>
+  }
+}</code></pre>
       </div>
 
-      <!-- ===================== PHẦN 3: VALIDATOR CORE ===================== -->
-      <h3 id="sec-val-core">3. AppValidator - Khung Bắt Buộc (lib/utils/app_validator.dart)</h3>
-      <p><strong>Dùng lúc nào?</strong> Copy file này đầu tiên vào thư mục <code>lib/utils/</code>. Chứa các hàm static bắt buộc mà <strong>đề thi nào cũng chấm điểm</strong> (Không để trống ô nhập, Đăng nhập, Đăng ký, So khớp Confirm Password).</p>
+      <div class="card" style="margin-top: 15px; margin-bottom: 30px;">
+        <h4 style="color:var(--accent-green);">Chi tiết giải thích code DatabaseHelper:</h4>
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Singleton Pattern:
+              <code>DatabaseHelper._internal(); static final DatabaseHelper instance = ...;</code></strong>
+            <br /><em>Dùng để làm gì:</em> Đảm bảo trong toàn bộ vòng đời ứng dụng chỉ có duy nhất một đối tượng
+            DatabaseHelper và một kết nối CSDL được mở.
+            <br /><em>Dùng thế nào:</em> Bất kỳ nơi nào cũng gọi qua <code>DatabaseHelper.instance.tênHàm()</code>.
+            <br /><em>Vì sao:</em> Tránh mở nhiều kết nối cùng lúc gây khóa file (database locked) hoặc rò rỉ tài
+            nguyên.
+          </li>
+          <li><strong>Khởi tạo đa nền tảng: <code>_initDatabase()</code> kết hợp <code>if (kIsWeb)</code></strong>
+            <br /><em>Dùng để làm gì:</em> Phân biệt tự động: nếu đang chạy trên Chrome thì dùng
+            <code>databaseFactoryFfiWeb</code> (WASM + IndexedDB), nếu chạy trên điện thoại/máy ảo Android thì dùng
+            <code>openDatabase(path)</code>.
+            <br /><em>Vì sao:</em> Giúp dự án chạy mượt mà trên cả trình duyệt Web lẫn thiết bị thật mà không cần sửa
+            bất kỳ dòng code nào.
+          </li>
+          <li><strong>Tự động tạo tài khoản Admin mặc định trong <code>_onCreate</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Chèn sẵn tài khoản <code>username: 'admin'</code>,
+            <code>password: '123456'</code> ngay khi database được khởi tạo lần đầu.
+            <br /><em>Vì sao:</em> Tiết kiệm thời gian trong phòng thi, bạn có thể đăng nhập test màn Home ngay mà không
+            bắt buộc phải qua màn Register tạo user trước.
+          </li>
+          <li><strong>Tự động nạp JSON qua <code>_seedDataFromJson()</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Đọc file <code>assets/data.json</code> được đề bài cấp sẵn và tự động chèn
+            hàng loạt vào bảng <code>items</code>.
+            <br /><em>Vì sao:</em> Bạn không cần gõ tay hàng chục lệnh <code>insert</code> tốn thời gian. Khối
+            <code>try-catch</code> đảm bảo nếu đề không cấp file json thì app vẫn chạy bình thường.
+          </li>
+          <li><strong>Kiểm tra trùng Username: <code>isUsernameExists(username)</code></strong>
+            <br /><em>Dùng để làm gì:</em> Truy vấn bảng <code>users</code> xem tên đăng nhập đã có chưa.
+            <br /><em>Dùng thế nào:</em> Gọi trong <code>_register()</code> tại màn hình Register trước khi gọi
+            <code>registerUser()</code>.
+          </li>
+          <li><strong>Các hàm CRUD (<code>insertItem</code>, <code>updateItem</code>, <code>deleteItem</code>,
+              <code>getAllItems</code>):</strong>
+            <br /><em>Dùng để làm gì:</em> Cung cấp các thao tác thêm, sửa, xóa, đọc chuẩn hóa qua tham số
+            <code>where: 'id = ?'</code> và <code>whereArgs: [id]</code> để chống lỗi SQL Injection.
+          </li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. APP VALIDATOR -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-app-validator">4. Class AppValidator (lib/utils/app_validator.dart)</h3>
+      <p>Tập hợp các hàm <code>static</code> kiểm tra tính hợp lệ của dữ liệu đầu vào trong Form, gán trực tiếp vào
+        thuộc tính <code>validator:</code> của <code>TextFormField</code>:</p>
 
       <div class="code-wrapper">
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
@@ -318,29 +518,20 @@ class DatabaseHelper {
     return null;
   }
 
-  // So khớp Confirm Password: validator: AppValidator.confirmPassword(_passwordController.text)
-  static String? Function(String?) confirmPassword(String originalPassword) {
-    return (String? confirmValue) {
-      if (confirmValue == null || confirmValue.trim().isEmpty) {
-        return 'Vui lòng xác nhận mật khẩu';
-      }
-      if (confirmValue.trim() != originalPassword.trim()) {
-        return 'Mật khẩu xác nhận không trùng khớp';
-      }
-      return null;
-    };
+  // 4. So khớp Confirm Password (truyền giá trị confirm và giá trị password gốc)
+  // Cách dùng trong TextFormField:
+  // validator: (value) =&gt; AppValidator.confirmPassword(value, _passwordController.text)
+  static String? confirmPassword(String? confirmValue, String originalPassword) {
+    if (confirmValue == null || confirmValue.trim().isEmpty) {
+      return 'Vui lòng xác nhận mật khẩu';
+    }
+    if (confirmValue != originalPassword) {
+      return 'Mật khẩu xác nhận không trùng khớp';
+    }
+    return null;
   }
-}</code></pre>
-      </div>
 
-      <!-- ===================== PHẦN 4: VALIDATOR OPTIONAL ===================== -->
-      <h3 id="sec-val-optional">4. AppValidator - Các Hàm Tùy Chọn Theo Điều Kiện Của Đề Bài</h3>
-      <p>Khi đề thi có thêm các ô nhập đặc thù (Email, SĐT, Số tiền, Năm...), hãy copy các hàm static này dán bổ sung vào class <code>AppValidator</code>:</p>
-
-      <h4>Trường hợp 1: Đề có ô Email (Regex Email chuẩn)</h4>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề yêu cầu nhập Email đúng định dạng
+  // DÙNG KHI: Đề yêu cầu nhập Email đúng định dạng
   // Cách dùng: validator: AppValidator.email
   static final RegExp _emailRegExp = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -354,13 +545,9 @@ class DatabaseHelper {
       return 'Email không hợp lệ (ví dụ: user@gmail.com)';
     }
     return null;
-  }</code></pre>
-      </div>
+  }
 
-      <h4>Trường hợp 2: Đề có ô Số Điện Thoại (Phone Regex)</h4>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề có ô Số điện thoại (10 chữ số bắt đầu bằng 0)
+  // DÙNG KHI: Đề có ô Số điện thoại (10 chữ số bắt đầu bằng 0)
   // Cách dùng: validator: AppValidator.phone
   static final RegExp _phoneRegExp = RegExp(r'^0[0-9]{9}$');
 
@@ -372,14 +559,10 @@ class DatabaseHelper {
       return 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0';
     }
     return null;
-  }</code></pre>
-      </div>
+  }
 
-      <h4>Trường hợp 3: Đề có ô Số Nguyên Dương (Năm xuất bản, Số lượng, Tuổi)</h4>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề yêu cầu nhập Năm xuất bản, Số lượng kho, Tuổi...
-  // Cách dùng: validator: (val) => AppValidator.positiveInteger(val, 'Năm xuất bản')
+  // DÙNG KHI: Đề yêu cầu nhập Năm xuất bản, Số lượng kho, Tuổi...
+  // Cách dùng: validator: (val) =&gt; AppValidator.positiveInteger(val, 'Năm xuất bản')
   static String? positiveInteger(String? value, [String fieldName = 'Giá trị']) {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName không được để trống';
@@ -392,14 +575,10 @@ class DatabaseHelper {
       return '$fieldName phải lớn hơn 0';
     }
     return null;
-  }</code></pre>
-      </div>
+  }
 
-      <h4>Trường hợp 4: Đề có ô Giá Tiền / Điểm Số (Số thực dương)</h4>
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">  // DÙNG KHI: Đề yêu cầu nhập Giá tiền (Price), Điểm GPA...
-  // Cách dùng: validator: (val) => AppValidator.positiveDouble(val, 'Giá tiền')
+  // DÙNG KHI: Đề yêu cầu nhập Giá tiền (Price), Điểm GPA...
+  // Cách dùng: validator: (val) =&gt; AppValidator.positiveDouble(val, 'Giá tiền')
   static String? positiveDouble(String? value, [String fieldName = 'Giá tiền']) {
     if (value == null || value.trim().isEmpty) {
       return '$fieldName không được để trống';
@@ -412,13 +591,45 @@ class DatabaseHelper {
       return '$fieldName phải lớn hơn 0';
     }
     return null;
-  }</code></pre>
+  }
+}</code></pre>
+      </div>
+
+      <div class="card" style="margin-top: 15px; margin-bottom: 30px;">
+        <h4 style="color:var(--accent-green);">Chi tiết giải thích code AppValidator:</h4>
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Phương thức static trả về <code>String?</code>:</strong>
+            <br /><em>Quy ước của Flutter:</em> Hàm validator nhận giá trị chuỗi nhập vào <code>String? value</code>.
+            Nếu dữ liệu hợp lệ, trả về <code>null</code>. Nếu vi phạm quy tắc, trả về chuỗi <code>String</code> chứa
+            thông báo lỗi để Flutter tự động hiển thị chữ đỏ dưới ô nhập.
+          </li>
+          <li><strong><code>AppValidator.required(val, 'Tiêu đề')</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Kiểm tra chung cho các trường văn bản trong Form Add/Edit (Title,
+            Description). Tránh việc người dùng chỉ gõ phím cách (space) bằng lệnh <code>value.trim().isEmpty</code>.
+          </li>
+          <li><strong><code>AppValidator.confirmPassword(val, _passwordController.text)</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> So sánh ký tự nhập vào ở ô xác nhận với ô mật khẩu gốc.
+            <br /><em>Dùng thế nào:</em> Gọi thông qua lambda:
+            <code>validator: (val) =&gt; AppValidator.confirmPassword(val, _passwordController.text)</code>.
+          </li>
+          <li><strong><code>AppValidator.email(val)</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Kiểm tra định dạng hòm thư điện tử bằng biểu thức chính quy (Regex chuẩn
+            RFC).
+          </li>
+          <li><strong><code>AppValidator.positiveDouble(val, 'Giá tiền')</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Dùng cho ô nhập Price hoặc GPA. Sử dụng <code>double.tryParse()</code> để
+            kiểm tra an toàn: vừa đảm bảo là số, vừa đảm bảo giá trị phải <code>&gt; 0</code>.
+          </li>
+        </ul>
       </div>
 
       <!-- Điều hướng chân trang -->
-      <div style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
-        <a href="01_setup_libraries_project_structure.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 1: Thư viện & Cấu trúc</a>
-        <a href="03_login_logout_screen.html" class="copy-btn" style="text-decoration:none;">Mục 3: Mẫu Login & Logout Screens &rarr;</a>
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="01_setup_libraries_project_structure.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 1:
+          Cấu hình & Thư mục</a>
+        <a href="03_register_screen.html" class="copy-btn" style="text-decoration:none;">Mục 3: Register Screen
+          &rarr;</a>
       </div>
     </main>
   </div>
@@ -426,4 +637,5 @@ class DatabaseHelper {
   <script src="../common.js"></script>
   <script src="../layout/sidebar.js"></script>
 </body>
+
 </html>

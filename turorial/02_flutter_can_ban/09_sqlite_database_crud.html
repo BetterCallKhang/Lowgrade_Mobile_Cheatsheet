@@ -32,7 +32,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 7 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 7 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Bản chất: SQLite là gì? Dùng thế nào? Vì sao phải dùng SQLite?</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. So sánh chuyên sâu: SharedPreferences vs SQLite Local Database</a></li>
@@ -52,17 +52,17 @@
 
       <div class="grid-3">
         <div class="card">
-          <div class="card-title">🗄️ Serverless & Nhúng Trực Tiếp</div>
+          <div class="card-title">Serverless & Nhúng Trực Tiếp</div>
           <p>Không cần cài đặt Database Server, không cần cấu hình IP/Port hay Username/Password. Engine SQLite chạy trực tiếp bên trong cùng tiến trình bộ nhớ của ứng dụng Flutter.</p>
           <span class="pill pill-blue">Zero Configuration</span>
         </div>
         <div class="card">
-          <div class="card-title">⚡ Đầy Đủ Sức Mạnh SQL Chuẩn</div>
+          <div class="card-title">Đầy Đủ Sức Mạnh SQL Chuẩn</div>
           <p>Hỗ trợ đầy đủ ngôn ngữ truy vấn SQL: <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, mệnh đề <code>WHERE</code>, <code>ORDER BY</code>, <code>JOIN</code> nhiều bảng và quan hệ khóa ngoại (Foreign Key).</p>
           <span class="pill pill-green">Chuẩn ACID & RDBMS</span>
         </div>
         <div class="card">
-          <div class="card-title">📱 Offline-First & Tốc Độ Cực Cao</div>
+          <div class="card-title">Offline-First & Tốc Độ Cực Cao</div>
           <p>Dữ liệu nằm sẵn trên ổ đĩa thiết bị (Flash/Disk). App hoạt động tức thì, mượt mà và toàn diện ngay cả khi thiết bị ngắt kết nối mạng hoàn toàn (Airplane Mode / No Internet).</p>
           <span class="pill pill-purple">Offline-First Native</span>
         </div>
@@ -137,19 +137,19 @@
 
       <div class="grid-2">
         <div class="card">
-          <div class="card-title">📦 1. <code>sqflite: ^2.4.2</code></div>
+          <div class="card-title">1. <code>sqflite: ^2.4.2</code></div>
           <p>Plugin SQLite chính thức và phổ biến nhất cho Flutter (Android, iOS, macOS). Cung cấp các API mở kết nối DB, thực thi lệnh DDL (tạo bảng) và các hàm tiện ích CRUD (<code>insert</code>, <code>query</code>, <code>update</code>, <code>delete</code>, <code>transaction</code>).</p>
         </div>
         <div class="card">
-          <div class="card-title">📦 2. <code>path: ^1.9.1</code></div>
+          <div class="card-title">2. <code>path: ^1.9.1</code></div>
           <p>Thư viện xử lý đường dẫn tệp tin đa nền tảng. Cung cấp hàm <code>join(dir, 'app.db')</code> giúp tự động chuẩn hóa dấu gạch nối (<code>/</code> trên Linux/macOS/Android hoặc <code>\</code> trên Windows) một cách chính xác tuyệt đối.</p>
         </div>
         <div class="card">
-          <div class="card-title">🌐 3. <code>sqflite_common_ffi_web: ^1.2.0</code></div>
+          <div class="card-title">3. <code>sqflite_common_ffi_web: ^1.2.0</code></div>
           <p>Giải pháp đưa SQLite lên môi trường trình duyệt Web (Chrome) dựa trên nền tảng WebAssembly (Wasm) và IndexedDB. Giúp bạn test app SQLite nhanh chóng trên trình duyệt mà không cần mở máy ảo Android nặng nề.</p>
         </div>
         <div class="card">
-          <div class="card-title">⚡ 4. <code>flutter_riverpod</code> & <code>riverpod_annotation</code></div>
+          <div class="card-title">4. <code>flutter_riverpod</code> & <code>riverpod_annotation</code></div>
           <p>Bộ đôi quản lý State hiện đại. Cầu nối giữa giao diện UI và Cơ sở dữ liệu SQLite: Tự động tải danh sách ghi chú khi mở màn hình, phản ứng tự động vẽ lại giao diện khi có thêm/sửa/xóa thông qua <code>ref.invalidateSelf()</code>.</p>
         </div>
       </div>
@@ -157,7 +157,7 @@
       <!-- ===================== PHẦN 4: ĐỀ BÀI 7 YÊU CẦU ===================== -->
       <h3 id="sec-4">4. Yêu Cầu Bài Toán Thực Hành CRUD Note App (7 Tiêu Chí)</h3>
       <div class="callout warn">
-        <div class="callout-title">📋 Bộ 7 tiêu chí nghiệp vụ cần hoàn thiện:</div>
+        <div class="callout-title">Bộ 7 tiêu chí nghiệp vụ cần hoàn thiện:</div>
         <ol style="margin-left: 20px; line-height: 2.1;">
           <li><strong>Tiêu chí 1 (Create Screen):</strong> Nhấn <code>FloatingActionButton</code> ở màn hình chính sẽ chuyển sang màn hình thêm mới (<code>NoteCreateScreen</code>). Màn hình này gồm <code>Form</code> với 2 trường nhập liệu <code>title</code> và <code>content</code>; bắt buộc quản lý <code>TextEditingController</code> và phải hủy tài nguyên trong <code>dispose()</code>.</li>
           <li><strong>Tiêu chí 2 (Validation):</strong> Trường <code>title</code> phải có độ dài ít nhất <strong>3 ký tự</strong>. Trường <code>content</code> phải có ít nhất <strong>10 ký tự</strong>.</li>
