@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flutter & Dart Cheatsheet - Cẩm nang thực hành toàn diện</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <aside class="sidebar"></aside>
 
@@ -16,14 +18,17 @@
         <span class="pill pill-green">Flutter Cheatsheet</span>
       </div>
       <div>
-        <a href="01_nen_tang/01_setup_format_cautruc.html" class="copy-btn" style="text-decoration:none;">Bắt đầu học: Phần 1 &rarr;</a>
+        <a href="01_nen_tang/01_setup_format_cautruc.html" class="copy-btn" style="text-decoration:none;">Bắt đầu học:
+          Phần 1 &rarr;</a>
       </div>
     </header>
 
     <main class="content-container">
       <div class="section-header">
         <h2>Flutter & Dart Cheatsheet</h2>
-        <p>Cẩm nang thực hành, tra cứu cú pháp, cấu trúc code, xử lý lỗi và quy trình làm bài thực hành, đồ án và ôn thi PE Flutter từ cơ bản đến nâng cao. Mỗi nội dung đều được phân tách thành từng chuyên đề độc lập, kèm ví dụ chạy thực tế và giải thích chi tiết có dấu chuẩn xác.</p>
+        <p>Cẩm nang thực hành, tra cứu cú pháp, cấu trúc code, xử lý lỗi và quy trình làm bài thực hành, đồ án và ôn thi
+          PE Flutter từ cơ bản đến nâng cao. Mỗi nội dung đều được phân tách thành từng chuyên đề độc lập, kèm ví dụ
+          chạy thực tế và giải thích chi tiết có dấu chuẩn xác.</p>
       </div>
 
       <!-- ===================== MỤC LỤC TỔNG QUAN (XẢ XUỐNG DỌC) ===================== -->
@@ -32,66 +37,180 @@
       <div style="display:flex; flex-direction:column; gap:20px;">
         <!-- NHÓM NỀN TẢNG -->
         <div class="card" style="border-left: 4px solid var(--accent-blue);">
-          <div class="card-title" style="font-size: 17px; color: #58a6ff;">📘 Nhóm 1: Nền tảng Công cụ & Ngôn ngữ Dart</div>
+          <div class="card-title" style="font-size: 17px; color: #58a6ff;">Nhóm 1: Nền tảng Công cụ & Ngôn ngữ Dart
+          </div>
           <p>Môi trường phát triển, công cụ gỡ lỗi và ngữ pháp ngôn ngữ lập trình Dart cốt lõi:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
-            <li><a href="01_nen_tang/01_setup_format_cautruc.html" style="color:var(--accent-blue); font-weight:600;">Phần 1. Setup, Format & Cấu trúc dự án</a>: Cài đặt SDK, cấu hình biến môi trường PATH, Android Studio, bảng phím tắt, định dạng code chuẩn.</li>
-            <li><a href="01_nen_tang/02_debug_loi.html" style="color:var(--accent-blue); font-weight:600;">Phần 2. Debug & Tra cứu lỗi thường gặp</a>: Cách đọc stack trace, lỗi màn hình đỏ, lỗi vạch sọc vàng-đen layout, sửa lỗi Gradle và build Android.</li>
-            <li><a href="01_nen_tang/03_dart_co_ban.html" style="color:var(--accent-blue); font-weight:600;">Phần 3. Dart cơ bản & Luồng xử lý</a>: Null Safety, String Interpolation, Toán tử đặc thù, If-Else, Switch Expression (Dart 3+), Vòng lặp, Hàm & Tham số bắt buộc (required).</li>
-            <li><a href="01_nen_tang/04_collections.html" style="color:var(--accent-blue); font-weight:600;">Phần 4. Tập dữ liệu & Generics</a>: Kiểu Generics (&lt;T&gt;), các thuộc tính và hàm thông dụng của List, Set, Map, kỹ thuật Spread (...), Collection If/For.</li>
-            <li><a href="01_nen_tang/05_oop_model.html" style="color:var(--accent-blue); font-weight:600;">Phần 5. OOP & Model JSON</a>: Constructor chuẩn, Initializer List, thuộc tính Private, Kế thừa, Interface ngầm định, Mixin, Extension Methods, Model fromJson/toJson.</li>
-            <li><a href="01_nen_tang/06_async_future_stream.html" style="color:var(--accent-blue); font-weight:600;">Phần 6. Bất đồng bộ (Future & Stream)</a>: Bản chất Event Loop, cơ chế dây chuyền .then(), async/await, Stream dòng chảy dữ liệu với async* và yield.</li>
+            <li><a href="01_nen_tang/01_setup_format_cautruc.html"
+                style="color:var(--accent-blue); font-weight:600;">Phần 1. Setup, Format & Cấu trúc dự án</a>: Cài đặt
+              SDK, cấu hình biến môi trường PATH, Android Studio, bảng phím tắt, định dạng code chuẩn.</li>
+            <li><a href="01_nen_tang/02_debug_loi.html" style="color:var(--accent-blue); font-weight:600;">Phần 2. Debug
+                & Tra cứu lỗi thường gặp</a>: Cách đọc stack trace, lỗi màn hình đỏ, lỗi vạch sọc vàng-đen layout, sửa
+              lỗi Gradle và build Android.</li>
+            <li><a href="01_nen_tang/03_dart_co_ban.html" style="color:var(--accent-blue); font-weight:600;">Phần 3.
+                Dart cơ bản & Luồng xử lý</a>: Null Safety, String Interpolation, Toán tử đặc thù, If-Else, Switch
+              Expression (Dart 3+), Vòng lặp, Hàm & Tham số bắt buộc (required).</li>
+            <li><a href="01_nen_tang/04_collections.html" style="color:var(--accent-blue); font-weight:600;">Phần 4. Tập
+                dữ liệu & Generics</a>: Kiểu Generics (&lt;T&gt;), các thuộc tính và hàm thông dụng của List, Set, Map,
+              kỹ thuật Spread (...), Collection If/For.</li>
+            <li><a href="01_nen_tang/05_oop_model.html" style="color:var(--accent-blue); font-weight:600;">Phần 5. OOP &
+                Model JSON</a>: Constructor chuẩn, Initializer List, thuộc tính Private, Kế thừa, Interface ngầm định,
+              Mixin, Extension Methods, Model fromJson/toJson.</li>
+            <li><a href="01_nen_tang/06_async_future_stream.html"
+                style="color:var(--accent-blue); font-weight:600;">Phần 6. Bất đồng bộ (Future & Stream)</a>: Bản chất
+              Event Loop, cơ chế dây chuyền .then(), async/await, Stream dòng chảy dữ liệu với async* và yield.</li>
           </ul>
         </div>
 
         <!-- NHÓM GIAO DIỆN & STATE -->
         <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-          <div class="card-title" style="font-size: 17px; color: #39c5cf;">🎨 Nhóm 2: Giao diện (UI), State & Cơ sở dữ liệu</div>
+          <div class="card-title" style="font-size: 17px; color: #39c5cf;">Nhóm 2: Giao diện (UI), State & Cơ sở dữ liệu
+          </div>
           <p>Các kiến trúc ứng dụng giao diện Flutter hoàn chỉnh:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
-            <li><a href="02_flutter_can_ban/01_widgets_can_ban.html" style="color:var(--accent-blue); font-weight:600;">Mục 1. Toàn diện về Flutter Widgets</a>: Khái niệm Widget, bộ 3 cây (Widget - Element - Render), StatelessWidget vs StatefulWidget & Lifecycle, MaterialApp & Scaffold Anatomy, cơ chế setState(), ListView, Card, ListTile kèm ảnh, GridView và bộ sưu tập các input widget thường dùng (Button, TextField, Checkbox, Switch, RadioListTile, Slider...).</li>
-            <li><a href="02_flutter_can_ban/02_theme_drawer.html" style="color:var(--accent-blue); font-weight:600;">Mục 2. ThemeData & Drawer</a>: Định nghĩa Theme, lý do sử dụng, cấu hình ColorScheme.fromSeed, copyWith, và Drawer chọn 3 màu (Pink, Teal, Orange) kèm Dark Mode và Banner.</li>
-            <li><a href="02_flutter_can_ban/03_navigation_route.html" style="color:var(--accent-blue); font-weight:600;">Mục 3. Navigation & Route</a>: Cơ chế ngăn xếp LIFO (Route Stack), bản chất Widget Navigator & các tham số (initialRoute, onGenerateRoute, onUnknownRoute, observers, pages), so sánh MaterialPageRoute vs Named Routes, truyền nhận dữ liệu 2 chiều (await push, pop result), và Deep Linking — Giải phẫu cấu trúc đường link (Anatomy of a Link: Scheme, Host, Path, Query Params) xử lý qua onGenerateRoute.</li>
-            <li><a href="02_flutter_can_ban/04_layout_responsive.html" style="color:var(--accent-blue); font-weight:600;">Mục 4. Layout, Multi-Child Widgets & Responsive Design</a>: Phân tích sâu BoxConstraints (Quy tắc "Constraints down, Sizes up, Parent sets position"), bố cục tuyến tính Row / Column / Flex (MainAxis vs CrossAxis), bố cục xếp lớp Stack & Positioned / Align, bố cục dạng lưới GridView (.count, .extent, .builder & SliverGridDelegate), co giãn linh hoạt Expanded, Flexible, Wrap, FittedBox, AspectRatio, FractionallySizedBox, phân biệt Responsive vs Adaptive và áp dụng thực tế dự án adaptive_layout (20 thẻ sản phẩm đổi số cột khi xoay, Drawer tự biến đổi thành Side Panel cố định).</li>
-            <li><a href="02_flutter_can_ban/05_form_validation.html" style="color:var(--accent-blue); font-weight:600;">Mục 5. Form, TextEditingController & Validation</a>: Bản chất Form và Validation, tại sao cần thiết, phân biệt TextField vs TextFormField, vai trò và vòng đời của TextEditingController kèm dispose() bắt buộc chống rò rỉ bộ nhớ, cách dùng GlobalKey&lt;FormState&gt;, toàn bộ công thức validator thường dùng (bắt buộc, độ dài, regex email, số thực, so khớp mật khẩu), kịch bản Create vs Edit form và dự án thực hành hoàn chỉnh.</li>
-            <li><a href="02_flutter_can_ban/06_call_api_http.html" style="color:var(--accent-blue); font-weight:600;">Mục 6. Call REST API với http & dio</a>: Quy trình soi JSON thực tế, tạo Model, fetch API GET/POST, bảng mã HTTP Status Code, nâng cao với thư viện dio.</li>
-            <li><a href="02_flutter_can_ban/07_riverpod_state.html" style="color:var(--accent-blue); font-weight:600;">Mục 7. Quản lý State với Riverpod</a>: State là gì, so sánh Provider vs Riverpod, hệ sinh thái thư viện (flutter_riverpod, riverpod_annotation, build_runner, riverpod_generator), quy tắc sinh file .g.dart, ref.watch vs ref.read và dự án REST Users thực chiến.</li>
-            <li><a href="02_flutter_can_ban/08_local_storage_prefs.html" style="color:var(--accent-blue); font-weight:600;">Mục 8. Lưu trữ cục bộ với SharedPreferences</a>: Lưu trữ Primitive Types, StringList JSON, Token JWT, cấu hình Theme và quản lý đồng bộ với Riverpod.</li>
-            <li><a href="02_flutter_can_ban/09_sqlite_database_crud.html" style="color:var(--accent-blue); font-weight:600;">Mục 9. Cơ sở dữ liệu SQLite & Full CRUD</a>: Bản chất SQLite, Singleton DatabaseHelper, bộ 4 thao tác CRUD, Riverpod AsyncNotifier, giải quyết trọn vẹn 7 yêu cầu thi thực hành (Validation, Confirm Dialog, SnackBar, Dispose Controller).</li>
+            <li><a href="02_flutter_can_ban/01_widgets_can_ban.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 1. Toàn diện về Flutter Widgets</a>: Khái niệm
+              Widget, bộ 3 cây (Widget - Element - Render), StatelessWidget vs StatefulWidget & Lifecycle, MaterialApp &
+              Scaffold Anatomy, cơ chế setState(), ListView, Card, ListTile kèm ảnh, GridView và bộ sưu tập các input
+              widget thường dùng (Button, TextField, Checkbox, Switch, RadioListTile, Slider...).</li>
+            <li><a href="02_flutter_can_ban/02_theme_drawer.html" style="color:var(--accent-blue); font-weight:600;">Mục
+                2. ThemeData & Drawer</a>: Định nghĩa Theme, lý do sử dụng, cấu hình ColorScheme.fromSeed, copyWith, và
+              Drawer chọn 3 màu (Pink, Teal, Orange) kèm Dark Mode và Banner.</li>
+            <li><a href="02_flutter_can_ban/03_navigation_route.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 3. Navigation & Route</a>: Cơ chế ngăn xếp LIFO
+              (Route Stack), bản chất Widget Navigator & các tham số (initialRoute, onGenerateRoute, onUnknownRoute,
+              observers, pages), so sánh MaterialPageRoute vs Named Routes, truyền nhận dữ liệu 2 chiều (await push, pop
+              result), và Deep Linking — Giải phẫu cấu trúc đường link (Anatomy of a Link: Scheme, Host, Path, Query
+              Params) xử lý qua onGenerateRoute.</li>
+            <li><a href="02_flutter_can_ban/04_layout_responsive.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 4. Layout, Multi-Child Widgets & Responsive
+                Design</a>: Phân tích sâu BoxConstraints (Quy tắc "Constraints down, Sizes up, Parent sets position"),
+              bố cục tuyến tính Row / Column / Flex (MainAxis vs CrossAxis), bố cục xếp lớp Stack & Positioned / Align,
+              bố cục dạng lưới GridView (.count, .extent, .builder & SliverGridDelegate), co giãn linh hoạt Expanded,
+              Flexible, Wrap, FittedBox, AspectRatio, FractionallySizedBox, phân biệt Responsive vs Adaptive và áp dụng
+              thực tế dự án adaptive_layout (20 thẻ sản phẩm đổi số cột khi xoay, Drawer tự biến đổi thành Side Panel cố
+              định).</li>
+            <li><a href="02_flutter_can_ban/05_form_validation.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 5. Form, TextEditingController & Validation</a>:
+              Bản chất Form và Validation, tại sao cần thiết, phân biệt TextField vs TextFormField, vai trò và vòng đời
+              của TextEditingController kèm dispose() bắt buộc chống rò rỉ bộ nhớ, cách dùng GlobalKey&lt;FormState&gt;,
+              toàn bộ công thức validator thường dùng (bắt buộc, độ dài, regex email, số thực, so khớp mật khẩu), kịch
+              bản Create vs Edit form và dự án thực hành hoàn chỉnh.</li>
+            <li><a href="02_flutter_can_ban/06_call_api_http.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 6. Call REST API với http & dio</a>: Quy trình
+              soi JSON thực tế, tạo Model, fetch API GET/POST, bảng mã HTTP Status Code, nâng cao với thư viện dio.</li>
+            <li><a href="02_flutter_can_ban/07_riverpod_state.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 7. Quản lý State với Riverpod</a>: State là gì,
+              so sánh Provider vs Riverpod, hệ sinh thái thư viện (flutter_riverpod, riverpod_annotation, build_runner,
+              riverpod_generator), quy tắc sinh file .g.dart, ref.watch vs ref.read và dự án REST Users thực chiến.</li>
+            <li><a href="02_flutter_can_ban/08_local_storage_prefs.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 8. Lưu trữ cục bộ với SharedPreferences</a>: Lưu
+              trữ Primitive Types, StringList JSON, Token JWT, cấu hình Theme và quản lý đồng bộ với Riverpod.</li>
+            <li><a href="02_flutter_can_ban/09_sqlite_database_crud.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 9. Cơ sở dữ liệu SQLite & Full CRUD</a>: Bản chất
+              SQLite, Singleton DatabaseHelper, bộ 4 thao tác CRUD, Riverpod AsyncNotifier, giải quyết trọn vẹn 7 yêu
+              cầu thi thực hành (Validation, Confirm Dialog, SnackBar, Dispose Controller).</li>
           </ul>
         </div>
 
         <!-- NHÓM CHEAT SHEET PHÒNG THI -->
         <div class="card" style="border-left: 4px solid var(--accent-purple, #bc8cff);">
-          <div class="card-title" style="font-size: 17px; color: #d2a8ff;">⚡ Cheat Sheet Phòng Thi (Copy & Paste Thực Chiến)</div>
-          <p>Tài liệu siêu tốc phục vụ kỳ thi thực hành PE: Giải thích ngắn gọn thư viện là gì, dùng khi nào và toàn bộ code mẫu chuẩn chỉ việc copy và paste:</p>
+          <div class="card-title" style="font-size: 17px; color: #d2a8ff;">Cheat Sheet Phòng Thi (Copy & Paste Thực
+            Chiến)</div>
+          <p>Tài liệu siêu tốc phục vụ kỳ thi thực hành PE: Giải thích ngắn gọn thư viện là gì, dùng khi nào và toàn bộ
+            code mẫu chuẩn chỉ việc copy và paste:</p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
-            <li><a href="03_cheat_sheet/01_setup_libraries_project_structure.html" style="color:var(--accent-blue); font-weight:600;">Mục 1. Thư viện & Cấu trúc dự án sẵn (Copy & Paste)</a>: Lệnh terminal cài 1 dòng, bảng tra cứu vai trò các thư viện (sqflite, web ffi, shared_preferences, riverpod, http), file pubspec.yaml chuẩn, cây thư mục lib/ sẵn sàng cho mọi đề thi và khung sườn main.dart an toàn.</li>
-            <li><a href="03_cheat_sheet/02_database_validator_helper.html" style="color:var(--accent-blue); font-weight:600;">Mục 2. Database & Static Validators Helper</a>: DatabaseHelper Singleton đa nền tảng (Mobile + Web), nạp dữ liệu mẫu ban đầu, và bộ hàm static AppValidator (login, register, email, pass, confirm pass, số nguyên, số thực) gọi là dùng.</li>
-            <li><a href="03_cheat_sheet/03_register_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 3. Mẫu Màn Hình Register (Đăng ký)</a>: Tối giản đúng 4 trường (Username, Email, Password, Confirm Password), gọi static validators, kiểm tra trùng CSDL và điều hướng sang Login.</li>
-            <li><a href="03_cheat_sheet/04_login_logout_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 4. Mẫu Màn Hình Login & Xử Lý Logout</a>: Tối giản, không màu mè, ăn trọn điểm validation, ẩn hiện mật khẩu, kiểm tra tài khoản, SessionService và Dialog xác nhận logout.</li>
-            <li><a href="03_cheat_sheet/05_item_list_screens.html" style="color:var(--accent-blue); font-weight:600;">Mục 5. Mẫu Danh Sách ListView (Riverpod Code Gen)</a>: Chuẩn cú pháp `@riverpod` annotation, lệnh `build_runner`, tách riêng `ItemCardWidget`, tự động cập nhật khi Thêm/Xóa và xử lý `.when()` mượt mà.</li>
-            <li><a href="03_cheat_sheet/06_add_edit_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)</a>: Kỹ thuật "2 trong 1" dùng chung 1 màn hình cho cả Thêm và Chỉnh sửa, Form dropdown, validation và lưu qua Riverpod.</li>
-            <li><a href="03_cheat_sheet/07_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 7. Mẫu Màn Hình Chi Tiết (Detail Screen)</a>: Nhận Model qua Constructor, trình bày thẻ thông tin thanh lịch, nút Edit trên AppBar và nút quay lại.</li>
-            <li><a href="03_cheat_sheet/08_common_widgets_reference.html" style="color:var(--accent-blue); font-weight:600;">Mục 8. Tra Cứu Colors, Icons & Widgets Thường Dùng</a>: Bảng màu thường dùng, danh sách Icons thực chiến, và toàn bộ constructors/tham số của ListView (.builder, .separated), GridView (.count, .builder, .extent), Form, Buttons...</li>
+            <li><a href="03_cheat_sheet/01_setup_libraries_project_structure.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 1. Thư viện & Cấu trúc dự án sẵn (Copy &
+                Paste)</a>: Toàn bộ pubspec.yaml chuẩn 100% của dự án mẫu, giải thích chi tiết từng thư viện, cây thư
+              mục lib/ và file khởi động main.dart.</li>
+            <li><a href="03_cheat_sheet/02_database_validator_helper.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 2. Models, Database & Static Validators
+                Helper</a>: Toàn bộ code class UserModel, ItemModel, DatabaseHelper (Mobile + Chrome Web) và
+              AppValidator dùng sẵn.</li>
+            <li><a href="03_cheat_sheet/03_register_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục
+                3. Mẫu Màn Hình Register (Đăng ký)</a>: Toàn bộ code class RegisterScreen, ảnh minh họa iPhone SE trên
+              trình duyệt và phân tích chi tiết.</li>
+            <li><a href="03_cheat_sheet/04_login_logout_screen.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 4. Mẫu Màn Hình Login & Xử Lý Logout</a>: Toàn bộ
+              code class SessionService và LoginScreen, ảnh minh họa iPhone SE và cơ chế xóa session khi logout.</li>
+            <li><a href="03_cheat_sheet/05_home_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 5.
+                Mẫu Màn Hình Home (HomeScreen)</a>: Màn hình chính sau khi đăng nhập, hỗ trợ chuyển đổi linh hoạt giữa
+              ListView cuộn dọc và GridView Responsive (dọc 2 cột, ngang 3 cột), xử lý AsyncValue với Riverpod Code Gen,
+              Empty State và Logout.</li>
+            <li><a href="03_cheat_sheet/06_delete_dialog.html" style="color:var(--accent-blue); font-weight:600;">Mục 6.
+                Mẫu Hộp Thoại Xác Nhận Xóa (DeleteDialog)</a>: Modal AlertDialog xác nhận trước khi xóa, hàm xử lý xóa
+              _handleDelete() và SnackBar nổi có nút ĐÓNG.</li>
+            <li><a href="03_cheat_sheet/07_add_item_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục
+                7. Mẫu Màn Hình Thêm Mới (AddItemScreen)</a>: Toàn bộ code class AddItemScreen, form nhập liệu, Dropdown
+              category, lưu qua Riverpod và pop về Home.</li>
+            <li><a href="03_cheat_sheet/08_edit_item_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục
+                8. Mẫu Màn Hình Chỉnh Sửa (EditItemScreen)</a>: Toàn bộ code class EditItemScreen, nạp dữ liệu cũ trong
+              initState(), giữ nguyên ID khi update.</li>
+            <li><a href="03_cheat_sheet/09_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Mục 9.
+                Mẫu Màn Hình Chi Tiết (Detail Screen)</a>: Toàn bộ code class DetailScreen, thẻ Card lớn, nút Sửa trên
+              AppBar và nút quay lại.</li>
+            <li><a href="03_cheat_sheet/10_drawer_theme_service.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 10. Mẫu Drawer, Theme & Đổi Giao Diện Sáng /
+                Tối</a>: Toàn bộ code class AppDrawer, AppTheme (Sáng: Kem-Cam, Tối: Đen-Xanh), ThemeService
+              (SharedPreferences), ThemeProvider (@riverpod) và kết nối main.dart.</li>
+            <li><a href="03_cheat_sheet/11_common_widgets_reference.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 11. Tra Cứu Colors, Icons & Widgets Thường
+                Dùng</a>: Bảng màu thường dùng, danh sách Icons thực chiến, và toàn bộ constructors/tham số của
+              ListView, GridView, Form, Buttons...</li>
+            <li><a href="03_cheat_sheet/12_run_flow_architecture_guide.html"
+                style="color:var(--accent-blue); font-weight:600;">Mục 12. Chạy Cố Định Cổng Web Port & Sơ Đồ Luồng
+                Component</a>: Giải thích bản chất SQLite trên trình duyệt theo Origin, lệnh chạy cố định cổng 8080 để
+              không mất dữ liệu, và sơ đồ luồng hoạt động giữa toàn bộ các component.</li>
           </ul>
         </div>
 
         <!-- NHÓM PHÒNG THI THỰC CHIẾN -->
         <div class="card" style="border-left: 4px solid var(--accent-green, #238636);">
-          <div class="card-title" style="font-size: 17px; color: #3fb950;">🛠️ Hướng Dẫn Giải Đề Mẫu 1 (Art Gallery Manager)</div>
-          <p>Hướng dẫn "cầm tay chỉ việc" giải quyết trọn vẹn đề thi thực hành từ A đến Z, dùng chung cho mọi dạng đề:</p>
+          <div class="card-title" style="font-size: 17px; color: #3fb950;">Hướng Dẫn Giải Đề Mẫu 1 (Art Gallery Manager)
+          </div>
+          <p>Hướng dẫn "cầm tay chỉ việc" giải quyết trọn vẹn đề thi thực hành từ A đến Z, dùng chung cho mọi dạng đề:
+          </p>
           <ul style="margin-left: 20px; margin-top: 10px; line-height: 2.2;">
-            <li><a href="04_giai_de_mau_1/01_setup_project_libraries.html" style="color:var(--accent-blue); font-weight:600;">Bước 1. Khởi tạo dự án & Cấu hình thư viện chung</a>: Quy tắc phòng thi, khởi tạo project linh hoạt theo mọi đề, khai báo trọn bộ package cốt lõi (sqflite, shared_preferences, flutter_riverpod, http), cấu hình assets/banner và phân chia thư mục chuẩn.</li>
-            <li><a href="04_giai_de_mau_1/02_data_models.html" style="color:var(--accent-blue); font-weight:600;">Bước 2. Phân tích & Tạo Data Models</a>: Phương pháp suy luận đối chiếu đề bài và dataSample.txt, công thức vàng của Model (Fields, Constructor, toMap, fromMap, copyWith), hoàn thiện UserModel và ArtworkModel.</li>
-            <li><a href="04_giai_de_mau_1/03_database_helper.html" style="color:var(--accent-blue); font-weight:600;">Bước 3. Tầng CSDL DatabaseHelper</a>: Thiết kế SQLite Singleton, cấu hình mở CSDL trên cả Mobile và Web Browser, nạp dữ liệu mẫu (Seeding) và toàn bộ các hàm truy vấn cho toàn app.</li>
-            <li><a href="04_giai_de_mau_1/04_register_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 4. Màn hình Đăng ký (Task 1: User Registration)</a>: Phân tích UI Register, kỹ thuật quản lý Form & dispose Controllers chống rò rỉ bộ nhớ, bộ validation bắt buộc / khớp mật khẩu / email regex, kiểm tra username unique và code RegisterScreen hoàn chỉnh.</li>
-            <li><a href="04_giai_de_mau_1/05_session_service.html" style="color:var(--accent-blue); font-weight:600;">Bước 5. Quản lý Session (Task 3: Session Management)</a>: Xây dựng SessionService với SharedPreferences, lưu trữ `isLoggedIn`, `userId`, `username`, kiểm tra trạng thái khi mở app và hàm Logout xóa session.</li>
-            <li><a href="04_giai_de_mau_1/06_login_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 6. Màn hình Đăng nhập (Task 2: User Login)</a>: Phân tích UI Login & Logo bảo tàng, xác thực tài khoản từ SQLite, xử lý cờ Session, thông báo lỗi `Invalid username or password`, và điều hướng an toàn sang Home Screen.</li>
-            <li><a href="04_giai_de_mau_1/07_home_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 7. Màn hình Danh sách & Xóa (Task 4: Home List & Task 7: Delete Artwork)</a>: Hiển thị Banner kèm Session Username, ListView.builder danh sách tranh, xử lý trạng thái rỗng "No artworks found", hộp thoại xác nhận xóa (Confirmation Dialog) và SnackBar thông báo.</li>
-            <li><a href="04_giai_de_mau_1/08_add_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 8. Màn hình Thêm tác phẩm (Task 5: Add Artwork Screen)</a>: Dựng Form nhập Title, Artist, Year (number), DropdownButtonFormField cho Category, Description, lấy User ID Session làm khóa ngoại createdBy và cập nhật lại Home.</li>
-            <li><a href="04_giai_de_mau_1/09_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 9. Màn hình Chi tiết (Task 6: Artwork Detail Screen)</a>: Kỹ thuật truyền đối tượng Model qua Constructor, trình bày thẻ thông tin thanh lịch và nút Back trên AppBar trở về Home.</li>
-            <li><a href="04_giai_de_mau_1/10_main_entry.html" style="color:var(--accent-blue); font-weight:600;">Bước 10. Hoàn thiện main.dart & Quy trình nộp bài</a>: Khởi tạo engine bắt buộc `WidgetsFlutterBinding.ensureInitialized()`, cổng phân luồng Session Gatekeeper (Home vs Login), kịch bản test 7 Tasks và lệnh `flutter clean` trước khi nộp.</li>
+            <li><a href="04_giai_de_mau_1/01_setup_project_libraries.html"
+                style="color:var(--accent-blue); font-weight:600;">Bước 1. Khởi tạo dự án & Cấu hình thư viện chung</a>:
+              Quy tắc phòng thi, khởi tạo project linh hoạt theo mọi đề, khai báo trọn bộ package cốt lõi (sqflite,
+              shared_preferences, flutter_riverpod, http), cấu hình assets/banner và phân chia thư mục chuẩn.</li>
+            <li><a href="04_giai_de_mau_1/02_data_models.html" style="color:var(--accent-blue); font-weight:600;">Bước
+                2. Phân tích & Tạo Data Models</a>: Phương pháp suy luận đối chiếu đề bài và dataSample.txt, công thức
+              vàng của Model (Fields, Constructor, toMap, fromMap, copyWith), hoàn thiện UserModel và ArtworkModel.</li>
+            <li><a href="04_giai_de_mau_1/03_database_helper.html"
+                style="color:var(--accent-blue); font-weight:600;">Bước 3. Tầng CSDL DatabaseHelper</a>: Thiết kế SQLite
+              Singleton, cấu hình mở CSDL trên cả Mobile và Web Browser, nạp dữ liệu mẫu (Seeding) và toàn bộ các hàm
+              truy vấn cho toàn app.</li>
+            <li><a href="04_giai_de_mau_1/04_register_screen.html"
+                style="color:var(--accent-blue); font-weight:600;">Bước 4. Màn hình Đăng ký (Task 1: User
+                Registration)</a>: Phân tích UI Register, kỹ thuật quản lý Form & dispose Controllers chống rò rỉ bộ
+              nhớ, bộ validation bắt buộc / khớp mật khẩu / email regex, kiểm tra username unique và code RegisterScreen
+              hoàn chỉnh.</li>
+            <li><a href="04_giai_de_mau_1/05_session_service.html"
+                style="color:var(--accent-blue); font-weight:600;">Bước 5. Quản lý Session (Task 3: Session
+                Management)</a>: Xây dựng SessionService với SharedPreferences, lưu trữ `isLoggedIn`, `userId`,
+              `username`, kiểm tra trạng thái khi mở app và hàm Logout xóa session.</li>
+            <li><a href="04_giai_de_mau_1/06_login_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước
+                6. Màn hình Đăng nhập (Task 2: User Login)</a>: Phân tích UI Login & Logo bảo tàng, xác thực tài khoản
+              từ SQLite, xử lý cờ Session, thông báo lỗi `Invalid username or password`, và điều hướng an toàn sang Home
+              Screen.</li>
+            <li><a href="04_giai_de_mau_1/07_home_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước
+                7. Màn hình Danh sách & Xóa (Task 4: Home List & Task 7: Delete Artwork)</a>: Hiển thị Banner kèm
+              Session Username, ListView.builder danh sách tranh, xử lý trạng thái rỗng "No artworks found", hộp thoại
+              xác nhận xóa (Confirmation Dialog) và SnackBar thông báo.</li>
+            <li><a href="04_giai_de_mau_1/08_add_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước 8.
+                Màn hình Thêm tác phẩm (Task 5: Add Artwork Screen)</a>: Dựng Form nhập Title, Artist, Year (number),
+              DropdownButtonFormField cho Category, Description, lấy User ID Session làm khóa ngoại createdBy và cập
+              nhật lại Home.</li>
+            <li><a href="04_giai_de_mau_1/09_detail_screen.html" style="color:var(--accent-blue); font-weight:600;">Bước
+                9. Màn hình Chi tiết (Task 6: Artwork Detail Screen)</a>: Kỹ thuật truyền đối tượng Model qua
+              Constructor, trình bày thẻ thông tin thanh lịch và nút Back trên AppBar trở về Home.</li>
+            <li><a href="04_giai_de_mau_1/10_main_entry.html" style="color:var(--accent-blue); font-weight:600;">Bước
+                10. Hoàn thiện main.dart & Quy trình nộp bài</a>: Khởi tạo engine bắt buộc
+              `WidgetsFlutterBinding.ensureInitialized()`, cổng phân luồng Session Gatekeeper (Home vs Login), kịch bản
+              test 7 Tasks và lệnh `flutter clean` trước khi nộp.</li>
           </ul>
         </div>
       </div>
@@ -100,13 +219,18 @@
       <h3>Mẹo sử dụng Cẩm nang hiệu quả</h3>
       <div class="def">
         <span class="def-term">Tính năng tìm kiếm</span>
-        <p>Sử dụng ô <strong>"Lọc nhanh trong trang..."</strong> ở trên thanh Sidebar bên trái để lọc tức thì các khối code, cú pháp lệnh hoặc bảng tra cứu cần tìm trong bất kỳ bài viết nào.</p>
+        <p>Sử dụng ô <strong>"Lọc nhanh trong trang..."</strong> ở trên thanh Sidebar bên trái để lọc tức thì các khối
+          code, cú pháp lệnh hoặc bảng tra cứu cần tìm trong bất kỳ bài viết nào.</p>
       </div>
 
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Thao tác</th><th>Mục đích</th><th>Phím tắt tham khảo</th></tr>
+            <tr>
+              <th>Thao tác</th>
+              <th>Mục đích</th>
+              <th>Phím tắt tham khảo</th>
+            </tr>
           </thead>
           <tbody>
             <tr>
@@ -117,7 +241,8 @@
             <tr>
               <td><strong>Tìm kiếm toàn trang</strong></td>
               <td>Tìm từ khoá hoặc tên hàm bất kỳ trên trang hiện tại.</td>
-              <td><span class="kbd">Ctrl</span> + <span class="kbd">F</span> (Mac: <span class="kbd">Cmd</span> + <span class="kbd">F</span>)</td>
+              <td><span class="kbd">Ctrl</span> + <span class="kbd">F</span> (Mac: <span class="kbd">Cmd</span> + <span
+                  class="kbd">F</span>)</td>
             </tr>
             <tr>
               <td><strong>Điều hướng bài tiếp theo</strong></td>
@@ -133,4 +258,5 @@
   <script src="layout/sidebar.js"></script>
   <script src="common.js"></script>
 </body>
+
 </html>

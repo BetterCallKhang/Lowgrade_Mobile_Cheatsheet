@@ -8,7 +8,7 @@
       ]
     },
     {
-      group: "📘 Nền tảng",
+      group: "Nền tảng",
       items: [
         { title: "1. Setup, Format, Cấu trúc", href: "01_nen_tang/01_setup_format_cautruc.html" },
         { title: "2. Debug và lỗi thường gặp", href: "01_nen_tang/02_debug_loi.html" },
@@ -19,7 +19,7 @@
       ]
     },
     {
-      group: " Flutter Căn Bản & Giao Diện",
+      group: "Flutter Căn Bản & Giao Diện",
       items: [
         { title: "1. Toàn diện về Flutter Widgets", href: "02_flutter_can_ban/01_widgets_can_ban.html" },
         { title: "2. ThemeData và Drawer", href: "02_flutter_can_ban/02_theme_drawer.html" },
@@ -33,20 +33,24 @@
       ]
     },
     {
-      group: " Cheat Sheet Phòng Thi",
+      group: "Cheat Sheet Phòng Thi",
       items: [
         { title: "1. Thư viện & Cấu trúc dự án sẵn", href: "03_cheat_sheet/01_setup_libraries_project_structure.html" },
         { title: "2. Database & Static Validators Helper", href: "03_cheat_sheet/02_database_validator_helper.html" },
         { title: "3. Mẫu Register Screen (Đăng ký)", href: "03_cheat_sheet/03_register_screen.html" },
         { title: "4. Mẫu Login & Logout Screens", href: "03_cheat_sheet/04_login_logout_screen.html" },
-        { title: "5. Mẫu Danh Sách ListView (Riverpod Code Gen)", href: "03_cheat_sheet/05_item_list_screens.html" },
-        { title: "6. Mẫu Màn Hình Thêm & Sửa (Add / Edit)", href: "03_cheat_sheet/06_add_edit_screen.html" },
-        { title: "7. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/07_detail_screen.html" },
-        { title: "8. Tra Cứu Colors, Icons & Widgets", href: "03_cheat_sheet/08_common_widgets_reference.html" }
+        { title: "5. Mẫu Màn Hình Home (HomeScreen)", href: "03_cheat_sheet/05_home_screen.html" },
+        { title: "6. Mẫu Hộp Thoại Xác Nhận Xóa (DeleteDialog)", href: "03_cheat_sheet/06_delete_dialog.html" },
+        { title: "7. Mẫu Màn Hình Thêm Mới (AddItemScreen)", href: "03_cheat_sheet/07_add_item_screen.html" },
+        { title: "8. Mẫu Màn Hình Chỉnh Sửa (EditItemScreen)", href: "03_cheat_sheet/08_edit_item_screen.html" },
+        { title: "9. Mẫu Màn Hình Chi Tiết (Detail Screen)", href: "03_cheat_sheet/09_detail_screen.html" },
+        { title: "10. Mẫu Drawer, Theme & Đổi Giao Diện", href: "03_cheat_sheet/10_drawer_theme_service.html" },
+        { title: "11. Tra Cứu Colors, Icons & Widgets", href: "03_cheat_sheet/11_common_widgets_reference.html" },
+        { title: "12. Chạy Cố Định Port & Luồng Component", href: "03_cheat_sheet/12_run_flow_architecture_guide.html" }
       ]
     },
     {
-      group: " Giải Đề Mẫu 1 (Art Gallery)",
+      group: "Giải Đề Mẫu 1 (Art Gallery)",
       items: [
         { title: "Bước 1. Khởi tạo & Thư viện dùng chung", href: "04_giai_de_mau_1/01_setup_project_libraries.html" },
         { title: "Bước 2. Phân tích & Tạo Data Models", href: "04_giai_de_mau_1/02_data_models.html" },

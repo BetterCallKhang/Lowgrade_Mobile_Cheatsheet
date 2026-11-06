@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 7: Màn Hình Thêm Mới (AddItemScreen) - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 7: AddItemScreen</span>
+        <span class="pill pill-purple">1-Click Copy & Paste</span>
+      </div>
+      <div>
+        <a href="06_delete_dialog.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 6: DeleteDialog</a>
+        <a href="08_edit_item_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 8:
+          EditItemScreen &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 7: Mẫu Màn Hình Thêm Mới (lib/screens/add_item_screen.dart)</h2>
+        <p>Màn hình đảm nhiệm Task <strong>Add New Item</strong> của đề thi: Gồm Form nhập Tiêu đề, Mô tả, Dropdown thể
+          loại, Giá tiền số thực, kết nối Riverpod lưu vào CSDL SQLite và tự động cập nhật danh sách ở HomeScreen. Toàn
+          bộ mã nguồn class được đưa <strong>lên trên cùng</strong>, kèm hình ảnh minh họa iPhone SE trên trình duyệt và
+          các mục giải thích chi tiết: <strong>Dùng để làm gì, dùng thế nào và vì sao</strong>.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-add-code" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class AddItemScreen
+              (lib/screens/add_item_screen.dart)</a></li>
+          <li><a href="#sec-add-preview" style="color:var(--accent-blue);">2. Hình ảnh minh họa giao diện UI
+              AddItemScreen (iPhone SE Trên Trình Duyệt)</a></li>
+          <li><a href="#sec-add-explain" style="color:var(--accent-blue);">3. Giải thích chi tiết code AddItemScreen:
+              Dùng để làm gì, dùng thế nào & vì sao?</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. ADD ITEM SCREEN CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-add-code">1. Toàn Bộ Mã Nguồn Class AddItemScreen (lib/screens/add_item_screen.dart)</h3>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/item_example.dart';
+import '../providers/item_provider.dart';
+import '../utils/app_validator.dart';
+
+class AddItemScreen extends ConsumerStatefulWidget {
+  const AddItemScreen({super.key});
+
+  @override
+  ConsumerState&lt;AddItemScreen&gt; createState() =&gt; _AddItemScreenState();
+}
+
+class _AddItemScreenState extends ConsumerState&lt;AddItemScreen&gt; {
+  final _formKey = GlobalKey&lt;FormState&gt;();
+  final _titleController = TextEditingController();
+  final _subtitleController = TextEditingController();
+  final _priceController = TextEditingController();
+
+  String _selectedCategory = 'Loại A';
+  final List&lt;String&gt; _categories = ['Loại A', 'Loại B', 'Loại C'];
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _subtitleController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  Future&lt;void&gt; _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final title = _titleController.text.trim();
+    final subtitle = _subtitleController.text.trim();
+    final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
+
+    // THÊM MỚI (ADD): ID tự động tăng
+    final newItem = ItemModel(
+      title: title,
+      subtitle: subtitle,
+      category: _selectedCategory,
+      price: price,
+    );
+
+    await ref.read(itemProvider.notifier).addItem(newItem);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Thêm mới thành công!')),
+    );
+
+    // Quay trở về màn hình trước (HomeScreen tự động cập nhật)
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Thêm mới'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Field 1: Title
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) =&gt; AppValidator.required(val, 'Tiêu đề'),
+              ),
+              const SizedBox(height: 16),
+
+              // Field 2: Description / Subtitle
+              TextFormField(
+                controller: _subtitleController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) =&gt; AppValidator.required(val, 'Mô tả'),
+              ),
+              const SizedBox(height: 16),
+
+              // Field 3: Category Dropdown
+              DropdownButtonFormField&lt;String&gt;(
+                value: _selectedCategory,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+                items: _categories.map((cat) {
+                  return DropdownMenuItem(value: cat, child: Text(cat));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() =&gt; _selectedCategory = val);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Field 4: Price (Số thực dương)
+              TextFormField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Price',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (val) =&gt; AppValidator.positiveDouble(val, 'Giá tiền'),
+              ),
+              const SizedBox(height: 24),
+
+              // Nút Lưu
+              ElevatedButton(
+                onPressed: _save,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text(
+                  'LƯU DỮ LIỆU',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. HÌNH ẢNH UI ADD SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-add-preview">2. Hình Ảnh Minh Họa Giao Diện UI AddItemScreen (iPhone SE Trên Trình Duyệt)</h3>
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-green, #3fb950); font-size: 15px;">Màn hình Thêm mới
+            (AddItemScreen)</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/add_screen_ui.svg" alt="Flutter Add Screen UI"
+              style="display: block; width: 320px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            AppBar "Thêm mới" kèm nút Back, 4 trường Title, Description, Dropdown Category, Price và nút "LƯU DỮ LIỆU".
+          </p>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. GIẢI THÍCH CHI TIẾT ADD SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-add-explain">3. Giải Thích Chi Tiết Code AddItemScreen: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
+      <div class="card" style="margin-bottom: 35px;">
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Kế thừa <code>ConsumerStatefulWidget</code>:</strong>
+            <br /><em>Vì sao dùng:</em> Vừa cho phép quản lý vòng đời State cục bộ (các
+            <code>TextEditingController</code>, <code>setState</code> khi chọn Dropdown), vừa cung cấp biến
+            <code>ref</code> toàn cục trong toàn bộ lớp State để giao tiếp với Riverpod.
+          </li>
+          <li><strong>Quy trình xử lý hàm <code>_save()</code>:</strong>
+            <br />1. Kiểm tra toàn bộ validators của Form: <code>if (!_formKey.currentState!.validate()) return;</code>
+            <br />2. Đọc giá trị từ các ô nhập: <code>title</code>, <code>subtitle</code>, và parse giá tiền:
+            <code>double.tryParse(...) ?? 0.0</code>
+            <br />3. Tạo đối tượng <code>ItemModel</code> mới: trường <code>id</code> không truyền (để null) vì SQLite
+            sẽ tự động tăng giá trị ID trong CSDL.
+            <br />4. Gọi <code>await ref.read(itemProvider.notifier).addItem(newItem);</code>
+            <br />5. Hiển thị SnackBar xanh báo thành công và gọi <code>Navigator.pop(context);</code> quay về màn hình
+            trước.
+          </li>
+          <li><strong>Dropdown chọn Category: <code>DropdownButtonFormField&lt;String&gt;</code></strong>
+            <br /><em>Dùng để làm gì:</em> Hiển thị danh sách các phân loại cố định dạng menu thả xuống (Loại A, Loại B,
+            Loại C).
+            <br /><em>Dùng thế nào:</em> Gán <code>value: _selectedCategory</code> và gọi
+            <code>setState(() =&gt; _selectedCategory = val)</code> khi người dùng chọn một mục khác.
+          </li>
+          <li><strong>Bàn phím số thực:
+              <code>keyboardType: const TextInputType.numberWithOptions(decimal: true)</code></strong>
+            <br /><em>Dùng để làm gì:</em> Bàn phím số trên điện thoại sẽ tự động hiển thị thêm phím dấu chấm thập phân
+            <code>.</code> để nhập giá tiền chính xác.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="06_delete_dialog.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 6: DeleteDialog</a>
+        <a href="08_edit_item_screen.html" class="copy-btn" style="text-decoration:none;">Mục 8: EditItemScreen
+          &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

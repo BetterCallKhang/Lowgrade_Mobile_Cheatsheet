@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 5: Màn Hình Home (HomeScreen) - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 5: Màn Hình Home (HomeScreen)</span>
+        <span class="pill pill-purple">ListView &amp; Responsive GridView</span>
+      </div>
+      <div>
+        <a href="04_login_logout_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 4: Login &
+          Logout</a>
+        <a href="06_delete_dialog.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 6:
+          DeleteDialog &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 5: Mẫu Màn Hình Home (HomeScreen) &amp; Quản Lý State Riverpod</h2>
+        <p>Đây là <strong>màn hình chính Home (HomeScreen)</strong> của ứng dụng sau khi đăng nhập thành công. Màn hình
+          hỗ trợ linh hoạt <strong>cả 2 dạng hiển thị phổ biến nhất trong đề thi PE</strong>: dạng danh sách cuộn dọc
+          (<code>ListView</code>) và dạng lưới thích ứng (<code>GridView</code> responsive: <strong>nằm dọc 2 cột, nằm
+            ngang 3 cột</strong>). Cả 2 dạng đã được tách riêng thành các Widget chuẩn mực (<code>ItemListWidget</code>
+          và <code>ItemGridWidget</code>), kết hợp với <code>Riverpod Code Gen</code> để tự động làm mới giao diện khi
+          có thay đổi dữ liệu.</p>
+        <p style="margin-top: 6px; font-size: 13px; color: var(--accent-blue);">
+          <em>Lưu ý: Hộp thoại xác nhận xóa (DeleteDialog) và xử lý sự kiện xóa đã được tách riêng thành một module
+            chuyên biệt tại <a href="06_delete_dialog.html" style="color:var(--accent-blue); font-weight:bold;">Mục 6:
+              DeleteDialog &rarr;</a></em>
+        </p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-home-screen" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class HomeScreen
+              (lib/screens/home_screen.dart)</a></li>
+          <li><a href="#sec-switch-guide" style="color:var(--accent-blue);">2. Hướng dẫn chuyển đổi nhanh giữa ListView
+              và GridView trong phòng thi</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">3. Hình ảnh minh họa giao diện UI HomeScreen
+              (Danh sách & Trạng thái rỗng)</a></li>
+          <li><a href="#sec-home-explain" style="color:var(--accent-blue);">4. Giải thích chi tiết code HomeScreen: Dùng
+              để làm gì, dùng thế nào & vì sao?</a></li>
+          <li><a href="#sec-item-provider" style="color:var(--accent-blue);">5. Class ItemNotifier
+              (lib/providers/item_provider.dart) & Lệnh sinh mã Code Gen</a></li>
+          <li><a href="#sec-item-list" style="color:var(--accent-blue);">6. Widget danh sách ListView: ItemListWidget &
+              ItemCardWidget</a></li>
+          <li><a href="#sec-item-grid" style="color:var(--accent-blue);">7. Widget dạng lưới GridView: ItemGridWidget
+              (Responsive) & ItemGridCardWidget</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. HOME SCREEN CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-home-screen">1. Toàn Bộ Mã Nguồn Class HomeScreen (lib/screens/home_screen.dart)</h3>
+      <p>Màn hình Home quản lý hiển thị dữ liệu qua Riverpod, nút Thêm mới (FAB), nút Đăng xuất trên AppBar và tích hợp
+        sẵn cả 2 lựa chọn hiển thị (ListView / GridView):</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/item_example.dart';
+import '../providers/item_provider.dart';
+import '../services/session_service.dart';
+import '../widgets/delete_dialog.dart'; // Import Dialog xóa tách riêng
+import '../widgets/item_list_widget.dart'; // Widget hiển thị dạng ListView tách riêng
+import '../widgets/item_grid_widget.dart'; // Widget hiển thị dạng GridView tách riêng
+import '../widgets/app_drawer.dart'; // Widget Drawer thanh menu bên hông (Xem Mục 10)
+import 'add_item_screen.dart'; // Màn Thêm mới
+import 'edit_item_screen.dart'; // Màn Chỉnh sửa
+import 'detail_screen.dart'; // Màn Chi tiết
+import 'login_screen.dart';
+
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
+
+  // Xử lý Xóa phần tử & Hiển thị SnackBar thông báo thành công
+  Future&lt;void&gt; _handleDelete(BuildContext context, WidgetRef ref, ItemModel item) async {
+    // 1. Mở dialog xác nhận xóa đã tách riêng ở file DeleteDialog
+    final bool confirm = await DeleteDialog.show(context, item.title);
+
+    if (confirm && item.id != null) {
+      // 2. Gọi Riverpod xóa item
+      await ref.read(itemProvider.notifier).deleteItem(item.id!);
+
+      if (!context.mounted) return;
+      // 3. HIỆN SNACKBAR THÔNG BÁO XÓA THÀNH CÔNG
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã xóa "${item.title}" thành công!'),
+          duration: const Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'ĐÓNG',
+            textColor: Colors.amber,
+            onPressed: () {},
+          ),
+        ),
+      );
+    }
+  }
+
+  Future&lt;void&gt; _logout(BuildContext context) async {
+    await SessionService.clearSession();
+    if (!context.mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
+      (route) =&gt; false,
+    );
+  }
+
+  void _navigateToEdit(BuildContext context, ItemModel item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) =&gt; EditItemScreen(item: item)),
+    );
+  }
+
+  void _navigateToDetail(BuildContext context, ItemModel item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) =&gt; DetailScreen(item: item)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncItems = ref.watch(itemProvider);
+
+    return Scaffold(
+      drawer: const AppDrawer(),
+      appBar: AppBar(
+        title: const Text('Danh sách'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Đăng xuất',
+            onPressed: () =&gt; _logout(context),
+          ),
+        ],
+      ),
+      // Xử lý 3 trạng thái với .when: loading, error, data (kèm xử lý rỗng)
+      body: asyncItems.when(
+        loading: () =&gt; const Center(child: CircularProgressIndicator()),
+        error: (err, stack) =&gt; Center(child: Text('Lỗi: $err')),
+        data: (items) {
+          // TRẠNG THÁI KHÔNG CÓ DỮ LIỆU (EMPTY STATE)
+          if (items.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.inbox, size: 64, color: Colors.grey),
+                  SizedBox(height: 12),
+                  Text(
+                    'Chưa có dữ liệu nào',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    '(No items found)',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // ===================================================================
+          // CHEAT SHEET PHÒNG THI - TÙY BIẾN HIỂN THỊ LISTVIEW / GRIDVIEW:
+          // ===================================================================
+          // [TRƯỜNG HỢP 1] Đề bắt: "Dọc là List, Ngang là Grid" (Mặc định)
+          // [TRƯỜNG HỢP 2] Đề bắt: "Dọc là Grid, Ngang là List":
+          //    -> Đổi: if (isPortrait) return ItemGridWidget(...)
+          //            else return ItemListWidget(...)
+          // [TRƯỜNG HỢP 3] Đề chỉ bắt duy nhất ListView:
+          //    -> Xóa OrientationBuilder, return ItemListWidget(...)
+          // [TRƯỜNG HỢP 4] Đề chỉ bắt duy nhất GridView:
+          //    -> Xóa OrientationBuilder, return ItemGridWidget(...)
+          // ===================================================================
+          return OrientationBuilder(
+            builder: (context, orientation) {
+              final isPortrait = orientation == Orientation.portrait;
+
+              // 1. Màn hình DỌC (Portrait) -&gt; Mặc định là ListView
+              if (isPortrait) {
+                return ItemListWidget(
+                  items: items,
+                  onDelete: (item) =&gt; _handleDelete(context, ref, item),
+                  onEdit: (item) =&gt; _navigateToEdit(context, item),
+                  onTap: (item) =&gt; _navigateToDetail(context, item),
+                );
+              }
+
+              // 2. Màn hình NGANG (Landscape) -&gt; Mặc định là GridView (3 cột)
+              return ItemGridWidget(
+                items: items,
+                landscapeCount: 3, // Tùy chỉnh số cột khi xoay ngang
+                onDelete: (item) =&gt; _handleDelete(context, ref, item),
+                onEdit: (item) =&gt; _navigateToEdit(context, item),
+                onTap: (item) =&gt; _navigateToDetail(context, item),
+              );
+            },
+          );
+        },
+      ),
+      // Nút Thêm mới dẫn sang AddItemScreen
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) =&gt; const AddItemScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. HƯỚNG DẪN CHUYỂN ĐỔI LISTVIEW & GRIDVIEW -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-switch-guide">2. Hướng Dẫn Chuyển Đổi Nhanh Giữa ListView Và GridView Trong Phòng Thi</h3>
+      <div class="card" style="margin-bottom: 25px; border-left: 4px solid var(--accent-purple);">
+        <p>Tùy theo yêu cầu của đề thi PE, bạn chỉ cần thay đổi nhanh trong khối <code>OrientationBuilder</code> của
+          <code>HomeScreen</code>:</p>
+        <ul style="line-height: 1.8; margin-left: 20px; margin-top: 8px;">
+          <li><strong>Mặc định (Dọc là List, Ngang là Grid):</strong>
+            <pre style="background:var(--bg-secondary); padding:10px; border-radius:6px; margin:6px 0;"><code>if (isPortrait) {
+  return ItemListWidget(...); // Dọc là ListView
+}
+return ItemGridWidget(..., landscapeCount: 3); // Ngang là GridView 3 cột</code></pre>
+          </li>
+          <li><strong>Nếu đề bắt "Dọc là Grid, Ngang là List":</strong> Hoán đổi 2 widget cho nhau:
+            <pre style="background:var(--bg-secondary); padding:10px; border-radius:6px; margin:6px 0;"><code>if (isPortrait) {
+  return ItemGridWidget(..., portraitCount: 2); // Dọc là GridView 2 cột
+}
+return ItemListWidget(...); // Ngang là ListView</code></pre>
+          </li>
+          <li><strong>Nếu đề chỉ bắt duy nhất 1 dạng (không cần xoay):</strong> Xóa <code>OrientationBuilder</code>,
+            return thẳng <code>ItemListWidget(...)</code> hoặc <code>ItemGridWidget(...)</code>.</li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. HÌNH ẢNH UI HOME SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-preview">3. Hình Ảnh Minh Họa Giao Diện UI HomeScreen (iPhone SE Trên Trình Duyệt)</h3>
+      <p>Đối chiếu giao diện màn hình Home khi có dữ liệu danh sách và khi rỗng:</p>
+
+      <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin: 28px 0;">
+        <!-- Hình 1: Bình thường -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-green, #3fb950); font-size: 14px;">1. HomeScreen: Danh
+            sách cuộn dạng ListView</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/listview_normal_ui.svg" alt="HomeScreen ListView Normal UI"
+              style="display: block; width: 300px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 300px;">
+            Màn hình Home hiển thị danh sách dạng cuộn với AppBar "Danh sách", nút Logout, các dòng Card và nút Thêm mới
+            (+).
+          </p>
+        </div>
+
+        <!-- Hình 2: Trạng thái rỗng -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-blue, #58a6ff); font-size: 14px;">2. HomeScreen: Khi danh
+            sách rỗng (Empty State)</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/listview_empty_ui.svg" alt="HomeScreen Empty UI"
+              style="display: block; width: 300px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 300px;">
+            Khi database chưa có bản ghi: Căn giữa Icon hộp thư rỗng + Chữ "Chưa có dữ liệu nào" chuẩn yêu cầu đề thi.
+          </p>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. GIẢI THÍCH CHI TIẾT HOME SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-home-explain">4. Giải Thích Chi Tiết Code HomeScreen: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">1. Bản chất màn hình Home (HomeScreen) và điều hướng</h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> <code>HomeScreen</code> là trung tâm điều hướng của ứng dụng: Xem danh
+            sách, mở xem chi tiết (tap), mở chỉnh sửa (nút bút xanh), xóa phần tử và mở màn thêm mới (nút FAB).</li>
+          <li><strong>Lợi ích của việc tách Widget hiển thị riêng:</strong> Tách <code>ItemListWidget</code> và
+            <code>ItemGridWidget</code> giúp code màn hình <code>HomeScreen</code> cực kỳ ngắn gọn, dễ chuyển đổi định
+            dạng theo đề bài mà không sợ làm hỏng logic xóa hay mở màn hình con.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">2. Kế thừa <code>ConsumerWidget</code> &amp; Cơ chế <code>ref.watch</code>
+        </h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì:</strong> <code>ConsumerWidget</code> cung cấp biến <code>WidgetRef ref</code>
+            trong hàm <code>build()</code>.</li>
+          <li><strong><code>final asyncItems = ref.watch(itemProvider);</code>:</strong> Lắng nghe liên tục dữ liệu từ
+            <code>itemProvider</code>. Bất cứ khi nào có hành động Thêm/Sửa/Xóa thành công, Riverpod tự động kích hoạt
+            hàm <code>build()</code> của HomeScreen chạy lại để cập nhật giao diện mới nhất.</li>
+          <li><strong>Xử lý 3 trạng thái với <code>asyncItems.when(...)</code>:</strong>
+            <br />- <code>loading:</code> Hiện <code>CircularProgressIndicator()</code> khi đang đọc SQLite.
+            <br />- <code>error:</code> Hiện lỗi nếu câu lệnh truy vấn CSDL thất bại.
+            <br />- <code>data:</code> Nhận danh sách <code>List&lt;ItemModel&gt;</code> để hiển thị.
+          </li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">3. Xử lý Đăng xuất (Logout) trên AppBar</h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li>Gọi <code>await SessionService.clearSession()</code> xóa sạch thông tin đăng nhập trong SharedPreferences.
+          </li>
+          <li>Dùng <code>Navigator.pushAndRemoveUntil(..., (route) =&gt; false)</code> xóa sạch toàn bộ lịch sử màn hình
+            cũ, ngăn người dùng bấm phím Back quay lại màn Home.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 30px;">
+        <h4 style="color:var(--accent-blue);">4. Tích hợp Drawer Menu bên hông &amp; Chuyển đổi Theme (AppDrawer)</h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li>Khai báo <code>drawer: const AppDrawer()</code> trong <code>Scaffold</code>. Flutter tự động sinh icon
+            Menu 3 gạch (hamburger icon) bên trái AppBar khi có thuộc tính <code>drawer</code>.</li>
+          <li>Khi bấm vào menu hoặc vuốt từ cạnh trái, ngăn kéo <code>AppDrawer</code> trượt ra với lời chào tên người
+            dùng và công tắc Switch chuyển đổi giao diện Sáng / Tối trực tiếp. Chi tiết xem tại <a
+              href="10_drawer_theme_service.html" style="color:var(--accent-blue); font-weight:bold;">Mục 10: Drawer
+              &amp; Theme Service &rarr;</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 5. ITEM PROVIDER CODE GEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-item-provider">5. Toàn Bộ Mã Nguồn Class ItemNotifier (lib/providers/item_provider.dart)</h3>
+      <p>Quản lý toàn bộ State danh sách items (đọc từ SQLite, thêm, sửa, xóa) và tự động làm mới UI:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../utils/database_helper.dart';
+import '../models/item_example.dart';
+
+// 1. DÒNG BẮT BUỘC: Liên kết file sinh mã tự động
+part 'item_provider.g.dart';
+
+// 2. Annotation @riverpod: Tự động sinh ra itemProvider
+@riverpod
+class ItemNotifier extends _$ItemNotifier {
+  // Hàm build() bất đồng bộ: Riverpod sẽ tự quản lý trạng thái Loading/Error/Data
+  @override
+  Future&lt;List&lt;ItemModel&gt;&gt; build() async {
+    final rawData = await DatabaseHelper.instance.getAllItems();
+    return rawData.map((e) =&gt; ItemModel.fromMap(e)).toList();
+  }
+
+  // Thêm một item mới
+  Future&lt;void&gt; addItem(ItemModel item) async {
+    await DatabaseHelper.instance.insertItem(item.toMap());
+    // Làm mới lại danh sách -&gt; UI tự động cập nhật
+    ref.invalidateSelf();
+    await future;
+  }
+
+  // Cập nhật một item theo ID
+  Future&lt;void&gt; updateItem(ItemModel item) async {
+    if (item.id == null) return;
+    await DatabaseHelper.instance.updateItem(item.id!, item.toMap());
+    ref.invalidateSelf();
+    await future;
+  }
+
+  // Xóa một item theo ID
+  Future&lt;void&gt; deleteItem(int id) async {
+    await DatabaseHelper.instance.deleteItem(id);
+    ref.invalidateSelf();
+    await future;
+  }
+}</code></pre>
+      </div>
+
+      <!-- CALLOUT NHẮC GENERATE CODE -->
+      <div class="callout warning" style="margin-top: 20px; margin-bottom: 30px;">
+        <strong>BẮT BUỘC CHẠY LỆNH CODE GENERATOR SAU KHI TẠO FILE NÀY:</strong>
+        <p>File <code>item_provider.g.dart</code> được liên kết bằng <code>part 'item_provider.g.dart';</code> là file
+          do máy tự sinh, <strong>BẠN KHÔNG CẦN TỰ GÕ FILE ĐÓ</strong>. Mở Terminal tại thư mục dự án và chạy ngay lệnh
+          sau:</p>
+        <pre
+          style="margin-top:8px; background:#0d1117; padding:8px 12px; border-radius:6px;"><code>dart run build_runner build --delete-conflicting-outputs</code></pre>
+        <p style="margin-top:8px; font-size:13px; color:var(--text-secondary);">
+          Lệnh này sẽ tự động sinh ra file <code>lib/providers/item_provider.g.dart</code> chứa
+          <code>itemProvider</code> và lớp cha <code>_$ItemNotifier</code> trong 5 giây, mọi gạch đỏ báo lỗi biến mất
+          ngay lập tức!
+        </p>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 6. ITEM LIST WIDGET & CARD -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-item-list">6. Widget Danh Sách ListView (lib/widgets/item_list_widget.dart &amp;
+        item_list_card_widget.dart)</h3>
+      <p>Bộ đôi widget chịu trách nhiệm hiển thị danh sách cuộn dọc chuẩn mực:</p>
+
+      <h4>6.1. File <code>lib/widgets/item_list_widget.dart</code></h4>
+      <p>Bọc <code>ListView.builder</code> và truyền sự kiện chạm, sửa, xóa xuống từng dòng:</p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../models/item_example.dart';
+import 'item_list_card_widget.dart';
+
+class ItemListWidget extends StatelessWidget {
+  final List&lt;ItemModel&gt; items;
+  final void Function(ItemModel item) onDelete;
+  final void Function(ItemModel item)? onEdit;
+  final void Function(ItemModel item)? onTap;
+
+  const ItemListWidget({
+    super.key,
+    required this.items,
+    required this.onDelete,
+    this.onEdit,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ItemCardWidget(
+          item: item,
+          index: index,
+          onDelete: () =&gt; onDelete(item),
+          onEdit: onEdit != null ? () =&gt; onEdit!(item) : null,
+          onTap: onTap != null ? () =&gt; onTap!(item) : null,
+        );
+      },
+    );
+  }
+}</code></pre>
+      </div>
+
+      <h4 style="margin-top: 24px;">6.2. File <code>lib/widgets/item_list_card_widget.dart</code></h4>
+      <p>Card hiển thị một dòng item dạng <code>ListTile</code> (Avatar số thứ tự bên trái, tiêu đề & giá ở giữa, nút
+        Sửa & Xóa bên phải):</p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../models/item_example.dart';
+
+class ItemCardWidget extends StatelessWidget {
+  final ItemModel item;
+  final int index;
+  final VoidCallback onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onTap;
+
+  const ItemCardWidget({
+    super.key,
+    required this.item,
+    required this.index,
+    required this.onDelete,
+    this.onEdit,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: ListTile(
+        onTap: onTap,
+        // Bên trái: Vòng tròn số thứ tự
+        leading: CircleAvatar(
+          child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        ),
+
+        // Ở giữa: Tiêu đề in đậm
+        title: Text(
+          item.title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+
+        // Dòng phụ: Thể loại & Giá tiền
+        subtitle: Text(
+          '${item.category ?? 'Chung'} • \$${item.price ?? 0.0}',
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+        ),
+
+        // Bên phải: Nút Sửa xanh & Nút Xóa đỏ
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (onEdit != null)
+              IconButton(
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                tooltip: 'Chỉnh sửa',
+                onPressed: onEdit,
+              ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              tooltip: 'Xóa mục này',
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 7. ITEM GRID WIDGET & CARD -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-item-grid" style="margin-top: 35px;">7. Widget Dạng Lưới GridView (lib/widgets/item_grid_widget.dart
+        &amp; item_grid_card_widget.dart)</h3>
+      <p>Bộ đôi widget chịu trách nhiệm hiển thị dạng lưới và <strong>tự động Responsive xoay màn hình</strong>:</p>
+
+      <h4>7.1. File <code>lib/widgets/item_grid_widget.dart</code> (Tự động thích ứng: Dọc 2 cột, Ngang 3 cột)</h4>
+      <p>Sử dụng <code>MediaQuery.of(context).orientation</code> để tự động chuyển 2 cột khi dọc và 3 cột khi ngang,
+        cùng tỉ lệ khung hình <code>childAspectRatio</code> phù hợp tránh tràn giao diện:</p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../models/item_example.dart';
+import 'item_grid_card_widget.dart';
+
+class ItemGridWidget extends StatelessWidget {
+  final List&lt;ItemModel&gt; items;
+  final void Function(ItemModel item) onDelete;
+  final void Function(ItemModel item)? onEdit;
+  final void Function(ItemModel item)? onTap;
+
+  /// Cố định số cột (nếu truyền vào thì bỏ qua responsive)
+  final int? crossAxisCount;
+
+  /// Số cột khi màn hình DỌC (Portrait) - mặc định là 2
+  final int portraitCount;
+
+  /// Số cột khi màn hình NGANG (Landscape) - mặc định là 3
+  final int landscapeCount;
+
+  /// Tỉ lệ chiều rộng / chiều cao của mỗi item
+  final double? childAspectRatio;
+
+  const ItemGridWidget({
+    super.key,
+    required this.items,
+    required this.onDelete,
+    this.onEdit,
+    this.onTap,
+    this.crossAxisCount,
+    this.portraitCount = 2,
+    this.landscapeCount = 3,
+    this.childAspectRatio,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Kiểm tra hướng màn hình hiện tại
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // Responsive: Dọc = 2 cột, Ngang = 3 cột (hoặc lấy crossAxisCount cố định nếu được truyền)
+    final int effectiveCrossAxisCount = crossAxisCount ?? (isLandscape ? landscapeCount : portraitCount);
+
+    // Tỉ lệ kích thước item: Ngang cần tỉ lệ cao hơn để card không bị kéo dài quá mức
+    final double effectiveAspectRatio = childAspectRatio ?? (isLandscape ? 0.95 : 0.8);
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: effectiveCrossAxisCount,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: effectiveAspectRatio,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ItemGridCardWidget(
+          item: item,
+          index: index,
+          onDelete: () =&gt; onDelete(item),
+          onEdit: onEdit != null ? () =&gt; onEdit!(item) : null,
+          onTap: onTap != null ? () =&gt; onTap!(item) : null,
+        );
+      },
+    );
+  }
+}</code></pre>
+      </div>
+
+      <h4 style="margin-top: 24px;">7.2. File <code>lib/widgets/item_grid_card_widget.dart</code></h4>
+      <p>Card được thiết kế chuyên biệt cho ô lưới GridView: bố cục cột gọn gàng, có badge phân loại, tiêu đề, mô tả tóm
+        tắt, giá tiền và nút Sửa/Xóa mini:</p>
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../models/item_example.dart';
+
+class ItemGridCardWidget extends StatelessWidget {
+  final ItemModel item;
+  final int index;
+  final VoidCallback onDelete;
+  final VoidCallback? onEdit;
+  final VoidCallback? onTap;
+
+  const ItemGridCardWidget({
+    super.key,
+    required this.item,
+    required this.index,
+    required this.onDelete,
+    this.onEdit,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Hàng trên: Số thứ tự & Tag phân loại (Category)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CircleAvatar(
+                    radius: 12,
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  if (item.category != null && item.category!.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        item.category!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Tiêu đề
+              Text(
+                item.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              const SizedBox(height: 2),
+
+              // Dòng phụ / Mô tả ngắn
+              Expanded(
+                child: Text(
+                  item.subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                ),
+              ),
+
+              // Giá tiền
+              Text(
+                '\$${item.price ?? 0.0}',
+                style: TextStyle(
+                  color: Colors.green.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+              const Divider(height: 10),
+
+              // Hàng nút: Chỉnh sửa & Xóa
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (onEdit != null)
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Chỉnh sửa',
+                      onPressed: onEdit,
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Xóa mục này',
+                    onPressed: onDelete,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="04_login_logout_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 4: Login &
+          Logout</a>
+        <a href="06_delete_dialog.html" class="copy-btn" style="text-decoration:none;">Mục 6: DeleteDialog &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

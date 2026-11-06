@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mục 9: Màn Hình Chi Tiết (Detail Screen) - Cheat Sheet Phòng Thi</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+  <aside class="sidebar"></aside>
+
+  <div class="main-wrapper">
+    <header class="topbar">
+      <div class="topbar-info">
+        <span class="pill pill-blue">Cheat Sheet Phòng Thi</span>
+        <span class="pill pill-green">Mục 9: Detail Screen</span>
+        <span class="pill pill-purple">1-Click Copy & Paste</span>
+      </div>
+      <div>
+        <a href="08_edit_item_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 8:
+          EditItemScreen</a>
+        <a href="10_drawer_theme_service.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 10:
+          Drawer &amp; Theme &rarr;</a>
+      </div>
+    </header>
+
+    <main class="content-container">
+      <div class="section-header">
+        <h2>Mục 9: Mẫu Màn Hình Chi Tiết (lib/screens/detail_screen.dart)</h2>
+        <p>Màn hình đáp ứng Task <strong>Item Detail Screen</strong>: Nhận đối tượng <code>ItemModel</code> qua
+          Constructor, trình bày thông tin chi tiết đẹp mắt dạng Card lớn, hỗ trợ nút Sửa trên AppBar và nút Quay lại
+          danh sách. Toàn bộ mã nguồn class được đưa <strong>lên trên cùng</strong>, kèm hình ảnh minh họa iPhone SE
+          trên trình duyệt và các mục giải thích chi tiết: <strong>Dùng để làm gì, dùng thế nào và vì sao</strong>.</p>
+      </div>
+
+      <!-- ===================== MỤC LỤC TRANG ===================== -->
+      <div class="card" style="margin-bottom: 25px;">
+        <div class="card-title">Danh mục nội dung:</div>
+        <ul style="margin-left: 20px; line-height: 2;">
+          <li><a href="#sec-detail-code" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class DetailScreen
+              (lib/screens/detail_screen.dart)</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">2. Hình ảnh minh họa giao diện UI DetailScreen
+              (iPhone SE Trên Trình Duyệt)</a></li>
+          <li><a href="#sec-detail-explain" style="color:var(--accent-blue);">3. Giải thích chi tiết code DetailScreen:
+              Dùng để làm gì, dùng thế nào & vì sao?</a></li>
+          <li><a href="#sec-how-to-open" style="color:var(--accent-blue);">4. Cách mở DetailScreen từ HomeScreen khi
+              người dùng nhấn vào Item</a></li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 1. CODE DETAIL SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-detail-code">1. Toàn Bộ Mã Nguồn Class DetailScreen (lib/screens/detail_screen.dart)</h3>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">import 'package:flutter/material.dart';
+import '../models/item_example.dart';
+import 'edit_item_screen.dart'; // Mở màn Sửa nếu cần
+
+class DetailScreen extends StatelessWidget {
+  final ItemModel item;
+
+  const DetailScreen({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chi tiết'),
+        centerTitle: true,
+        actions: [
+          // Nút bấm chuyển sang màn hình Chỉnh sửa
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: 'Chỉnh sửa mục này',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =&gt; EditItemScreen(item: item),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Thẻ Card lớn chứa toàn bộ thông tin chi tiết
+            Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    // Avatar hoặc Biểu tượng lớn
+                    CircleAvatar(
+                      radius: 36,
+                      child: Text(
+                        item.title.isNotEmpty ? item.title[0].toUpperCase() : '?',
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Tiêu đề
+                    Text(
+                      item.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Giá tiền
+                    Text(
+                      '\$${item.price ?? 0.0}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const Divider(height: 32),
+
+                    // Thông tin dạng bảng dòng
+                    _buildInfoRow('Mã định danh (ID):', '#${item.id ?? 0}'),
+                    const SizedBox(height: 12),
+                    _buildInfoRow('Thể loại (Category):', item.category ?? 'Mặc định'),
+                    const SizedBox(height: 16),
+
+                    // Mô tả chi tiết
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Mô tả chi tiết:',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        item.subtitle.isNotEmpty ? item.subtitle : 'Không có mô tả chi tiết.',
+                        style: TextStyle(color: Colors.grey.shade800, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Nút Quay lại
+            ElevatedButton(
+              onPressed: () =&gt; Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('QUAY LẠI DANH SÁCH', style: TextStyle(fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget phụ tạo dòng thông tin hai bên
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+      ],
+    );
+  }
+}</code></pre>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. HÌNH ẢNH UI DETAIL SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-preview">2. Hình Ảnh Minh Họa Giao Diện UI DetailScreen (iPhone SE Trên Trình Duyệt)</h3>
+      <p>Đối chiếu chuẩn xác từng dòng code Flutter (AppBar "Chi tiết" có nút Sửa, Thẻ Card lớn bo tròn 12px, Avatar chữ
+        cái đầu in hoa, giá tiền xanh lá và nút QUAY LẠI DANH SÁCH):</p>
+
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <h4 style="margin-bottom: 10px; color: var(--accent-purple, #a371f7); font-size: 15px;">Màn hình Chi tiết
+            (DetailScreen)</h4>
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/detail_screen_ui.svg" alt="Flutter Detail Screen UI"
+              style="display: block; width: 320px; height: auto;" />
+          </div>
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            Hiển thị Avatar chữ cái, tiêu đề, giá tiền xanh, ID #1, Thể loại và mô tả chi tiết.
+          </p>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. GIẢI THÍCH CHI TIẾT DETAIL SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-detail-explain">3. Giải Thích Chi Tiết Code DetailScreen: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
+      <div class="card" style="margin-bottom: 30px;">
+        <ul style="line-height: 1.9; margin-left: 20px;">
+          <li><strong>Kế thừa <code>StatelessWidget</code>:</strong>
+            <br /><em>Vì sao dùng StatelessWidget:</em> Màn hình chi tiết chỉ nhận dữ liệu <code>item</code> từ bên
+            ngoài truyền vào để hiển thị (Read-only UI), không tự thay đổi dữ liệu nội bộ nên dùng StatelessWidget giúp
+            tối ưu hiệu năng và code ngắn gọn nhất.
+          </li>
+          <li><strong>Avatar chữ cái đầu in hoa:
+              <code>item.title.isNotEmpty ? item.title[0].toUpperCase() : '?'</code></strong>
+            <br /><em>Dùng để làm gì:</em> Tự động lấy ký tự đầu tiên của tiêu đề (ví dụ "Mona Lisa" &rarr; lấy chữ "M")
+            để làm logo đại diện trong <code>CircleAvatar</code> khi đề thi không yêu cầu load ảnh URL/file phức tạp.
+          </li>
+          <li><strong>Hàm phụ <code>_buildInfoRow(label, value)</code>:</strong>
+            <br /><em>Dùng để làm gì:</em> Trình bày một hàng thông tin hai cột dạng Key - Value (nhãn xám bên trái, giá
+            trị in đậm bên phải) bằng <code>Row(mainAxisAlignment: MainAxisAlignment.spaceBetween)</code>.
+            <br /><em>Vì sao:</em> Tái sử dụng code, giúp giao diện đều đặn và chuyên nghiệp.
+          </li>
+          <li><strong>Nút chỉnh sửa trên AppBar:</strong>
+            <br /><em>Dùng để làm gì:</em> Người dùng đang xem chi tiết có thể bấm ngay biểu tượng bút sửa
+            <code>Icons.edit</code> trên góc phải AppBar để chuyển sang <code>EditItemScreen(item: item)</code> mà không
+            cần phải back lại danh sách.
+          </li>
+          <li><strong>Nút QUAY LẠI DANH SÁCH: <code>Navigator.pop(context)</code></strong>
+            <br /><em>Dùng để làm gì:</em> Đóng màn hình Detail và quay trở về <code>HomeScreen</code>.
+          </li>
+        </ul>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 4. CÁCH MỞ TỪ HOME SCREEN -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-how-to-open">4. Cách Mở DetailScreen Từ HomeScreen Khi Bấm Vào Một Dòng Item</h3>
+      <p>Tại <code>HomeScreen</code>, trong thuộc tính <code>onTap:</code> của <code>ItemCardWidget</code>, truyền lệnh
+        mở màn hình chi tiết như sau:</p>
+
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-dart">onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) =&gt; DetailScreen(item: item),
+    ),
+  );
+}</code></pre>
+      </div>
+
+      <!-- Điều hướng chân trang -->
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="08_edit_item_screen.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 8:
+          EditItemScreen</a>
+        <a href="10_drawer_theme_service.html" class="copy-btn" style="text-decoration:none;">Mục 10: Drawer &amp; Theme
+          &rarr;</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="../common.js"></script>
+  <script src="../layout/sidebar.js"></script>
+</body>
+
+</html>

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mục 3: Mẫu Màn Hình Register (Copy & Paste Cho Kỳ Thi)</title>
+  <title>Mục 3: Mẫu Màn Hình Register (lib/screens/register_screen.dart) - Cheat Sheet Phòng Thi</title>
   <link rel="stylesheet" href="../style.css" />
 </head>
+
 <body>
   <aside class="sidebar"></aside>
 
@@ -17,42 +19,46 @@
         <span class="pill pill-purple">1-Click Copy & Paste</span>
       </div>
       <div>
-        <a href="02_database_validator_helper.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 2: Helpers & Validators</a>
-        <a href="04_login_logout_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 4: Login & Logout &rarr;</a>
+        <a href="02_database_validator_helper.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 2: Helpers
+          & Validators</a>
+        <a href="04_login_logout_screen.html" class="copy-btn" style="text-decoration:none; margin-left:8px;">Mục 4:
+          Login & Logout &rarr;</a>
       </div>
     </header>
 
     <main class="content-container">
       <div class="section-header">
         <h2>Mục 3: Mẫu Màn Hình Đăng Ký (Register Screen) Chuẩn Đề Thi</h2>
-        <p>Mẫu code được thiết kế tối giản, <strong>chỉ gồm đúng 4 trường bắt buộc của đề bài: Username, Email, Password và Password Confirm</strong>. Sử dụng toàn bộ các hàm <code>static</code> có sẵn trong <code>AppValidator</code> (Mục 2), kiểm tra tài khoản trùng trong SQLite qua <code>DatabaseHelper</code>, hiển thị SnackBar và có hình ảnh minh hoạ đối chiếu trực quan.</p>
+        <p>Mã nguồn đầy đủ class <code>RegisterScreen</code> trong <code>lib/screens/register_screen.dart</code> được
+          đưa <strong>lên trên cùng</strong>. Tiếp theo là hình ảnh minh họa giao diện iPhone SE trên trình duyệt, và
+          bên dưới là phần giải thích chi tiết từng mục: <strong>Dùng để làm gì, dùng thế nào và vì sao</strong>.</p>
       </div>
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 25px;">
-        <div class="card-title">⚡ Danh mục nội dung:</div>
+        <div class="card-title">Danh mục nội dung:</div>
         <ul style="margin-left: 20px; line-height: 2;">
-          <li><a href="#sec-register-code" style="color:var(--accent-blue);">1. Code RegisterScreen hoàn chỉnh (lib/screens/register_screen.dart)</a></li>
-          <li><a href="#sec-preview" style="color:var(--accent-blue);">2. Hình ảnh minh hoạ giao diện UI màn hình Register chuẩn Flutter</a></li>
-          <li><a href="#sec-nav-tip" style="color:var(--accent-blue);">3. Cách mở màn hình Register từ LoginScreen</a></li>
+          <li><a href="#sec-register-code" style="color:var(--accent-blue);">1. Toàn bộ mã nguồn class RegisterScreen
+              (lib/screens/register_screen.dart)</a></li>
+          <li><a href="#sec-preview" style="color:var(--accent-blue);">2. Hình ảnh minh họa giao diện UI iPhone SE trên
+              trình duyệt (Khởi tạo & Báo lỗi)</a></li>
+          <li><a href="#sec-register-explain" style="color:var(--accent-blue);">3. Giải thích chi tiết code: Dùng để làm
+              gì, dùng thế nào và vì sao?</a></li>
         </ul>
       </div>
 
-      <!-- ===================== PHẦN 1: CODE ===================== -->
-      <h3 id="sec-register-code">1. Code RegisterScreen Hoàn Chỉnh (lib/screens/register_screen.dart)</h3>
-      <p><strong>Dùng lúc nào?</strong> Đáp ứng Task <strong>User Registration</strong>. Gồm đúng 4 trường và 1 nút Bấm:</p>
-      <ul style="margin-left: 20px; line-height: 1.8;">
-        <li><strong>Username</strong>: Kiểm tra không rỗng và độ dài &ge; 3 ký tự (gọi <code>AppValidator.registerUsername</code>).</li>
-        <li><strong>Email</strong>: Kiểm tra không rỗng và Regex email chuẩn (gọi <code>AppValidator.email</code>).</li>
-        <li><strong>Password</strong>: Kiểm tra không rỗng và độ dài &ge; 6 ký tự (gọi <code>AppValidator.registerPassword</code>).</li>
-        <li><strong>Confirm Password</strong>: Kiểm tra khớp mật khẩu (gọi <code>AppValidator.confirmPassword(_passwordController.text)</code>).</li>
-        <li><strong>Kiểm tra trùng</strong>: Gọi <code>DatabaseHelper.instance.isUsernameExists</code> trước khi thêm.</li>
-      </ul>
+      <!-- ========================================================================= -->
+      <!-- 1. CODE TOÀN BỘ CLASS -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-register-code">1. Toàn Bộ Mã Nguồn Class RegisterScreen (lib/screens/register_screen.dart)</h3>
+      <p>Đáp ứng trọn vẹn Task <strong>User Registration</strong> của đề thi: Gồm 4 trường Form (Username, Email,
+        Password, Confirm Password), tích hợp kiểm tra trùng tài khoản SQLite, hiển thị SnackBar và nút chuyển sang
+        Login:</p>
 
       <div class="code-wrapper">
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
         <pre><code class="language-dart">import 'package:flutter/material.dart';
-import '../database/database_helper.dart';
+import '../utils/database_helper.dart';
 import '../utils/app_validator.dart';
 import 'login_screen.dart';
 
@@ -60,7 +66,7 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State&lt;RegisterScreen&gt; createState() => _RegisterScreenState();
+  State&lt;RegisterScreen&gt; createState() =&gt; _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
@@ -119,7 +125,7 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
       // 4. Điều hướng sang màn hình LoginScreen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
       );
     } catch (e) {
       if (!mounted) return;
@@ -186,7 +192,8 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
                   labelText: 'Confirm Password',
                   border: OutlineInputBorder(),
                 ),
-                validator: AppValidator.confirmPassword(_passwordController.text),
+                validator: (value) =&gt;
+                    AppValidator.confirmPassword(value, _passwordController.text),
               ),
               const SizedBox(height: 20),
 
@@ -198,6 +205,17 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
                 ),
                 child: const Text('REGISTER', style: TextStyle(fontSize: 16)),
               ),
+              const SizedBox(height: 12),
+              // Nút quay lại màn hình Đăng nhập
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) =&gt; const LoginScreen()),
+                  );
+                },
+                child: const Text('Đã có tài khoản? Đăng nhập ngay'),
+              ),
             ],
           ),
         ),
@@ -207,9 +225,12 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
 }</code></pre>
       </div>
 
-      <!-- ===================== PHẦN 2: HÌNH ẢNH UI ===================== -->
-      <h3 id="sec-preview">2. Hình Ảnh Minh Hoạ Giao Diện UI Màn Hình Register Chuẩn Flutter</h3>
-      <p>Đối chiếu chuẩn xác 100% từng dòng code Flutter (AppBar có tiêu đề <code>Register</code>, 4 ô <code>OutlineInputBorder</code> và hiệu ứng viền đỏ báo lỗi):</p>
+      <!-- ========================================================================= -->
+      <!-- 2. HÌNH ẢNH MINH HỌA GIAO DIỆN (IPHONE SE TRÊN BROWSER) -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-preview">2. Hình Ảnh Minh Họa Giao Diện UI Chuẩn iPhone SE Trên Trình Duyệt</h3>
+      <p>Đối chiếu chuẩn xác 100% từng dòng code Flutter (AppBar có tiêu đề <code>Register</code>, 4 ô nhập
+        <code>OutlineInputBorder</code> và hiệu ứng viền đỏ báo lỗi khi validate thất bại):</p>
 
       <div style="display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin: 28px 0;">
         <!-- Hình 1: Màn hình ban đầu -->
@@ -217,11 +238,14 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
           <h4 style="margin-bottom: 10px; color: var(--accent-green, #3fb950); font-size: 15px;">
             1. Màn hình ban đầu (Chưa nhập gì)
           </h4>
-          <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-            <img src="images/register_initial_ui.svg" alt="Flutter Register Initial UI" style="display: block; width: 320px; height: auto;" />
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/register_initial_ui.svg" alt="Flutter Register Initial UI"
+              style="display: block; width: 320px; height: auto;" />
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
-            4 trường yêu cầu: Username, Email, Password, Confirm Password ở trạng thái nghỉ.
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            4 trường yêu cầu: Username, Email, Password, Confirm Password ở trạng thái khởi tạo.
           </p>
         </div>
 
@@ -230,36 +254,90 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
           <h4 style="margin-bottom: 10px; color: var(--accent-red, #f85149); font-size: 15px;">
             2. Màn hình khi để trống hoặc nhập sai
           </h4>
-          <div style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
-            <img src="images/register_error_ui.svg" alt="Flutter Register Error UI" style="display: block; width: 320px; height: auto;" />
+          <div
+            style="border: 2px solid #30363d; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <img src="images/register_error_ui.svg" alt="Flutter Register Error UI"
+              style="display: block; width: 320px; height: auto;" />
           </div>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
-            Báo đỏ chuẩn Flutter: Trống username, sai định dạng email, mật khẩu xác nhận không khớp.
+          <p
+            style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; text-align: center; max-width: 320px;">
+            Báo lỗi chuẩn Flutter: Trống username, sai định dạng email, mật khẩu xác nhận không khớp.
           </p>
         </div>
       </div>
 
-      <!-- ===================== PHẦN 3: ĐIỀU HƯỚNG TỪ LOGIN ===================== -->
-      <h3 id="sec-nav-tip">3. Cách Mở Màn Hình Register Từ Màn Hình Login</h3>
-      <p>Trong <code>LoginScreen</code>, bên dưới nút Đăng nhập, thêm một nút văn bản nhỏ để người dùng bấm chuyển sang <code>RegisterScreen</code>:</p>
+      <!-- ========================================================================= -->
+      <!-- 3. GIẢI THÍCH CHI TIẾT CODE -->
+      <!-- ========================================================================= -->
+      <h3 id="sec-register-explain">3. Giải Thích Chi Tiết Từng Phần Code: Dùng Để Làm Gì, Dùng Thế Nào & Vì Sao?</h3>
 
-      <div class="code-wrapper">
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        <pre><code class="language-dart">TextButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) =&gt; const RegisterScreen()),
-    );
-  },
-  child: const Text('Chưa có tài khoản? Đăng ký ngay'),
-)</code></pre>
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">1. Quản lý Controller &amp; Hàm <code>dispose()</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Dùng để làm gì?</strong> 4 biến <code>TextEditingController</code> dùng để đọc chuỗi văn bản người
+            dùng nhập vào ô TextField và lắng nghe thay đổi.</li>
+          <li><strong>Dùng thế nào?</strong> Khởi tạo ở đầu State và gọi <code>controller.dispose()</code> bên trong hàm
+            <code>dispose()</code>.</li>
+          <li><strong>Vì sao?</strong> Bắt buộc phải giải phóng bộ nhớ khi rời màn hình để tránh hiện tượng rò rỉ bộ nhớ
+            (Memory Leak) trong Flutter.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">2. Quy trình xử lý hàm <code>_register()</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong>Bước 1 - Validate Form:</strong> Gọi <code>if (!_formKey.currentState!.validate()) return;</code>
+            để kích hoạt toàn bộ các hàm validator của 4 trường. Nếu có bất kỳ ô nào chưa đạt yêu cầu, form lập tức hiện
+            thông báo đỏ và dừng thực thi.</li>
+          <li><strong>Bước 2 - Kiểm tra tài khoản tồn tại:</strong> Gọi
+            <code>await DatabaseHelper.instance.isUsernameExists(username)</code>. Nếu trả về <code>true</code> &rarr;
+            Hiện SnackBar đỏ báo lỗi và dừng lại, không chèn đè.</li>
+          <li><strong>Bước 3 - Lưu vào SQLite:</strong> Gọi <code>await DatabaseHelper.instance.registerUser(...)</code>
+            để thêm bản ghi mới vào bảng <code>users</code>.</li>
+          <li><strong>Bước 4 - Thông báo &amp; Chuyển trang:</strong> Hiển thị SnackBar màu xanh báo thành công và
+            chuyển sang <code>LoginScreen</code> bằng lệnh:
+            <br /><code>Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) =&gt; const LoginScreen()));</code>
+            <br /><em>Vì sao dùng <code>pushReplacement</code>:</em> Để thay thế hoàn toàn màn hình Register trên ngăn
+            xếp điều hướng, ngăn người dùng bấm phím Back quay lại form đăng ký vừa hoàn thành.
+          </li>
+          <li><strong>Kiểm tra <code>if (!mounted) return;</code>:</strong>
+            <br /><em>Vì sao:</em> Sau mỗi lệnh <code>await</code> bất đồng bộ, người dùng có thể đã tắt hoặc thoát màn
+            hình. Kiểm tra <code>mounted</code> giúp đảm bảo State còn tồn tại trên Widget Tree trước khi truy cập
+            <code>context</code>, tránh lỗi crash kinh điển <em>"Looking up a deactivated widget's ancestor is
+              unsafe"</em>.
+          </li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <h4 style="color:var(--accent-blue);">3. Cấu trúc Widget Tree trong hàm <code>build()</code></h4>
+        <ul style="line-height: 1.8; margin-left: 20px;">
+          <li><strong><code>SingleChildScrollView</code>:</strong>
+            <br /><em>Vì sao dùng:</em> Khi người dùng bấm vào các ô nhập ở dưới, bàn phím ảo (virtual keyboard) sẽ bật
+            lên chiếm 50% màn hình. Bọc trong <code>SingleChildScrollView</code> giúp giao diện tự động cuộn lên được,
+            chống triệt để lỗi tràn pixel sọc vàng đen (<em>RenderFlex overflowed</em>).
+          </li>
+          <li><strong><code>obscureText: true</code> trên ô Mật khẩu:</strong>
+            <br /><em>Dùng để làm gì:</em> Che giấu các ký tự mật khẩu thành các dấu chấm tròn bảo mật.
+          </li>
+          <li><strong><code>keyboardType: TextInputType.emailAddress</code> trên ô Email:</strong>
+            <br /><em>Dùng để làm gì:</em> Bàn phím ảo trên điện thoại sẽ tự động xuất hiện sẵn phím ký tự
+            <code>@</code> giúp thao tác nhập email thuận tiện nhất.
+          </li>
+          <li><strong>Nút TextButton chuyển sang Đăng nhập:</strong>
+            <br /><em>Dùng để làm gì:</em> Cho phép người dùng chuyển thẳng sang màn hình <code>LoginScreen</code> nếu
+            họ đã có tài khoản sẵn từ trước.
+          </li>
+        </ul>
       </div>
 
       <!-- Điều hướng chân trang -->
-      <div style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
-        <a href="02_database_validator_helper.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 2: Helpers & Validators</a>
-        <a href="04_login_logout_screen.html" class="copy-btn" style="text-decoration:none;">Mục 4: Mẫu Login & Logout Screens &rarr;</a>
+      <div
+        style="display:flex; justify-content:space-between; margin-top:35px; padding-top:20px; border-top:1px solid var(--border-color);">
+        <a href="02_database_validator_helper.html" class="copy-btn" style="text-decoration:none;">&larr; Mục 2: Helpers
+          & Validators</a>
+        <a href="04_login_logout_screen.html" class="copy-btn" style="text-decoration:none;">Mục 4: Login & Logout
+          &rarr;</a>
       </div>
     </main>
   </div>
@@ -267,5 +345,5 @@ class _RegisterScreenState extends State&lt;RegisterScreen&gt; {
   <script src="../common.js"></script>
   <script src="../layout/sidebar.js"></script>
 </body>
-</html>
 
+</html>

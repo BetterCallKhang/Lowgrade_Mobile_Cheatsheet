@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 6 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 6 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu Task 6 & Giao diện mẫu theo đề thi</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Kỹ thuật truyền nhận dữ liệu qua Constructor (Object Passing)</a></li>
@@ -49,20 +49,20 @@
         <div class="card">
           <div class="card-title">Các thông tin hiển thị (Display Information)</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>🏷️ <strong>Title:</strong> Tiêu đề tranh to, in đậm (ví dụ: <em>The Persistence of Memory</em>).</li>
-            <li>👤 <strong>Artist:</strong> Tên nghệ sĩ (ví dụ: <em>Salvador Dali</em>).</li>
-            <li>📅 <strong>Year:</strong> Năm sáng tác (ví dụ: <em>1931</em>).</li>
-            <li>🎨 <strong>Category:</strong> Thể loại (ví dụ: <em>Landscape</em> hoặc <em>Abstract</em>).</li>
-            <li>📄 <strong>Description:</strong> Đoạn văn mô tả chi tiết tác phẩm bên dưới.</li>
+            <li><strong>Title:</strong> Tiêu đề tranh to, in đậm (ví dụ: <em>The Persistence of Memory</em>).</li>
+            <li><strong>Artist:</strong> Tên nghệ sĩ (ví dụ: <em>Salvador Dali</em>).</li>
+            <li><strong>Year:</strong> Năm sáng tác (ví dụ: <em>1931</em>).</li>
+            <li><strong>Category:</strong> Thể loại (ví dụ: <em>Landscape</em> hoặc <em>Abstract</em>).</li>
+            <li><strong>Description:</strong> Đoạn văn mô tả chi tiết tác phẩm bên dưới.</li>
           </ul>
         </div>
 
         <div class="card">
           <div class="card-title">Yêu cầu điều hướng (Requirements)</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>✅ <strong>Trigger từ Home:</strong> Người dùng chạm vào item trong <code>ListView.builder</code> thì mở màn hình này.</li>
-            <li>✅ <strong>Back button:</strong> Màn hình bắt buộc phải có nút Back (mũi tên quay lại trên AppBar) để trở về Home Screen.</li>
-            <li>✅ <strong>StatelessWidget:</strong> Màn hình này chỉ đọc và hiển thị dữ liệu tĩnh đã truyền sang, không cần gọi SQLite hay đổi state nên viết dạng <code>StatelessWidget</code> là tối ưu hiệu năng nhất!</li>
+            <li><strong>Trigger từ Home:</strong> Người dùng chạm vào item trong <code>ListView.builder</code> thì mở màn hình này.</li>
+            <li><strong>Back button:</strong> Màn hình bắt buộc phải có nút Back (mũi tên quay lại trên AppBar) để trở về Home Screen.</li>
+            <li><strong>StatelessWidget:</strong> Màn hình này chỉ đọc và hiển thị dữ liệu tĩnh đã truyền sang, không cần gọi SQLite hay đổi state nên viết dạng <code>StatelessWidget</code> là tối ưu hiệu năng nhất!</li>
           </ul>
         </div>
       </div>
@@ -71,7 +71,7 @@
       <h3 id="sec-2">2. Kỹ Thuật Truyền Nhận Dữ Liệu Qua Constructor</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Truyền thẳng nguyên một đối tượng Model</div>
+        <div class="card-title" style="color:var(--accent-blue);">Truyền thẳng nguyên một đối tượng Model</div>
         <p><strong>Cách làm tối ưu:</strong> Thay vì phải truyền rời rạc 5 biến (<code>title, artist, year, category, description</code>), ta chỉ cần khai báo 1 thuộc tính duy nhất: <code>final ArtworkModel artwork;</code> trong Constructor.</p>
       </div>
 
@@ -90,7 +90,7 @@
       <h3 id="sec-3">3. Widget Hiển Thị Từng Dòng Thông Tin (Label & Value)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Hàm phụ tái sử dụng _buildInfoRow()</div>
+        <div class="card-title" style="color:var(--accent-purple);">Hàm phụ tái sử dụng _buildInfoRow()</div>
         <p><strong>Mục đích:</strong> Dùng chung cho 3 dòng <em>Artist</em>, <em>Year</em>, <em>Category</em>. Cột nhãn bên trái màu xám nhạt, cột giá trị bên phải màu đen đậm, giúp giao diện gọn gàng và không lặp lại code.</p>
       </div>
 
@@ -125,7 +125,7 @@
       <h3 id="sec-4">4. AppBar Chuẩn Kèm Nút Back</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 AppBar với nút Back tự động</div>
+        <div class="card-title" style="color:var(--accent-green);">AppBar với nút Back tự động</div>
         <p><strong>Bản chất:</strong> Trong Flutter, khi dùng <code>Navigator.push()</code> từ Home sang Detail, <code>Scaffold</code> có <code>AppBar</code> sẽ <strong>tự động tạo nút mũi tên Back (&larr;)</strong> bên trái thanh tiêu đề. Bấm vào nút này sẽ tự động gọi <code>Navigator.pop(context)</code> quay lại Home.</p>
       </div>
 
@@ -292,7 +292,7 @@ class ArtworkDetailScreen extends StatelessWidget {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT THÚC BƯỚC 9:</strong>
+        <strong>KẾT THÚC BƯỚC 9:</strong>
         <p>Toàn bộ các màn hình nghiệp vụ (Tasks 1, 2, 4, 5, 6, 7) đã xong trọn vẹn! Bây giờ chỉ còn một bước cuối cùng: <strong>Bước 10: Khởi chạy ứng dụng tại main.dart (Task 3: Kiểm tra Session phân luồng)</strong> để hoàn tất 100% đồ án phòng thi.</p>
       </div>
 

@@ -402,7 +402,7 @@ class MyApp extends StatelessWidget {
       <!-- Sơ đồ trực quan Scaffold -->
       <div class="scaffold-diagram">
         <div class="scaffold-part scaffold-appbar">
-          <span>☰ (Drawer icon)</span>
+          <span>(Drawer icon)</span>
           <span>appBar: AppBar(title: Text('Tiêu đề'))</span>
           <span>⋮</span>
         </div>
@@ -580,7 +580,7 @@ class MyApp extends StatelessWidget {
       <h3 id="sec-6">6. Hiển Thị Danh Sách Cuộn: ListView, Card, ListTile & Chèn Hình Ảnh</h3>
 
       <div class="note-box" style="border-left: 4px solid var(--accent-yellow); margin-bottom: 24px;">
-        <strong style="font-size: 15px; color: var(--accent-yellow);">💡 Giải đáp cốt lõi: ListView và GridView có các Constructor đặc biệt không? Tham số của chúng khác nhau ra sao?</strong>
+        <strong style="font-size: 15px; color: var(--accent-yellow);">Giải đáp cốt lõi: ListView và GridView có các Constructor đặc biệt không? Tham số của chúng khác nhau ra sao?</strong>
         <p style="margin-top: 6px;"><strong>CÂU TRẢ LỜI LÀ: CÓ!</strong> Cả hai đều sở hữu các Constructor đặt tên đặc biệt (như <code>.builder</code>, <code>.separated</code>, <code>.count</code>, <code>.extent</code>).</p>
         <ul style="margin-left: 20px; margin-top: 6px; line-height: 1.8;">
           <li><strong>Điểm GIỐNG NHAU:</strong> Các tham số điều khiển cuộn (<code>padding</code>, <code>physics</code>, <code>reverse</code>, <code>shrinkWrap</code>, <code>controller</code>, <code>scrollDirection</code>) hoàn toàn như nhau ở mọi constructor.</li>
@@ -665,8 +665,7 @@ class MyApp extends StatelessWidget {
             <div class="title">Nguyễn Văn A (id: 1)</div>
             <div class="subtitle">Email: anguyen@example.com • Trạng thái: Online</div>
           </div>
-          <div class="trail">➔</div>
-        </div>
+                  </div>
         <div class="visual-list-tile">
           <div class="lead">
             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span style=\'color:white;\'>B</span>'" />
@@ -675,8 +674,7 @@ class MyApp extends StatelessWidget {
             <div class="title">Trần Thị B (id: 2)</div>
             <div class="subtitle">Email: btran@example.com • Trạng thái: Đang bận</div>
           </div>
-          <div class="trail">➔</div>
-        </div>
+                  </div>
       </div>
 
       <div class="table-wrap">
@@ -1071,18 +1069,18 @@ class ProductGridDemo extends StatelessWidget {
 
       <!-- 8.1 Button -->
       <div class="card" style="margin-bottom: 24px;">
-        <div class="card-title">🔘 1. Các loại nút bấm (ElevatedButton, OutlinedButton, TextButton)</div>
+        <div class="card-title">1. Các loại nút bấm (ElevatedButton, OutlinedButton, TextButton)</div>
         <p>Flutter chia làm 3 cấp bậc nút theo độ ưu tiên thị giác (Hierarchy):</p>
 
         <!-- Preview Button -->
         <div class="widget-preview-box">
-          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="widget-preview-title">Giao diện thực tế hiển thị:</div>
           <div class="ui-row-demo">
             <div class="ui-btn ui-btn-elevated">
-              <span>🚀 ElevatedButton</span>
+              <span>ElevatedButton</span>
             </div>
             <div class="ui-btn ui-btn-outlined">
-              <span>⚙️ OutlinedButton</span>
+              <span>OutlinedButton</span>
             </div>
             <div class="ui-btn ui-btn-text">
               <span>Quên mật khẩu? (TextButton)</span>
@@ -1138,15 +1136,14 @@ class ProductGridDemo extends StatelessWidget {
 
       <!-- 8.2 TextField -->
       <div class="card" style="margin-bottom: 24px;">
-        <div class="card-title">⌨️ 2. Ô nhập dữ liệu (TextField & InputDecoration)</div>
+        <div class="card-title">2. Ô nhập dữ liệu (TextField & InputDecoration)</div>
         <p>Cho phép người dùng nhập văn bản, email, số điện thoại hoặc mật khẩu:</p>
 
         <!-- Preview TextField -->
         <div class="widget-preview-box">
-          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="widget-preview-title">Giao diện thực tế hiển thị:</div>
           <div class="ui-input-demo">
-            <span class="icon">✉️</span>
-            <div>
+                        <div>
               <div style="font-size:11px; color:#60a5fa; font-weight:600;">Email tài khoản</div>
               <span class="text">user.prm393@gmail.com</span>
             </div>
@@ -1215,15 +1212,15 @@ class ProductGridDemo extends StatelessWidget {
 
       <!-- 8.3 Checkbox & CheckboxListTile -->
       <div class="card" style="margin-bottom: 24px;">
-        <div class="card-title">☑️ 3. Hộp chọn (Checkbox & CheckboxListTile)</div>
+        <div class="card-title">3. Hộp chọn (Checkbox & CheckboxListTile)</div>
         <p>Dùng cho các tuỳ chọn bật/tắt độc lập hoặc chọn nhiều mục cùng lúc (Multi-choice):</p>
 
         <!-- Preview Checkbox -->
         <div class="widget-preview-box">
-          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="widget-preview-title">Giao diện thực tế hiển thị:</div>
           <div class="ui-toggle-row">
             <div style="display:flex; align-items:center; gap:10px;">
-              <div class="ui-checkbox-box">✓</div>
+              <div class="ui-checkbox-box"></div>
               <span style="font-size:13px; color:#e6edf3;">Tôi đồng ý với điều khoản & chính sách</span>
             </div>
             <span class="widget-tag">value: true</span>
@@ -1285,16 +1282,15 @@ CheckboxListTile(
 
       <!-- 8.4 Switch & SwitchListTile -->
       <div class="card" style="margin-bottom: 24px;">
-        <div class="card-title">🔘 4. Cần gạt bật tắt (Switch & SwitchListTile)</div>
+        <div class="card-title">4. Cần gạt bật tắt (Switch & SwitchListTile)</div>
         <p>Thường dùng trong màn hình Cài đặt (Settings): bật/tắt Wi-Fi, nhận thông báo đẩy, chế độ giao diện tối (Dark Mode):</p>
 
         <!-- Preview Switch -->
         <div class="widget-preview-box">
-          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="widget-preview-title">Giao diện thực tế hiển thị:</div>
           <div class="ui-toggle-row">
             <div style="display:flex; align-items:center; gap:10px;">
-              <span>🌙</span>
-              <div>
+                            <div>
                 <div style="font-size:13px; font-weight:600; color:#e6edf3;">Chế độ giao diện tối</div>
                 <div style="font-size:11px; color:#8b949e;">Tiết kiệm pin cho màn hình OLED</div>
               </div>
@@ -1352,23 +1348,23 @@ SwitchListTile(
 
       <!-- 8.5 Radio & RadioListTile -->
       <div class="card" style="margin-bottom: 24px;">
-        <div class="card-title">📻 5. Nhóm chọn duy nhất (Radio & RadioListTile)</div>
+        <div class="card-title">5. Nhóm chọn duy nhất (Radio & RadioListTile)</div>
         <p>Dùng khi người dùng <strong>chỉ được phép chọn 1 trong nhiều phương án</strong> (ví dụ: Giới tính, Phương thức thanh toán):</p>
 
         <!-- Preview Radio -->
         <div class="widget-preview-box">
-          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="widget-preview-title">Giao diện thực tế hiển thị:</div>
           <div style="display:flex; flex-direction:column; gap:8px;">
             <div class="ui-toggle-row">
               <div style="display:flex; align-items:center; gap:10px;">
                 <div class="ui-radio-outer"><div class="ui-radio-inner"></div></div>
-                <span style="font-size:13px; color:#e6edf3;">💵 Thanh toán Tiền mặt (COD) - <strong>Đang chọn</strong></span>
+                <span style="font-size:13px; color:#e6edf3;">Thanh toán Tiền mặt (COD) - <strong>Đang chọn</strong></span>
               </div>
             </div>
             <div class="ui-toggle-row">
               <div style="display:flex; align-items:center; gap:10px;">
                 <div class="ui-radio-outer" style="border-color:#484f58;"></div>
-                <span style="font-size:13px; color:#8b949e;">💳 Chuyển khoản Ngân hàng</span>
+                <span style="font-size:13px; color:#8b949e;">Chuyển khoản Ngân hàng</span>
               </div>
             </div>
           </div>
@@ -1434,12 +1430,12 @@ Column(
 
       <!-- 8.6 Slider -->
       <div class="card" style="margin-bottom: 24px;">
-        <div class="card-title">🎚️ 6. Thanh trượt chọn giá trị liên tục (Slider)</div>
+        <div class="card-title">6. Thanh trượt chọn giá trị liên tục (Slider)</div>
         <p>Dùng để chỉnh âm lượng, độ sáng màn hình, hoặc thanh lọc tầm giá sản phẩm:</p>
 
         <!-- Preview Slider -->
         <div class="widget-preview-box">
-          <div class="widget-preview-title">📱 Giao diện thực tế hiển thị:</div>
+          <div class="widget-preview-title">Giao diện thực tế hiển thị:</div>
           <div class="ui-slider-demo">
             <div style="display:flex; justify-content:space-between; font-size:12px; color:#c9d1d9;">
               <span>Mức âm lượng:</span>

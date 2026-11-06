@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 8 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu Task 5 & Giao diện mẫu theo đề thi</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo Form Key, Controllers, biến State & Hàm <code>dispose()</code></a></li>
@@ -51,23 +51,23 @@
         <div class="card">
           <div class="card-title">Các trường nhập liệu (Fields) bắt buộc</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>📝 <strong>Title:</strong> Tên tác phẩm (icon: <code>Icons.title</code>)</li>
-            <li>👤 <strong>Artist:</strong> Tên họa sĩ / nghệ sĩ (icon: <code>Icons.person_outline</code>)</li>
-            <li>📅 <strong>Year:</strong> Năm sáng tác (icon: <code>Icons.calendar_today_outlined</code>, kiểu số)</li>
-            <li>🏷️ <strong>Category:</strong> Thể loại tranh chọn từ Dropdown (ví dụ: Abstract, Modern, Landscape, Portrait...)</li>
-            <li>📄 <strong>Description:</strong> Mô tả tác phẩm (icon: <code>Icons.subject</code>, nhập nhiều dòng)</li>
+            <li><strong>Title:</strong> Tên tác phẩm (icon: <code>Icons.title</code>)</li>
+            <li><strong>Artist:</strong> Tên họa sĩ / nghệ sĩ (icon: <code>Icons.person_outline</code>)</li>
+            <li><strong>Year:</strong> Năm sáng tác (icon: <code>Icons.calendar_today_outlined</code>, kiểu số)</li>
+            <li><strong>Category:</strong> Thể loại tranh chọn từ Dropdown (ví dụ: Abstract, Modern, Landscape, Portrait...)</li>
+            <li><strong>Description:</strong> Mô tả tác phẩm (icon: <code>Icons.subject</code>, nhập nhiều dòng)</li>
           </ul>
         </div>
 
         <div class="card">
           <div class="card-title">Các tiêu chí yêu cầu (Requirements)</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>✅ <strong>Validation:</strong> Bắt buộc nhập đầy đủ, hiển thị chữ đỏ báo lỗi nếu để trống.</li>
-            <li>✅ <strong>Artwork ID must auto-increment:</strong> Không nhập ID, SQLite tự sinh.</li>
-            <li>✅ <strong>Lấy Foreign Key createdBy:</strong> Đọc User ID từ <code>SessionService.getUserId()</code>.</li>
-            <li>✅ <strong>Save into SQLite:</strong> Gọi <code>DatabaseHelper.instance.insertArtwork(newArtwork)</code>.</li>
-            <li>✅ <strong>Return & Update:</strong> Gọi <code>Navigator.pop(context, true)</code> để báo cho Home reload danh sách.</li>
-            <li>✅ <strong>SnackBar notification:</strong> Hiện thông báo: <code>Artwork added successfully</code>.</li>
+            <li><strong>Validation:</strong> Bắt buộc nhập đầy đủ, hiển thị chữ đỏ báo lỗi nếu để trống.</li>
+            <li><strong>Artwork ID must auto-increment:</strong> Không nhập ID, SQLite tự sinh.</li>
+            <li><strong>Lấy Foreign Key createdBy:</strong> Đọc User ID từ <code>SessionService.getUserId()</code>.</li>
+            <li><strong>Save into SQLite:</strong> Gọi <code>DatabaseHelper.instance.insertArtwork(newArtwork)</code>.</li>
+            <li><strong>Return & Update:</strong> Gọi <code>Navigator.pop(context, true)</code> để báo cho Home reload danh sách.</li>
+            <li><strong>SnackBar notification:</strong> Hiện thông báo: <code>Artwork added successfully</code>.</li>
           </ul>
         </div>
       </div>
@@ -76,7 +76,7 @@
       <h3 id="sec-2">2. Khai Báo Form Key, Controllers & Hàm <code>dispose()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Controllers, Category mặc định & Hàm thu hồi bộ nhớ dispose()</div>
+        <div class="card-title" style="color:var(--accent-blue);">Controllers, Category mặc định & Hàm thu hồi bộ nhớ dispose()</div>
         <p><strong>Bản chất:</strong> 4 trường dạng chữ dùng <code>TextEditingController</code>, riêng trường <code>Category</code> lưu bằng 1 biến chuỗi <code>_selectedCategory</code> với giá trị ban đầu là <code>'Abstract'</code>.</p>
       </div>
 
@@ -109,7 +109,7 @@
       <h3 id="sec-3">3. Widget DropdownButtonFormField Cho Category</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Chọn Thể loại từ Dropdown chuẩn Material</div>
+        <div class="card-title" style="color:var(--accent-purple);">Chọn Thể loại từ Dropdown chuẩn Material</div>
         <p><strong>Thiết kế:</strong> Dùng <code>DropdownButtonFormField&lt;String&gt;</code> để đồng bộ giao diện khung viền <code>OutlineInputBorder</code> giống hệt các ô <code>TextFormField</code> khác.</p>
       </div>
 
@@ -140,7 +140,7 @@
       <h3 id="sec-4">4. Hàm Xử Lý Lưu Tác Phẩm <code>_handleSaveArtwork()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 Quy trình 5 bước Insert vào SQLite & Trả về Home</div>
+        <div class="card-title" style="color:var(--accent-green);">Quy trình 5 bước Insert vào SQLite & Trả về Home</div>
         <p><strong>Nhiệm vụ:</strong> Kiểm tra Form &rarr; Lấy ID User từ Session &rarr; Chuyển Year thành số nguyên &rarr; Ghi vào SQLite &rarr; Bắn SnackBar &rarr; Gọi <code>Navigator.pop(context, true)</code>.</p>
       </div>
 
@@ -197,7 +197,7 @@
       <h3 id="sec-5">5. Chi Tiết Các Ô Nhập Liệu Khác (Title, Artist, Year, Description)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-orange);">
-        <div class="card-title" style="color:var(--accent-orange);">🟠 Các ô TextFormField & Validator kiểm tra số nguyên</div>
+        <div class="card-title" style="color:var(--accent-orange);">Các ô TextFormField & Validator kiểm tra số nguyên</div>
         <p><strong>Lưu ý:</strong> Ô <code>Year</code> phải đặt <code>keyboardType: TextInputType.number</code> và kiểm tra <code>int.tryParse()</code> để người dùng không gõ chữ cái vào năm.</p>
       </div>
 
@@ -263,7 +263,7 @@ TextFormField(
       <h3 id="sec-6">6. Nút Bấm "Save Artwork"</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-        <div class="card-title" style="color:var(--accent-cyan);">🌐 Nút Lưu màu xanh Teal chuẩn nhận diện đề thi</div>
+        <div class="card-title" style="color:var(--accent-cyan);">Nút Lưu màu xanh Teal chuẩn nhận diện đề thi</div>
         <p><strong>Nhiệm vụ:</strong> Bấm để gọi <code>_handleSaveArtwork()</code>, có biểu tượng vòng tròn xoay <code>CircularProgressIndicator</code> khi đang lưu.</p>
       </div>
 
@@ -537,7 +537,7 @@ class _AddArtworkScreenState extends State<AddArtworkScreen> {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT THÚC BƯỚC 8:</strong>
+        <strong>KẾT THÚC BƯỚC 8:</strong>
         <p>Màn hình Thêm tác phẩm đã hoàn tất 100%! Tiếp theo là <strong>Bước 9: Màn hình Xem chi tiết (Task 6: Artwork Detail Screen)</strong>.</p>
       </div>
 

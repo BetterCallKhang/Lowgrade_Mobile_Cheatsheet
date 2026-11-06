@@ -145,7 +145,7 @@ Future<String> fetchUser() {
   return Future.delayed(const Duration(seconds: 2), () => "Khang");
 }
 
-<span class="c">// ❌ Cách cũ (.then): Bị thụt lề, khó bắt try-catch bao quát</span>
+<span class="c">// Cách cũ (.then): Bị thụt lề, khó bắt try-catch bao quát</span>
 void testThen() {
   fetchUser().then((u) {
     print('Xin chào $u');

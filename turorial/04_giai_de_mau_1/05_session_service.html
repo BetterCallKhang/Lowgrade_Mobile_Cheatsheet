@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 6 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 6 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu đề bài Task 3: Session là gì? Cần lưu những gì?</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khởi tạo SessionService & Bộ Keys hằng số chuẩn</a></li>
@@ -87,7 +87,7 @@
       <h3 id="sec-2">2. Khởi Tạo Class SessionService & Bộ Keys Hằng Số</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Cấu trúc Class & Định nghĩa Keys hằng số</div>
+        <div class="card-title" style="color:var(--accent-blue);">Cấu trúc Class & Định nghĩa Keys hằng số</div>
         <p><strong>Mục đích:</strong> Định nghĩa các chuỗi key thành biến <code>static const</code> để khi gọi không bị gõ nhầm chính tả. Mọi hàm đều là <code>static</code> giúp gọi trực tiếp ở bất kỳ đâu dạng <code>SessionService.tênHàm()</code> mà không cần khởi tạo đối tượng rườm rà.</p>
       </div>
 
@@ -108,7 +108,7 @@ class SessionService {
       <h3 id="sec-3">3. Hàm Lưu Phiên Đăng Nhập <code>saveUserSession()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 Hàm lưu phiên khi User đăng nhập thành công</div>
+        <div class="card-title" style="color:var(--accent-green);">Hàm lưu phiên khi User đăng nhập thành công</div>
         <p><strong>Nhiệm vụ:</strong> Nhận vào <code>userId</code> và <code>username</code> từ User vừa đăng nhập, ghi đồng thời 3 thông tin vào SharedPreferences: đặt <code>is_logged_in = true</code>, lưu <code>userId</code> và <code>username</code>.</p>
       </div>
 
@@ -127,7 +127,7 @@ class SessionService {
       <h3 id="sec-4">4. Các Hàm Đọc Dữ Liệu Phiên Đăng Nhập</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Bộ 3 hàm lấy dữ liệu phiên ra sử dụng</div>
+        <div class="card-title" style="color:var(--accent-purple);">Bộ 3 hàm lấy dữ liệu phiên ra sử dụng</div>
         <p><strong>Nhiệm vụ:</strong></p>
         <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
           <li><code>isLoggedIn()</code> &rarr; Trả về <code>true/false</code> (dùng tại <code>main.dart</code> để phân luồng).</li>
@@ -161,7 +161,7 @@ class SessionService {
       <h3 id="sec-5">5. Hàm Đăng Xuất & Xóa Phiên <code>clearSession()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-red);">
-        <div class="card-title" style="color:var(--accent-red);">🔴 Hàm xóa sạch phiên khi Logout</div>
+        <div class="card-title" style="color:var(--accent-red);">Hàm xóa sạch phiên khi Logout</div>
         <p><strong>Nhiệm vụ:</strong> Khi người dùng bấm nút Đăng xuất trên thanh AppBar hoặc Drawer của màn hình Home, hàm này sẽ xoá sạch bộ nhớ SharedPreferences và đưa người dùng quay lại màn hình Login.</p>
       </div>
 
@@ -230,7 +230,7 @@ class SessionService {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT THÚC BƯỚC 5:</strong>
+        <strong>KẾT THÚC BƯỚC 5:</strong>
         <p>Tầng quản lý Session đã hoàn tất. Bây giờ chúng ta sẽ bước sang <a href="06_login_screen.html" style="color:var(--accent-blue); font-weight:bold;">Bước 6: Màn hình Đăng nhập (Login Screen - Task 2)</a> để nối kết nối giữa DatabaseHelper và SessionService thành một luồng hoàn chỉnh!</p>
       </div>
 

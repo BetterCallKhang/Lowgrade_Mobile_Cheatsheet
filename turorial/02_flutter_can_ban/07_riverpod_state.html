@@ -118,7 +118,7 @@
         <!-- THÀNH PHẦN 1 -->
         <div class="card" style="border-top: 4px solid var(--accent-green);">
           <div class="card-title" style="color:var(--accent-green); font-size:16px;">
-            📢 1. Nhà Thông Báo (Notifier / StateNotifier)
+            1. Nhà Thông Báo (Notifier / StateNotifier)
           </div>
           <p><strong>Bản chất:</strong> Là "Bộ não xử lý logic" và là "Người quản kho dữ liệu".</p>
           <ul style="margin-left: 18px; margin-top: 8px; font-size: 13.5px; line-height: 1.8;">
@@ -131,7 +131,7 @@
         <!-- THÀNH PHẦN 2 -->
         <div class="card" style="border-top: 4px solid var(--accent-blue);">
           <div class="card-title" style="color:var(--accent-blue); font-size:16px;">
-            🏪 2. Nhà Cung Cấp (Provider)
+            2. Nhà Cung Cấp (Provider)
           </div>
           <p><strong>Bản chất:</strong> Là "Cầu nối trung gian" hoặc "Đại lý phân phối" gắn nhãn công khai cho State.</p>
           <ul style="margin-left: 18px; margin-top: 8px; font-size: 13.5px; line-height: 1.8;">
@@ -144,7 +144,7 @@
         <!-- THÀNH PHẦN 3 -->
         <div class="card" style="border-top: 4px solid var(--accent-purple);">
           <div class="card-title" style="color:var(--accent-purple); font-size:16px;">
-            🛒 3. Người Tiêu Thụ (Consumer / UI Widget)
+            3. Người Tiêu Thụ (Consumer / UI Widget)
           </div>
           <p><strong>Bản chất:</strong> Là "Khách hàng" - Giao diện người dùng (Widget) cần dữ liệu để hiển thị.</p>
           <ul style="margin-left: 18px; margin-top: 8px; font-size: 13.5px; line-height: 1.8;">
@@ -181,16 +181,16 @@
           <div style="text-align:center; color:var(--text-muted); font-size:18px;">&darr; &uarr;</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
             <div style="background:var(--bg-tertiary); border:1px solid var(--accent-green); padding:12px; border-radius:6px;">
-              <strong style="color:var(--accent-green);">📢 1. Nhà Thông Báo (Notifier)</strong><br />
+              <strong style="color:var(--accent-green);">1. Nhà Thông Báo (Notifier)</strong><br />
               <span style="color:var(--text-secondary); font-size:12.5px;">- Nắm giữ <code>state</code><br />- Chứa các hàm nghiệp vụ (fetch, clear)<br />- Gán <code>state = mới</code> &rarr; Bắn thông báo</span>
             </div>
             <div style="background:var(--bg-tertiary); border:1px solid var(--accent-purple); padding:12px; border-radius:6px;">
-              <strong style="color:var(--accent-purple);">🛒 3. Người Tiêu Thụ (Consumer UI)</strong><br />
+              <strong style="color:var(--accent-purple);">3. Người Tiêu Thụ (Consumer UI)</strong><br />
               <span style="color:var(--text-secondary); font-size:12.5px;">- <code>ref.watch(userProvider)</code>: Lắng nghe vẽ lại UI<br />- <code>ref.read(userProvider.notifier)</code>: Gọi hàm xử lý</span>
             </div>
           </div>
           <div style="background:var(--bg-tertiary); border:1px dashed var(--accent-blue); padding:10px; border-radius:6px; text-align:center;">
-            <strong style="color:var(--accent-blue);">🏪 2. Nhà Cung Cấp (Provider - vd: <code>userProvider</code>)</strong><br />
+            <strong style="color:var(--accent-blue);">2. Nhà Cung Cấp (Provider - vd: <code>userProvider</code>)</strong><br />
             <span style="color:var(--text-secondary); font-size:12.5px;">Làm chiếc cầu nối trung gian kết nối Người Tiêu Thụ với Nhà Thông Báo tương ứng.</span>
           </div>
           <div style="text-align:center; color:var(--accent-orange); font-size:12.5px; background:rgba(255,166,87,0.1); padding:8px; border-radius:4px; border:1px dashed var(--accent-orange);">

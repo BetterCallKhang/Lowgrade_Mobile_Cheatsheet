@@ -31,7 +31,7 @@
 
       <!-- ===================== MỤC LỤC TRANG ===================== -->
       <div class="card" style="margin-bottom: 28px;">
-        <div class="card-title">📌 Nội dung bài học gồm 8 phần chi tiết:</div>
+        <div class="card-title">Nội dung bài học gồm 8 phần chi tiết:</div>
         <ul style="margin-left: 20px; line-height: 2;">
           <li><a href="#sec-1" style="color:var(--accent-blue);">1. Phân tích yêu cầu đề bài Task 2 & Hình ảnh UI mẫu Login</a></li>
           <li><a href="#sec-2" style="color:var(--accent-blue);">2. Khai báo Form Key, Controllers & Thu hồi bộ nhớ dispose()</a></li>
@@ -51,19 +51,19 @@
         <div class="card">
           <div class="card-title">Các ô nhập liệu (Fields) bắt buộc</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>👤 <strong>Username:</strong> Tên tài khoản (icon: <code>Icons.person_outline</code>)</li>
-            <li>🔒 <strong>Password:</strong> Mật khẩu (ẩn ký tự: <code>obscureText: true</code>, icon: <code>Icons.lock_outline</code>)</li>
-            <li>🖼️ <strong>Header Logo/Icon:</strong> Biểu tượng bảo tàng nghệ thuật (<code>Icons.museum_outlined</code>) nằm gọn trong ô vuông màu xanh teal nhạt.</li>
+            <li><strong>Username:</strong> Tên tài khoản (icon: <code>Icons.person_outline</code>)</li>
+            <li><strong>Password:</strong> Mật khẩu (ẩn ký tự: <code>obscureText: true</code>, icon: <code>Icons.lock_outline</code>)</li>
+            <li><strong>Header Logo/Icon:</strong> Biểu tượng bảo tàng nghệ thuật (<code>Icons.museum_outlined</code>) nằm gọn trong ô vuông màu xanh teal nhạt.</li>
           </ul>
         </div>
 
         <div class="card">
           <div class="card-title">Các điều kiện bắt buộc (Requirements)</div>
           <ul style="margin-left: 18px; line-height: 1.8; font-size: 13.5px;">
-            <li>✅ <strong>Validate input fields:</strong> Không để trống ô Username và Password.</li>
-            <li>✅ <strong>Verify credentials from database:</strong> Đối chiếu cặp tài khoản/mật khẩu với SQLite.</li>
-            <li>✅ <strong>If login succeeds:</strong> Gọi <code>SessionService.saveUserSession()</code> & điều hướng vào <strong>Home Screen</strong> (thay thế ngăn xếp để bấm Back không bị quay lại Login).</li>
-            <li>❌ <strong>If login fails:</strong> Hiển thị thông báo lỗi chính xác: <code>Invalid username or password</code> bằng SnackBar đỏ.</li>
+            <li><strong>Validate input fields:</strong> Không để trống ô Username và Password.</li>
+            <li><strong>Verify credentials from database:</strong> Đối chiếu cặp tài khoản/mật khẩu với SQLite.</li>
+            <li><strong>If login succeeds:</strong> Gọi <code>SessionService.saveUserSession()</code> & điều hướng vào <strong>Home Screen</strong> (thay thế ngăn xếp để bấm Back không bị quay lại Login).</li>
+            <li><strong>If login fails:</strong> Hiển thị thông báo lỗi chính xác: <code>Invalid username or password</code> bằng SnackBar đỏ.</li>
           </ul>
         </div>
       </div>
@@ -72,7 +72,7 @@
       <h3 id="sec-2">2. Khai Báo Biến, Controllers & Hàm <code>dispose()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-blue);">
-        <div class="card-title" style="color:var(--accent-blue);">🔷 Controllers & Thu hồi bộ nhớ dispose()</div>
+        <div class="card-title" style="color:var(--accent-blue);">Controllers & Thu hồi bộ nhớ dispose()</div>
         <p><strong>Bản chất:</strong> Màn hình Login chỉ cần 2 bộ điều khiển văn bản cho <code>_usernameController</code> và <code>_passwordController</code>, cùng biến cờ <code>_isLoading</code> và <code>_obscurePassword</code>.</p>
       </div>
 
@@ -97,7 +97,7 @@
       <h3 id="sec-3">3. Hàm Kiểm Tra Hợp Lệ Dữ Liệu (Validators)</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-orange);">
-        <div class="card-title" style="color:var(--accent-orange);">🟠 Hàm kiểm tra không được để trống</div>
+        <div class="card-title" style="color:var(--accent-orange);">Hàm kiểm tra không được để trống</div>
         <p><strong>Nhiệm vụ:</strong> Kiểm tra người dùng đã gõ đầy đủ tên tài khoản và mật khẩu hay chưa trước khi gửi lệnh truy vấn CSDL.</p>
       </div>
 
@@ -124,7 +124,7 @@ String? validatePassword(String? val) {
       <h3 id="sec-4">4. Hàm Xử Lý Sự Kiện Đăng Nhập <code>_handleLogin()</code></h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-green);">
-        <div class="card-title" style="color:var(--accent-green);">🟢 Quy trình 5 bước xác thực & tạo Session</div>
+        <div class="card-title" style="color:var(--accent-green);">Quy trình 5 bước xác thực & tạo Session</div>
         <p><strong>Nhiệm vụ:</strong> Kiểm tra Form &rarr; Gọi hàm <code>DatabaseHelper.instance.loginUser</code> &rarr; Nếu khớp thì gọi <code>SessionService.saveUserSession</code> &rarr; Chuyển sang <code>HomeScreen</code> bằng <code>pushReplacement</code>.</p>
       </div>
 
@@ -190,7 +190,7 @@ String? validatePassword(String? val) {
       <h3 id="sec-5">5. Chi Tiết Header Logo & Các Ô Nhập Liệu</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-purple);">
-        <div class="card-title" style="color:var(--accent-purple);">🟣 Header Logo Art Gallery & Text Form Fields</div>
+        <div class="card-title" style="color:var(--accent-purple);">Header Logo Art Gallery & Text Form Fields</div>
         <p><strong>Thiết kế:</strong> Logo biểu tượng bảo tàng nghệ thuật với viền bo tròn nhẹ, tên app <em>"Art Gallery Manager"</em> và slogan <em>"Sign in to manage your collection"</em> đúng như ảnh đề thi.</p>
       </div>
 
@@ -260,7 +260,7 @@ TextFormField(
       <h3 id="sec-6">6. Nút Bấm Đăng Nhập & Liên Kết Sang Trang Đăng Ký</h3>
 
       <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-        <div class="card-title" style="color:var(--accent-cyan);">🌐 Nút bấm Login & Dòng chuyển sang Register Screen</div>
+        <div class="card-title" style="color:var(--accent-cyan);">Nút bấm Login & Dòng chuyển sang Register Screen</div>
         <p><strong>Nhiệm vụ:</strong> Nút bấm kích hoạt <code>_handleLogin()</code>, bên dưới có dòng chữ <em>"No account? Register now"</em> giúp mở <code>RegisterScreen</code>.</p>
       </div>
 
@@ -545,7 +545,7 @@ class _LoginScreenState extends State<LoginScreen> {
       </div>
 
       <div class="callout success">
-        <strong>✅ KẾT THÚC BƯỚC 6:</strong>
+        <strong>KẾT THÚC BƯỚC 6:</strong>
         <p>Màn hình Đăng nhập (Task 2) và Quản lý phiên làm việc (Task 3) đã hoàn thành xuất sắc! Tiếp theo sẽ là <strong>Bước 7: Màn hình Danh sách chính (Task 4 & Task 7: Home Screen & Delete Artwork)</strong>.</p>
       </div>
 
