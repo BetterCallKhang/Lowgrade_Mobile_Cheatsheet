@@ -101,6 +101,51 @@
       .toLowerCase();
   }
 
+  // Escape HTML tránh XSS
+  function escapeHtml(text) {
+    if (!text) return '';
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Highlight cụm từ tìm kiếm trong chuỗi (giữ nguyên chữ hoa/thường gốc)
+  function highlightText(text, qNorm) {
+    if (!text || !qNorm) return escapeHtml(text);
+    const normText = removeVietnameseTones(text);
+    let result = '';
+    let lastIdx = 0;
+    let pos = 0;
+
+    while ((pos = normText.indexOf(qNorm, lastIdx)) !== -1) {
+      result += escapeHtml(text.slice(lastIdx, pos));
+      result += '<mark class="search-hl">' + escapeHtml(text.slice(pos, pos + qNorm.length)) + '</mark>';
+      lastIdx = pos + qNorm.length;
+    }
+    result += escapeHtml(text.slice(lastIdx));
+    return result;
+  }
+
+  // Trích xuất đoạn văn mẫu chứa từ khóa để preview trong sidebar
+  function getSnippet(content, qNorm) {
+    if (!content || !qNorm) return '';
+    const normContent = removeVietnameseTones(content);
+    const pos = normContent.indexOf(qNorm);
+    if (pos === -1) return '';
+
+    const start = Math.max(0, pos - 28);
+    const end = Math.min(content.length, pos + qNorm.length + 55);
+
+    let snippet = content.slice(start, end).trim();
+    if (start > 0) snippet = '...' + snippet;
+    if (end < content.length) snippet = snippet + '...';
+
+    return highlightText(snippet, qNorm);
+  }
+
   // Đếm số lần xuất hiện của chuỗi tìm kiếm trong văn bản
   function countOccurrences(text, searchStr) {
     if (!text || !searchStr) return 0;
@@ -153,16 +198,22 @@
   }
 
   // Kiểm tra độ khớp của 1 trang với từ khóa tìm kiếm
-  // Trả về số điểm / số lần khớp (> 0 là khớp, 0 là không khớp)
   function matchPage(href, title, groupName, qRaw, qNorm, qTerms) {
     let score = 0;
+    let titleMatched = false;
+    let contentSnippet = '';
 
-    // 1. Kiểm tra tiêu đề trang và tên nhóm (ngay cả khi chưa tải index)
+    // 1. Kiểm tra tiêu đề trang và tên nhóm
     const titleNorm = removeVietnameseTones(title);
     const groupNorm = removeVietnameseTones(groupName || '');
 
-    if (titleNorm.includes(qNorm)) score += 20;
-    if (groupNorm && groupNorm.includes(qNorm)) score += 5;
+    if (titleNorm.includes(qNorm)) {
+      score += 25;
+      titleMatched = true;
+    }
+    if (groupNorm && groupNorm.includes(qNorm)) {
+      score += 5;
+    }
 
     // 2. Tìm kiếm toàn diện trong index nội dung
     if (window.CHEATSHEET_SEARCH_INDEX && window.CHEATSHEET_SEARCH_INDEX[href]) {
@@ -170,8 +221,6 @@
       if (!entry._norm) prepareIndex();
 
       const rawQ = qRaw.toLowerCase();
-
-      // Đếm số lần xuất hiện cụm từ chính xác
       const normMatches = countOccurrences(entry._norm, qNorm);
       const rawMatches = countOccurrences(entry._rawLower, rawQ);
       const occurrences = Math.max(normMatches, rawMatches);
@@ -181,19 +230,162 @@
         if (entry._headingsNorm && entry._headingsNorm.includes(qNorm)) {
           score += 10;
         }
+        contentSnippet = getSnippet(entry.content, qNorm);
       } else if (qTerms.length > 1) {
-        // Nếu không khớp cả cụm, kiểm tra nếu tất cả các từ đơn đều xuất hiện
         const allTermsMatch = qTerms.every(term => entry._norm.includes(term) || entry._rawLower.includes(term));
         if (allTermsMatch) {
           score += 1;
+          contentSnippet = getSnippet(entry.content, qTerms[0]);
         }
       }
     }
 
-    return score;
+    return { score, titleMatched, snippet: contentSnippet };
   }
 
-  // Thực hiện tìm kiếm và cập nhật giao diện sidebar
+  // ==========================================
+  // HIGHLIGHT TRONG NỘI DUNG TRANG WEB (<main>)
+  // ==========================================
+  let currentHighlightIndex = -1;
+  let totalPageHighlights = 0;
+
+  function clearPageContentHighlights() {
+    const container = document.querySelector('main.content-container') || document.querySelector('main');
+    if (!container) return;
+
+    const marks = container.querySelectorAll('mark.page-search-hl');
+    marks.forEach(mark => {
+      const parent = mark.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      }
+    });
+
+    currentHighlightIndex = -1;
+    totalPageHighlights = 0;
+    updateHighlightToolbar(0, 0);
+  }
+
+  function highlightPageContent(query) {
+    clearPageContentHighlights();
+    const trimmed = (query || '').trim();
+    if (!trimmed) return;
+
+    const container = document.querySelector('main.content-container') || document.querySelector('main');
+    if (!container) return;
+
+    const qNorm = removeVietnameseTones(trimmed);
+    if (!qNorm) return;
+
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const parent = node.parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        const tag = parent.tagName.toUpperCase();
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'MARK' || parent.classList.contains('no-search-highlight')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    const textNodes = [];
+    while (walker.nextNode()) {
+      textNodes.push(walker.currentNode);
+    }
+
+    let matchCount = 0;
+    textNodes.forEach(node => {
+      const text = node.nodeValue;
+      const normText = removeVietnameseTones(text);
+      let lastIdx = 0;
+      let pos = 0;
+      const fragments = [];
+
+      while ((pos = normText.indexOf(qNorm, lastIdx)) !== -1) {
+        if (pos > lastIdx) {
+          fragments.push(document.createTextNode(text.slice(lastIdx, pos)));
+        }
+        const mark = document.createElement('mark');
+        mark.className = 'page-search-hl';
+        mark.textContent = text.slice(pos, pos + qNorm.length);
+        fragments.push(mark);
+        matchCount++;
+        lastIdx = pos + qNorm.length;
+      }
+
+      if (fragments.length > 0) {
+        if (lastIdx < text.length) {
+          fragments.push(document.createTextNode(text.slice(lastIdx)));
+        }
+        const parent = node.parentNode;
+        if (parent) {
+          fragments.forEach(frag => parent.insertBefore(frag, node));
+          parent.removeChild(node);
+        }
+      }
+    });
+
+    totalPageHighlights = matchCount;
+
+    if (totalPageHighlights > 0) {
+      currentHighlightIndex = 0;
+      scrollToHighlight(0);
+      updateHighlightToolbar(1, totalPageHighlights);
+    } else {
+      updateHighlightToolbar(0, 0);
+    }
+  }
+
+  function scrollToHighlight(index) {
+    const marks = document.querySelectorAll('mark.page-search-hl');
+    if (!marks.length) return;
+
+    marks.forEach(m => m.classList.remove('active'));
+
+    const safeIndex = (index + marks.length) % marks.length;
+    currentHighlightIndex = safeIndex;
+
+    const target = marks[safeIndex];
+    if (target) {
+      target.classList.add('active');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      updateHighlightToolbar(safeIndex + 1, marks.length);
+    }
+  }
+
+  window.navigateHighlight = function (direction) {
+    if (totalPageHighlights <= 0) return;
+    scrollToHighlight(currentHighlightIndex + direction);
+  };
+
+  function updateHighlightToolbar(current, total) {
+    let toolbar = document.getElementById('search-hl-toolbar');
+    if (total === 0) {
+      if (toolbar) toolbar.remove();
+      return;
+    }
+
+    if (!toolbar) {
+      toolbar = document.createElement('div');
+      toolbar.id = 'search-hl-toolbar';
+      toolbar.className = 'search-hl-toolbar';
+      document.body.appendChild(toolbar);
+    }
+
+    toolbar.innerHTML = `
+      <span class="search-hl-info">Khớp <strong>${current}/${total}</strong></span>
+      <button type="button" class="search-hl-btn" onclick="navigateHighlight(-1)" title="Vị trí trước (Shift+F3 hoặc Shift+Enter)">▲</button>
+      <button type="button" class="search-hl-btn" onclick="navigateHighlight(1)" title="Vị trí kế tiếp (F3 hoặc Enter)">▼</button>
+      <button type="button" class="search-hl-close" onclick="clearSidebarSearch()" title="Đóng tìm kiếm (Esc)">&times;</button>
+    `;
+  }
+
+  // ==========================================
+  // THỰC HIỆN TÌM KIẾM TOÀN TRANG
+  // ==========================================
   function performSearch(query) {
     const trimmed = (query || '').trim();
     const clearBtn = document.getElementById('search-clear-btn');
@@ -207,7 +399,6 @@
 
     // ==========================================
     // TRƯỜNG HỢP 1: BÌNH THƯỜNG (Ô tìm kiếm trống)
-    // Hiện đầy đủ tất cả các trang và khôi phục trạng thái đóng/mở
     // ==========================================
     if (!trimmed) {
       if (statusEl) {
@@ -218,20 +409,45 @@
         emptyStateEl.style.display = 'none';
       }
 
+      // Xóa highlight trên trang
+      clearPageContentHighlights();
+
+      // Xóa query parameter khỏi URL
+      if (window.location.search.includes('q=')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
       // Khôi phục tất cả nav-item
       const items = document.querySelectorAll('.nav-menu .nav-item');
       items.forEach(it => {
         it.style.display = '';
+
+        // Khôi phục tiêu đề gốc
+        const titleEl = it.querySelector('.nav-item-title');
+        const origTitle = it.getAttribute('data-title');
+        if (titleEl && origTitle) titleEl.innerText = origTitle;
+
+        // Ẩn snippet
+        const snippetEl = it.querySelector('.nav-item-snippet');
+        if (snippetEl) {
+          snippetEl.style.display = 'none';
+          snippetEl.innerHTML = '';
+        }
+
+        // Khôi phục link gốc không kèm ?q=
+        const origHref = it.getAttribute('data-orig-href');
+        if (origHref) {
+          it.setAttribute('href', origHref);
+        }
+
+        // Xóa badge tìm kiếm, phục hồi badge ban đầu
         const searchBadge = it.querySelector('.search-badge');
         if (searchBadge) searchBadge.remove();
-        // Khôi phục badge gốc nếu có
         const origBadge = it.querySelector('.nav-badge-original');
-        if (origBadge) {
-          origBadge.style.display = '';
-        }
+        if (origBadge) origBadge.style.display = '';
       });
 
-      // Khôi phục tất cả nav-group
+      // Khôi phục trạng thái accordion
       const groups = document.querySelectorAll('.nav-menu .nav-group');
       groups.forEach(g => {
         g.style.display = '';
@@ -256,7 +472,6 @@
 
     // ==========================================
     // TRƯỜNG HỢP 2: ĐANG TÌM KIẾM
-    // Chỉ hiện các trang liên quan, tự mở rộng nhóm có kết quả
     // ==========================================
     if (window.CHEATSHEET_SEARCH_INDEX && !indexPrepared) {
       prepareIndex();
@@ -277,30 +492,59 @@
 
       items.forEach(itemEl => {
         const href = itemEl.getAttribute('data-href');
-        const title = itemEl.getAttribute('data-title') || itemEl.innerText.trim();
+        const origTitle = itemEl.getAttribute('data-title') || itemEl.innerText.trim();
 
-        const matchScore = matchPage(href, title, groupName, qRaw, qNorm, qTerms);
+        const matchResult = matchPage(href, origTitle, groupName, qRaw, qNorm, qTerms);
 
-        if (matchScore > 0) {
+        if (matchResult.score > 0) {
           itemEl.style.display = 'flex';
           groupMatchCount++;
           totalMatchedPages++;
 
-          // Ẩn badge gốc khi tìm kiếm
+          // 1. Highlight tiêu đề mục nếu có khớp
+          const titleEl = itemEl.querySelector('.nav-item-title');
+          if (titleEl) {
+            if (matchResult.titleMatched) {
+              titleEl.innerHTML = highlightText(origTitle, qNorm);
+            } else {
+              titleEl.innerText = origTitle;
+            }
+          }
+
+          // 2. Hiển thị snippet trích xuất nội dung nếu có
+          const snippetEl = itemEl.querySelector('.nav-item-snippet');
+          if (snippetEl) {
+            if (matchResult.snippet) {
+              snippetEl.innerHTML = matchResult.snippet;
+              snippetEl.style.display = 'block';
+            } else {
+              snippetEl.style.display = 'none';
+              snippetEl.innerHTML = '';
+            }
+          }
+
+          // 3. Cập nhật link href để khi click sang trang mới vẫn giữ query tìm kiếm
+          const origHref = itemEl.getAttribute('data-orig-href');
+          if (origHref) {
+            const separator = origHref.includes('?') ? '&' : '?';
+            itemEl.setAttribute('href', `${origHref}${separator}q=${encodeURIComponent(trimmed)}`);
+          }
+
+          // 4. Cập nhật badge số lần khớp
           const origBadge = itemEl.querySelector('.nav-badge:not(.search-badge)');
           if (origBadge) {
             origBadge.classList.add('nav-badge-original');
             origBadge.style.display = 'none';
           }
 
-          // Cập nhật hoặc tạo badge hiển thị độ khớp
           let searchBadge = itemEl.querySelector('.search-badge');
           if (!searchBadge) {
             searchBadge = document.createElement('span');
             searchBadge.className = 'nav-badge search-badge';
-            itemEl.appendChild(searchBadge);
+            const topEl = itemEl.querySelector('.nav-item-top') || itemEl;
+            topEl.appendChild(searchBadge);
           }
-          searchBadge.innerText = matchScore > 1 ? `${matchScore} khớp` : 'khớp';
+          searchBadge.innerText = matchResult.score > 1 ? `${matchResult.score} khớp` : 'khớp';
         } else {
           itemEl.style.display = 'none';
           const searchBadge = itemEl.querySelector('.search-badge');
@@ -309,11 +553,9 @@
       });
 
       if (groupMatchCount > 0) {
-        // Nhóm có chứa trang khớp: Hiển thị và tự động mở ra
         groupEl.style.display = '';
         groupEl.classList.remove('collapsed');
       } else {
-        // Nhóm không có trang nào khớp: Ẩn hoàn toàn
         groupEl.style.display = 'none';
       }
     });
@@ -330,11 +572,11 @@
       }
     }
 
-    // Hiển thị khung thông báo trống nếu không có kết quả nào
+    // Hiển thị khung thông báo trống nếu không có kết quả
     if (emptyStateEl) {
       if (totalMatchedPages === 0) {
         emptyStateEl.style.display = 'block';
-        const safeQuery = trimmed.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeQuery = escapeHtml(trimmed);
         emptyStateEl.innerHTML = `
           <div class="empty-icon">🔍</div>
           <div class="empty-title">Không tìm thấy kết quả</div>
@@ -345,9 +587,12 @@
         emptyStateEl.style.display = 'none';
       }
     }
+
+    // Highlight các từ khớp trong nội dung trang hiện tại
+    highlightPageContent(trimmed);
   }
 
-  // Phơi ra các hàm điều khiển tìm kiếm toàn cục
+  // Phơi ra các hàm điều khiển toàn cục
   window.handleSidebarSearch = function (value) {
     performSearch(value);
   };
@@ -377,21 +622,49 @@
     }
   };
 
-  // Lắng nghe phím tắt: Esc để xóa tìm kiếm, '/' để focus vào ô tìm kiếm
+  // Lắng nghe phím tắt:
+  // - Esc: Hủy tìm kiếm
+  // - / : Focus vào ô tìm kiếm
+  // - Enter / F3: Chuyển đến vị trí highlight tiếp theo trên trang
+  // - Shift+Enter / Shift+F3: Vị trí trước
   document.addEventListener('keydown', function (e) {
     const searchInput = document.getElementById('sidebar-search-input');
-    if (!searchInput) return;
 
-    if (e.key === 'Escape' && document.activeElement === searchInput) {
+    if (e.key === 'Escape') {
       window.clearSidebarSearch();
-    } else if (
+      return;
+    }
+
+    if (
       e.key === '/' &&
       document.activeElement.tagName !== 'INPUT' &&
       document.activeElement.tagName !== 'TEXTAREA'
     ) {
       e.preventDefault();
-      searchInput.focus();
-      searchInput.select();
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+      return;
+    }
+
+    if (e.key === 'Enter' && document.activeElement === searchInput) {
+      e.preventDefault();
+      if (e.shiftKey) {
+        window.navigateHighlight(-1);
+      } else {
+        window.navigateHighlight(1);
+      }
+      return;
+    }
+
+    if (e.key === 'F3') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        window.navigateHighlight(-1);
+      } else {
+        window.navigateHighlight(1);
+      }
     }
   });
 
@@ -442,8 +715,14 @@
           const targetFilename = item.href.substring(item.href.lastIndexOf('/') + 1);
           const isActive = (filename === targetFilename) || (item.id === 'home' && (filename === '' || filename === 'index.html'));
           const activeClass = isActive ? ' active' : '';
-          const escapedTitle = item.title.replace(/"/g, '&quot;');
-          html += `<a class="nav-item${activeClass}" href="${itemHref}" data-href="${item.href}" data-title="${escapedTitle}"><span>${item.title}</span></a>`;
+          const escapedTitle = escapeHtml(item.title);
+          html += `
+          <a class="nav-item${activeClass}" href="${itemHref}" data-href="${item.href}" data-orig-href="${itemHref}" data-title="${escapedTitle}">
+            <div class="nav-item-top">
+              <span class="nav-item-title">${escapedTitle}</span>
+            </div>
+            <div class="nav-item-snippet" style="display:none;"></div>
+          </a>`;
         });
         html += `</div>`;
         return;
@@ -455,8 +734,6 @@
         return filename === targetFilename;
       });
 
-      // Nếu chứa trang hiện tại -> luôn mở
-      // Nếu không chứa -> theo localStorage
       const isSavedCollapsed = Boolean(savedState[section.group]);
       const isCollapsed = hasActiveChild ? false : isSavedCollapsed;
       const collapsedClass = isCollapsed ? ' collapsed' : '';
@@ -466,16 +743,29 @@
       html += `<div class="nav-group-content">`;
 
       section.items.forEach(item => {
-        const escapedTitle = item.title.replace(/"/g, '&quot;');
+        const escapedTitle = escapeHtml(item.title);
         if (item.disabled) {
-          html += `<span class="nav-item disabled" data-href="${item.href || ''}" data-title="${escapedTitle}"><span>${item.title}</span><span class="nav-badge">${item.badge || 'chưa soạn'}</span></span>`;
+          html += `
+          <span class="nav-item disabled" data-href="${item.href || ''}" data-title="${escapedTitle}">
+            <div class="nav-item-top">
+              <span class="nav-item-title">${escapedTitle}</span>
+              <span class="nav-badge">${item.badge || 'chưa soạn'}</span>
+            </div>
+            <div class="nav-item-snippet" style="display:none;"></div>
+          </span>`;
         } else {
           const itemHref = prefix + item.href;
           const targetFilename = item.href.substring(item.href.lastIndexOf('/') + 1);
           const isActive = (filename === targetFilename) || (item.id === 'home' && (filename === '' || filename === 'index.html'));
           const activeClass = isActive ? ' active' : '';
 
-          html += `<a class="nav-item${activeClass}" href="${itemHref}" data-href="${item.href}" data-title="${escapedTitle}"><span>${item.title}</span></a>`;
+          html += `
+          <a class="nav-item${activeClass}" href="${itemHref}" data-href="${item.href}" data-orig-href="${itemHref}" data-title="${escapedTitle}">
+            <div class="nav-item-top">
+              <span class="nav-item-title">${escapedTitle}</span>
+            </div>
+            <div class="nav-item-snippet" style="display:none;"></div>
+          </a>`;
         }
       });
 
@@ -496,6 +786,26 @@
 
     // Đảm bảo search index được nạp
     ensureSearchIndexLoaded();
+
+    // Tự động kích hoạt tìm kiếm nếu URL có tham số ?q=
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const qParam = urlParams.get('q');
+      if (qParam && qParam.trim()) {
+        const input = document.getElementById('sidebar-search-input');
+        if (input) {
+          input.value = qParam;
+          // Đợi index sẵn sàng rồi thực thi tìm kiếm
+          if (window.CHEATSHEET_SEARCH_INDEX) {
+            performSearch(qParam);
+          } else {
+            setTimeout(() => performSearch(qParam), 150);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Cannot read query params:', e);
+    }
   }
 
   if (document.readyState === 'loading') {
